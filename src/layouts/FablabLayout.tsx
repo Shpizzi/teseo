@@ -5,20 +5,22 @@ import {
   ShoppingBag,
   Activity,
   Printer,
-  Users,
   Box,
   Menu,
 } from 'lucide-react'
 import Sidebar, { type NavItem } from '../components/Sidebar'
 import { useIsMobile } from '../hooks/useIsMobile'
+import { Toaster } from '../components/Toast'
+import { fablabOrders } from '../mock'
 
-const fablabNavItems: NavItem[] = [
+const newOrders = fablabOrders.filter(o => o.status === 'new').length
+
+export const fablabNavItems: NavItem[] = [
   { label: 'Dashboard',  icon: <LayoutDashboard size={20} />, href: '/fablab/dashboard' },
-  { label: 'Ordini',     icon: <ShoppingBag size={20} />,     href: '/fablab/ordini', badge: 2 },
+  { label: 'Ordini',     icon: <ShoppingBag size={20} />,     href: '/fablab/ordini', badge: newOrders },
   { label: 'Slicing',    icon: <Box size={20} />,             href: '/fablab/slicing' },
   { label: 'Coda',       icon: <Activity size={20} />,        href: '/fablab/coda' },
   { label: 'Stampanti',  icon: <Printer size={20} />,         href: '/fablab/stampanti' },
-  { label: 'Community',  icon: <Users size={20} />,           href: '/fablab/community' },
 ]
 
 export default function FablabLayout() {
@@ -69,6 +71,7 @@ export default function FablabLayout() {
         )}
         <Outlet />
       </div>
+      <Toaster />
     </div>
   )
 }

@@ -6,10 +6,15 @@ import {
   Bookmark,
   Users,
   MapPin,
+  MessageSquare,
   Menu,
 } from 'lucide-react'
 import Sidebar, { type NavItem } from '../components/Sidebar'
 import { useIsMobile } from '../hooks/useIsMobile'
+import { Toaster } from '../components/Toast'
+import { conversations } from '../mock/user-pages'
+
+const unreadCount = conversations.reduce((n, c) => n + c.unread, 0)
 
 const userNavItems: NavItem[] = [
   { label: 'Dashboard',  icon: <LayoutDashboard size={20} />, href: '/app/dashboard' },
@@ -17,6 +22,7 @@ const userNavItems: NavItem[] = [
   { label: 'Salvati',    icon: <Bookmark size={20} />,         href: '/app/salvati' },
   { label: 'Community',  icon: <Users size={20} />,            href: '/app/community' },
   { label: 'Produttori', icon: <MapPin size={20} />,           href: '/app/produttori' },
+  { label: 'Messaggi',   icon: <MessageSquare size={20} />,    href: '/app/messages', badge: unreadCount },
 ]
 
 export default function UserLayout() {
@@ -38,7 +44,7 @@ export default function UserLayout() {
       <Sidebar
         items={userNavItems}
         brand={{ subtitle: 'spazio personale' }}
-        user={{ initials: 'F', name: 'Francesca R.', role: 'account base' }}
+        user={{ initials: 'F', name: 'Francesca R.', role: 'account base', href: '/app/profile' }}
         {...(isMobile ? { open, onClose: () => setOpen(false) } : {})}
       />
       <div
@@ -67,6 +73,7 @@ export default function UserLayout() {
         )}
         <Outlet />
       </div>
+      <Toaster />
     </div>
   )
 }

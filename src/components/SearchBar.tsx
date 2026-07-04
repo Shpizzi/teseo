@@ -3,9 +3,11 @@ import { Search } from 'lucide-react'
 type SearchBarProps = {
   placeholder?: string
   className?: string
+  value?: string
+  onChange?: (value: string) => void
 }
 
-export default function SearchBar({ placeholder = 'Cerca…', className = '' }: SearchBarProps) {
+export default function SearchBar({ placeholder = 'Cerca…', className = '', value, onChange }: SearchBarProps) {
   return (
     <div
       className={className}
@@ -25,6 +27,8 @@ export default function SearchBar({ placeholder = 'Cerca…', className = '' }: 
       <input
         type="text"
         placeholder={placeholder}
+        value={value}
+        onChange={onChange ? e => onChange(e.target.value) : undefined}
         style={{
           flex: 1,
           background: 'none',

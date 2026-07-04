@@ -18,6 +18,7 @@ type SidebarProps = {
     initials: string
     name: string
     role: string
+    href?: string
   }
   // When onClose is provided, the sidebar renders as a mobile off-canvas drawer
   // controlled by `open`. Omit both for the static desktop column.
@@ -160,7 +161,10 @@ export default function Sidebar({ items, brand, user, open, onClose }: SidebarPr
       <div style={{ flex: 1 }} />
 
       {/* User block */}
-      <div
+      <Link
+        to={user.href ?? '#'}
+        onClick={onClose}
+        title="Profilo"
         style={{
           display: 'flex',
           alignItems: 'center',
@@ -168,7 +172,9 @@ export default function Sidebar({ items, brand, user, open, onClose }: SidebarPr
           padding: 9,
           borderRadius: 12,
           border: '1px solid var(--line)',
-          cursor: 'pointer',
+          cursor: user.href ? 'pointer' : 'default',
+          textDecoration: 'none',
+          pointerEvents: user.href ? 'auto' : 'none',
         }}
       >
         <span
@@ -206,7 +212,7 @@ export default function Sidebar({ items, brand, user, open, onClose }: SidebarPr
             {user.role}
           </div>
         </span>
-      </div>
+      </Link>
     </>
   )
 
