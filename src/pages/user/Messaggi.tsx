@@ -233,7 +233,7 @@ export default function Messaggi() {
                 flex: '0 0 auto',
               }}
               onMouseEnter={e => { (e.currentTarget as HTMLButtonElement).style.background = 'var(--cyan)' }}
-              onMouseLeave={e => { (e.currentTarget as HTMLButtonElement).style.background = '#fff' }}
+              onMouseLeave={e => { (e.currentTarget as HTMLButtonElement).style.background = 'var(--forest)' }}
             >
               <Send size={16} />
               Invia

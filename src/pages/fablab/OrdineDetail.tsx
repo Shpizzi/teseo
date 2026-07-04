@@ -187,7 +187,7 @@ export default function OrdineDetail() {
           }}
             onClick={() => navigate('/fablab/slicing')}
             onMouseEnter={e => { (e.currentTarget as HTMLButtonElement).style.background = 'var(--cyan)' }}
-            onMouseLeave={e => { (e.currentTarget as HTMLButtonElement).style.background = '#fff' }}
+            onMouseLeave={e => { (e.currentTarget as HTMLButtonElement).style.background = 'var(--forest)' }}
           >
             Avvia stampa
           </button>

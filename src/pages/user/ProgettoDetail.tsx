@@ -141,7 +141,7 @@ export default function ProgettoDetail() {
                 transition: '0.2s',
               }}
               onMouseEnter={e => { (e.currentTarget as HTMLButtonElement).style.background = 'var(--cyan)' }}
-              onMouseLeave={e => { (e.currentTarget as HTMLButtonElement).style.background = '#fff' }}
+              onMouseLeave={e => { (e.currentTarget as HTMLButtonElement).style.background = 'var(--forest)' }}
             >
               Contatta produttore
             </button>
