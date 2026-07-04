@@ -1,6 +1,6 @@
 import { useRef, useMemo, Suspense } from 'react'
 import { Canvas, useFrame } from '@react-three/fiber'
-import { useGLTF } from '@react-three/drei'
+import { useGLTF, Html } from '@react-three/drei'
 import * as THREE from 'three'
 
 // The displaced icosahedron mesh — byte-identical to prototype
@@ -25,20 +25,43 @@ function buildDisplacedGeo(): THREE.BufferGeometry {
   return geo
 }
 
-// Center a scanned geometry, stand its longest axis vertical, and scale it to
-// span ~2.4 units in Y so it fills the same frame + clip range as the procedural
+// Principal axis of the point cloud via power iteration on the covariance
+// matrix — the true long axis of a tilted scan, which an axis-aligned bbox
+// can't find.
+function principalAxis(g: THREE.BufferGeometry): THREE.Vector3 {
+  const pos = g.attributes.position
+  const c = new THREE.Vector3()
+  for (let i = 0; i < pos.count; i++) c.add(new THREE.Vector3().fromBufferAttribute(pos, i))
+  c.divideScalar(pos.count)
+  let xx = 0, xy = 0, xz = 0, yy = 0, yz = 0, zz = 0
+  const v = new THREE.Vector3()
+  for (let i = 0; i < pos.count; i++) {
+    v.fromBufferAttribute(pos, i).sub(c)
+    xx += v.x * v.x; xy += v.x * v.y; xz += v.x * v.z
+    yy += v.y * v.y; yz += v.y * v.z; zz += v.z * v.z
+  }
+  const cov = new THREE.Matrix3().set(xx, xy, xz, xy, yy, yz, xz, yz, zz)
+  const axis = new THREE.Vector3(1, 0.31, 0.19).normalize() // asymmetric seed
+  for (let i = 0; i < 40; i++) {
+    axis.applyMatrix3(cov)
+    if (axis.lengthSq() < 1e-12) return new THREE.Vector3(0, 1, 0)
+    axis.normalize()
+  }
+  return axis
+}
+
+// Center a scanned geometry, stand its true long axis vertical, and scale it to
+// span ~2.4 units so it fills the same frame + clip range as the procedural
 // mesh. Textures/materials are dropped — the blueprint look is wireframe only.
 function normalizeGeo(src: THREE.BufferGeometry): THREE.BufferGeometry {
   const g = src.clone()
-  g.computeBoundingBox()
-  let size = g.boundingBox!.getSize(new THREE.Vector3())
-  if (size.x >= size.y && size.x >= size.z) g.rotateZ(Math.PI / 2)       // longest = X → up
-  else if (size.z >= size.x && size.z >= size.y) g.rotateX(-Math.PI / 2) // longest = Z → up
+  const q = new THREE.Quaternion().setFromUnitVectors(principalAxis(g), new THREE.Vector3(0, 1, 0))
+  g.applyQuaternion(q)
   g.computeBoundingBox()
   const center = g.boundingBox!.getCenter(new THREE.Vector3())
   g.translate(-center.x, -center.y, -center.z)
   g.computeBoundingBox()
-  size = g.boundingBox!.getSize(new THREE.Vector3())
+  const size = g.boundingBox!.getSize(new THREE.Vector3())
   const scale = 2.4 / Math.max(size.x, size.y, size.z)
   g.scale(scale, scale, scale)
   g.computeVertexNormals()
@@ -122,6 +145,9 @@ type PrintViewer3DProps = {
   modelUrl?: string // load a scanned .glb; omit for the procedural mesh
 }
 
+// Fetch the scanned mesh ahead of the result state so the viewer isn't blank.
+useGLTF.preload('/meshes/remote.glb')
+
 export default function PrintViewer3D({ onProgressChange, modelUrl }: PrintViewer3DProps) {
   const cb = onProgressChange ?? (() => {})
   return (
@@ -131,7 +157,15 @@ export default function PrintViewer3D({ onProgressChange, modelUrl }: PrintViewe
       style={{ position: 'absolute', inset: 0, width: '100%', height: '100%' }}
       onCreated={({ camera }) => { camera.lookAt(0, 0.1, 0) }}
     >
-      <Suspense fallback={null}>
+      <Suspense
+        fallback={
+          <Html center>
+            <span style={{ fontFamily: 'var(--mono)', fontSize: 11, letterSpacing: '0.08em', color: 'var(--cyan)', whiteSpace: 'nowrap' }}>
+              CARICAMENTO MODELLO 3D…
+            </span>
+          </Html>
+        }
+      >
         {modelUrl ? <LoadedMesh url={modelUrl} onProgressChange={cb} /> : <ProceduralMesh onProgressChange={cb} />}
       </Suspense>
     </Canvas>
