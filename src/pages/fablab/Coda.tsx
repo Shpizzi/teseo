@@ -1,12 +1,57 @@
-import { Link } from 'react-router-dom'
+import { useState } from 'react'
+import { Link, useNavigate } from 'react-router-dom'
 import { Zap, ArrowUp, ArrowDown } from 'lucide-react'
 import GlassCard from '../../components/GlassCard'
 import { printQueue, printersFull } from '../../mock/fablab-pages'
+import { orderByOrdNum, type DeadlineType } from '../../mock'
+import { toast } from '../../components/Toast'
+
+// Somma le stringhe tipo "2h 10m" / "45m" per l'ETA complessiva
+function sumEta(times: string[]): string {
+  let mins = 0
+  for (const t of times) {
+    mins += 60 * (Number(/(\d+)h/.exec(t)?.[1]) || 0) + (Number(/(\d+)m/.exec(t)?.[1]) || 0)
+  }
+  return `~${Math.floor(mins / 60)}h ${String(mins % 60).padStart(2, '0')}m`
+}
+
+const DEADLINE_RANK: Record<DeadlineType, number> = { urgent: 0, today: 1, week: 2 }
 
 // ── Coda ──────────────────────────────────────────────────────
 export default function Coda() {
+  const navigate = useNavigate()
+  const [queue, setQueue] = useState(printQueue)
   const activePrinters = printersFull.filter(p => p.status === 'active')
-  const queuedItems = printQueue.filter(q => q.status === 'queued')
+  const queuedItems = queue.filter(q => q.status === 'queued')
+  const printingCount = queue.filter(q => q.status === 'printing').length
+
+  // Sposta un elemento in coda di una posizione (solo tra i queued)
+  const move = (id: string, dir: -1 | 1) => {
+    setQueue(prev => {
+      const queued = prev.filter(q => q.status === 'queued').sort((a, b) => a.position - b.position)
+      const idx = queued.findIndex(q => q.id === id)
+      const swapWith = queued[idx + dir]
+      if (idx === -1 || !swapWith) return prev
+      return prev.map(q =>
+        q.id === id ? { ...q, position: swapWith.position }
+        : q.id === swapWith.id ? { ...q, position: queued[idx].position }
+        : q)
+    })
+  }
+
+  // Riordina i queued per scadenza dell'ordine collegato
+  const optimize = () => {
+    setQueue(prev => {
+      const queued = prev.filter(q => q.status === 'queued')
+      const positions = queued.map(q => q.position).sort((a, b) => a - b)
+      const sorted = [...queued].sort((a, b) =>
+        (DEADLINE_RANK[orderByOrdNum(a.ordNum)?.deadline ?? 'week']) -
+        (DEADLINE_RANK[orderByOrdNum(b.ordNum)?.deadline ?? 'week']))
+      const posById = new Map(sorted.map((q, i) => [q.id, positions[i]]))
+      return prev.map(q => posById.has(q.id) ? { ...q, position: posById.get(q.id)! } : q)
+    })
+    toast('Coda riordinata per scadenza')
+  }
 
   return (
     <>
@@ -20,21 +65,24 @@ export default function Coda() {
             color: 'var(--muted)', fontSize: 12, marginTop: 3,
             fontWeight: 500, fontFamily: 'var(--mono)', letterSpacing: '0.02em',
           }}>
-            5 ELEMENTI · 2 IN STAMPA
+            {queue.length} ELEMENTI · {printingCount} IN STAMPA
           </p>
         </div>
         <div style={{ flex: 1 }} />
-        <button style={{
-          display: 'flex', alignItems: 'center', gap: 7,
-          background: 'transparent', border: '1px solid var(--cyan)',
-          color: 'var(--cyan)', fontFamily: 'inherit', fontWeight: 600, fontSize: 14,
-          padding: '0 20px', height: 44, borderRadius: 100, cursor: 'pointer',
-          transition: '0.18s', whiteSpace: 'nowrap',
-        }}
+        <button
+          title="Riordina gli elementi in coda mettendo prima le scadenze più vicine"
+          onClick={optimize}
+          style={{
+            display: 'flex', alignItems: 'center', gap: 7,
+            background: 'transparent', border: '1px solid var(--cyan)',
+            color: 'var(--cyan)', fontFamily: 'inherit', fontWeight: 600, fontSize: 14,
+            padding: '0 20px', height: 44, borderRadius: 100, cursor: 'pointer',
+            transition: '0.18s', whiteSpace: 'nowrap',
+          }}
           onMouseEnter={e => { (e.currentTarget as HTMLButtonElement).style.background = 'rgba(63,115,8,.10)' }}
           onMouseLeave={e => { (e.currentTarget as HTMLButtonElement).style.background = 'transparent' }}
         >
-          <Zap size={16} /> Ottimizza coda
+          <Zap size={16} /> Ordina per scadenza
         </button>
       </div>
 
@@ -64,14 +112,28 @@ export default function Coda() {
 
           {/* Queue list */}
           <div style={{ flex: 1, overflow: 'auto', display: 'flex', flexDirection: 'column', gap: 8 }}>
-            {printQueue.map(item => (
+            {queue.length === 0 && (
+              <div style={{ padding: 28, textAlign: 'center', color: 'var(--muted)', fontSize: 13 }}>
+                Coda vuota —{' '}
+                <Link to="/fablab/ordini" style={{ color: 'var(--cyan)', fontWeight: 600, textDecoration: 'none' }}>
+                  accetta un ordine
+                </Link>{' '}
+                per riempirla.
+              </div>
+            )}
+            {[...queue].sort((a, b) => a.position - b.position).map(item => {
+              const linkedOrder = orderByOrdNum(item.ordNum)
+              return (
               <div
                 key={item.id}
+                onClick={linkedOrder ? () => navigate(`/fablab/ordini/${linkedOrder.id}`) : undefined}
+                title={linkedOrder ? 'Apri il dettaglio ordine' : undefined}
                 style={{
                   display: 'flex', alignItems: 'center', gap: 14,
                   padding: 14, borderRadius: 'var(--radius-sm)',
                   background: 'var(--glass)', border: '1px solid var(--line)',
                   transition: '0.18s',
+                  cursor: linkedOrder ? 'pointer' : 'default',
                 }}
                 onMouseEnter={e => {
                   (e.currentTarget as HTMLDivElement).style.borderColor = 'var(--line-2)'
@@ -125,23 +187,39 @@ export default function Coda() {
                   </div>
                 )}
                 {item.status === 'queued' && (
-                  <div style={{ display: 'flex', alignItems: 'center', gap: 6, flex: '0 0 auto' }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 6, flex: '0 0 auto' }} onClick={e => e.stopPropagation()}>
                     <span style={{ fontFamily: 'var(--mono)', fontSize: 11, color: 'var(--muted)' }}>
                       {item.estimatedTime}
                     </span>
                     <div style={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
-                      <ArrowUp size={12} color="var(--muted)" style={{ cursor: 'pointer' }} />
-                      <ArrowDown size={12} color="var(--muted)" style={{ cursor: 'pointer' }} />
+                      <button
+                        onClick={() => move(item.id, -1)}
+                        aria-label="Sposta su nella coda"
+                        style={{ background: 'none', border: 'none', padding: 0, cursor: 'pointer', display: 'grid', color: 'var(--muted)' }}
+                        onMouseEnter={e => { (e.currentTarget as HTMLButtonElement).style.color = 'var(--cyan)' }}
+                        onMouseLeave={e => { (e.currentTarget as HTMLButtonElement).style.color = 'var(--muted)' }}
+                      >
+                        <ArrowUp size={12} />
+                      </button>
+                      <button
+                        onClick={() => move(item.id, 1)}
+                        aria-label="Sposta giù nella coda"
+                        style={{ background: 'none', border: 'none', padding: 0, cursor: 'pointer', display: 'grid', color: 'var(--muted)' }}
+                        onMouseEnter={e => { (e.currentTarget as HTMLButtonElement).style.color = 'var(--cyan)' }}
+                        onMouseLeave={e => { (e.currentTarget as HTMLButtonElement).style.color = 'var(--muted)' }}
+                      >
+                        <ArrowDown size={12} />
+                      </button>
                     </div>
                   </div>
                 )}
 
-                {/* Status pill */}
+                {/* Status pill — pausa non è un errore: pill neutra tratteggiata */}
                 {item.status === 'printing' && <span className="status-pill sp-print" style={{ flex: '0 0 auto' }}>In stampa</span>}
                 {item.status === 'queued'   && <span className="status-pill sp-new"   style={{ flex: '0 0 auto' }}>In coda</span>}
-                {item.status === 'paused'   && <span className="status-pill sp-err"   style={{ flex: '0 0 auto' }}>In pausa</span>}
+                {item.status === 'paused'   && <span className="status-pill sp-new"   style={{ flex: '0 0 auto', borderStyle: 'dashed' }}>In pausa</span>}
               </div>
-            ))}
+            )})}
           </div>
 
           {/* Footer stats */}
@@ -151,12 +229,12 @@ export default function Coda() {
           }}>
             <div>
               <div style={{ fontFamily: 'var(--mono)', fontSize: 9.5, color: 'var(--muted)', textTransform: 'uppercase', letterSpacing: '0.06em' }}>Totale elementi</div>
-              <div style={{ fontFamily: 'var(--mono)', fontWeight: 700, fontSize: 16, color: 'var(--ink)' }}>{printQueue.length}</div>
+              <div style={{ fontFamily: 'var(--mono)', fontWeight: 700, fontSize: 16, color: 'var(--ink)' }}>{queue.length}</div>
             </div>
             <div style={{ width: 1, height: 30, background: 'var(--line)' }} />
             <div>
               <div style={{ fontFamily: 'var(--mono)', fontSize: 9.5, color: 'var(--muted)', textTransform: 'uppercase', letterSpacing: '0.06em' }}>ETA completamento</div>
-              <div style={{ fontFamily: 'var(--mono)', fontWeight: 700, fontSize: 16, color: 'var(--cyan)' }}>~14h 30m</div>
+              <div style={{ fontFamily: 'var(--mono)', fontWeight: 700, fontSize: 16, color: 'var(--cyan)' }}>{sumEta(queue.map(q => q.estimatedTime))}</div>
             </div>
           </div>
         </GlassCard>
@@ -227,7 +305,7 @@ export default function Coda() {
               Prossime in coda
             </h3>
             <div style={{ display: 'flex', flexDirection: 'column', gap: 8, overflow: 'auto', flex: 1 }}>
-              {queuedItems.map(item => (
+              {[...queuedItems].sort((a, b) => a.position - b.position).map(item => (
                 <div key={item.id} style={{
                   display: 'flex', alignItems: 'center', gap: 10,
                   padding: '10px 12px', borderRadius: 11,
