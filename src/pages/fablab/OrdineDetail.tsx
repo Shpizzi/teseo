@@ -5,6 +5,11 @@ import GlassCard from '../../components/GlassCard'
 import PrintViewer3D from '../../components/PrintViewer3D'
 import { orderDetails } from '../../mock/fablab-pages'
 import type { DeadlineType } from '../../mock'
+import { useLiveOrders, setOrderStatus, type LiveStatus } from '../../mock/orderStore'
+import { toast } from '../../components/Toast'
+
+// Quanti step della timeline risultano completati per ogni stato
+const DONE_STEPS: Record<LiveStatus, number> = { new: 1, accepted: 2, printing: 3, ready: 4, error: 3 }
 
 // ── DeadlineChip ──────────────────────────────────────────────
 function DeadlineChip({ type, label }: { type: DeadlineType; label: string }) {
@@ -41,7 +46,8 @@ function FieldRow({ label, children }: { label: string; children: React.ReactNod
 export default function OrdineDetail() {
   const { id } = useParams<{ id: string }>()
   const navigate = useNavigate()
-  const [progress, setProgress] = useState(62)
+  const [confirmReject, setConfirmReject] = useState(false)
+  const live = useLiveOrders().find(o => o.id === id)
 
   const order = orderDetails.find(o => o.id === id)
 
@@ -69,8 +75,16 @@ export default function OrdineDetail() {
     )
   }
 
-  // First pending step index
-  const currentStepIdx = order.timeline.findIndex(s => !s.done)
+  // Stato vivo (accetta/rifiuta agiscono sullo store condiviso) + timeline derivata
+  const status: LiveStatus = live?.status ?? order.status
+  const progress = live?.progress ?? 0
+  const doneCount = DONE_STEPS[status]
+  const timeline = order.timeline.map((s, i) => ({
+    ...s,
+    done: i < doneCount,
+    date: i < doneCount && s.date === '—' ? 'adesso' : s.date,
+  }))
+  const currentStepIdx = timeline.findIndex(s => !s.done)
 
   return (
     <>
@@ -178,26 +192,118 @@ export default function OrdineDetail() {
             </div>
           )}
 
-          {/* Action buttons */}
-          <button style={{
-            background: 'var(--forest)', border: 'none', color: '#fff',
-            fontFamily: 'inherit', fontWeight: 700, fontSize: 14,
-            padding: '11px 0', borderRadius: 100, cursor: 'pointer',
-            width: '100%', marginBottom: 8, transition: '0.18s',
-          }}
-            onClick={() => navigate('/fablab/slicing')}
-            onMouseEnter={e => { (e.currentTarget as HTMLButtonElement).style.background = 'var(--cyan)' }}
-            onMouseLeave={e => { (e.currentTarget as HTMLButtonElement).style.background = 'var(--forest)' }}
-          >
-            Avvia stampa
-          </button>
-          <button style={{
-            background: 'transparent', border: '1px solid var(--line-2)', color: 'var(--muted)',
-            fontFamily: 'inherit', fontWeight: 600, fontSize: 13,
-            padding: '10px 0', borderRadius: 100, cursor: 'pointer', width: '100%',
-          }}>
-            Rifiuta ordine
-          </button>
+          {/* Action buttons — CTA coerente con lo stato dell'ordine */}
+          {status === 'new' && (
+            <>
+              <button style={{
+                background: 'var(--forest)', border: 'none', color: '#fff',
+                fontFamily: 'inherit', fontWeight: 700, fontSize: 14,
+                padding: '11px 0', borderRadius: 100, cursor: 'pointer',
+                width: '100%', marginBottom: 8, transition: '0.18s',
+              }}
+                onClick={() => {
+                  setOrderStatus(order.id, 'accepted')
+                  toast('Ordine accettato — pronto per lo slicing')
+                }}
+                onMouseEnter={e => { (e.currentTarget as HTMLButtonElement).style.background = 'var(--cyan)' }}
+                onMouseLeave={e => { (e.currentTarget as HTMLButtonElement).style.background = 'var(--forest)' }}
+              >
+                Accetta ordine
+              </button>
+              {confirmReject ? (
+                <div style={{ display: 'flex', gap: 8 }}>
+                  <button
+                    onClick={() => {
+                      setOrderStatus(order.id, 'rejected')
+                      toast('Ordine rifiutato — il cliente riceve una notifica')
+                      navigate('/fablab/ordini')
+                    }}
+                    style={{
+                      flex: 1, background: 'transparent', border: '1px dashed #e40014', color: '#e40014',
+                      fontFamily: 'inherit', fontWeight: 600, fontSize: 13,
+                      padding: '10px 0', borderRadius: 100, cursor: 'pointer',
+                    }}>
+                    Sì, rifiuta
+                  </button>
+                  <button
+                    onClick={() => setConfirmReject(false)}
+                    style={{
+                      flex: 1, background: 'transparent', border: '1px solid var(--line)', color: 'var(--muted)',
+                      fontFamily: 'inherit', fontWeight: 600, fontSize: 13,
+                      padding: '10px 0', borderRadius: 100, cursor: 'pointer',
+                    }}>
+                    No, mantieni
+                  </button>
+                </div>
+              ) : (
+                <button
+                  onClick={() => setConfirmReject(true)}
+                  style={{
+                    background: 'transparent', border: '1px solid var(--line-2)', color: 'var(--muted)',
+                    fontFamily: 'inherit', fontWeight: 600, fontSize: 13,
+                    padding: '10px 0', borderRadius: 100, cursor: 'pointer', width: '100%',
+                  }}>
+                  Rifiuta ordine
+                </button>
+              )}
+            </>
+          )}
+          {status === 'accepted' && (
+            <button style={{
+              background: 'var(--forest)', border: 'none', color: '#fff',
+              fontFamily: 'inherit', fontWeight: 700, fontSize: 14,
+              padding: '11px 0', borderRadius: 100, cursor: 'pointer',
+              width: '100%', transition: '0.18s',
+            }}
+              onClick={() => navigate(`/fablab/slicing?ordine=${order.id}`)}
+              onMouseEnter={e => { (e.currentTarget as HTMLButtonElement).style.background = 'var(--cyan)' }}
+              onMouseLeave={e => { (e.currentTarget as HTMLButtonElement).style.background = 'var(--forest)' }}
+            >
+              Avvia slicing →
+            </button>
+          )}
+          {status === 'printing' && (
+            <button
+              onClick={() => navigate('/fablab/coda')}
+              style={{
+                background: 'transparent', border: '1px solid var(--line-2)', color: 'var(--cyan)',
+                fontFamily: 'inherit', fontWeight: 600, fontSize: 13,
+                padding: '10px 0', borderRadius: 100, cursor: 'pointer', width: '100%',
+              }}>
+              In stampa — vedi coda →
+            </button>
+          )}
+          {status === 'ready' && (
+            <button style={{
+              background: 'var(--forest)', border: 'none', color: '#fff',
+              fontFamily: 'inherit', fontWeight: 700, fontSize: 14,
+              padding: '11px 0', borderRadius: 100, cursor: 'pointer',
+              width: '100%', transition: '0.18s',
+            }}
+              onClick={() => toast(`${order.customer.name} avvisato: ordine pronto al ritiro`)}
+              onMouseEnter={e => { (e.currentTarget as HTMLButtonElement).style.background = 'var(--cyan)' }}
+              onMouseLeave={e => { (e.currentTarget as HTMLButtonElement).style.background = 'var(--forest)' }}
+            >
+              Avvisa cliente per il ritiro
+            </button>
+          )}
+          {status === 'error' && (
+            <button style={{
+              background: 'var(--forest)', border: 'none', color: '#fff',
+              fontFamily: 'inherit', fontWeight: 700, fontSize: 14,
+              padding: '11px 0', borderRadius: 100, cursor: 'pointer',
+              width: '100%', transition: '0.18s',
+            }}
+              onClick={() => {
+                setOrderStatus(order.id, 'printing')
+                toast('Stampa riavviata — l’ordine torna in coda')
+              }}
+              onMouseEnter={e => { (e.currentTarget as HTMLButtonElement).style.background = 'var(--cyan)' }}
+              onMouseLeave={e => { (e.currentTarget as HTMLButtonElement).style.background = 'var(--forest)' }}
+            >
+              Riavvia stampa
+            </button>
+          )}
         </GlassCard>
 
         {/* ── Colonna centrale: Anteprima oggetto ── */}
@@ -223,38 +329,40 @@ export default function OrdineDetail() {
             </span>
           </div>
 
-          {/* 3D viewer */}
+          {/* 3D viewer — avanzamento reale solo se la stampa è in corso */}
           <div style={{ flex: 1, position: 'relative' }}>
-            <PrintViewer3D onProgressChange={setProgress} />
+            <PrintViewer3D progress={status === 'printing' ? progress : 100} />
           </div>
 
-          {/* Progress badge bottom */}
-          <div style={{
-            position: 'absolute', bottom: 20, left: 20, right: 20, zIndex: 5,
-          }}>
+          {/* Progress badge bottom — solo per ordini in stampa */}
+          {status === 'printing' && (
             <div style={{
-              background: 'rgba(244,250,237,0.9)', backdropFilter: 'blur(10px)',
-              border: '1px solid var(--line)', borderRadius: 10,
-              padding: '10px 14px',
+              position: 'absolute', bottom: 20, left: 20, right: 20, zIndex: 5,
             }}>
               <div style={{
-                display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 6,
+                background: 'rgba(244,250,237,0.9)', backdropFilter: 'blur(10px)',
+                border: '1px solid var(--line)', borderRadius: 10,
+                padding: '10px 14px',
               }}>
-                <span style={{ fontFamily: 'var(--mono)', fontSize: 9.5, color: 'var(--muted)', textTransform: 'uppercase', letterSpacing: '0.08em' }}>
-                  Avanzamento
-                </span>
-                <span style={{ fontFamily: 'var(--mono)', fontSize: 12, fontWeight: 700, color: 'var(--cyan)' }}>
-                  {progress}%
-                </span>
-              </div>
-              <div className="progress-track">
-                <span
-                  className="progress-track-fill progress-track-fill-striped"
-                  style={{ width: `${progress}%` }}
-                />
+                <div style={{
+                  display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 6,
+                }}>
+                  <span style={{ fontFamily: 'var(--mono)', fontSize: 9.5, color: 'var(--muted)', textTransform: 'uppercase', letterSpacing: '0.08em' }}>
+                    Avanzamento
+                  </span>
+                  <span style={{ fontFamily: 'var(--mono)', fontSize: 12, fontWeight: 700, color: 'var(--cyan)' }}>
+                    {progress}%
+                  </span>
+                </div>
+                <div className="progress-track">
+                  <span
+                    className="progress-track-fill progress-track-fill-striped"
+                    style={{ width: `${progress}%` }}
+                  />
+                </div>
               </div>
             </div>
-          </div>
+          )}
         </GlassCard>
 
         {/* ── Colonna destra: Cliente + Timeline + Chat ── */}
@@ -300,9 +408,9 @@ export default function OrdineDetail() {
           </div>
 
           <div style={{ display: 'flex', flexDirection: 'column', gap: 0, flex: 1 }}>
-            {order.timeline.map((step, idx) => {
+            {timeline.map((step, idx) => {
               const isCurrent = idx === currentStepIdx
-              const isLast = idx === order.timeline.length - 1
+              const isLast = idx === timeline.length - 1
               return (
                 <div key={idx} style={{ display: 'flex', gap: 12, position: 'relative' }}>
                   {/* Dot + vertical line */}
@@ -350,18 +458,21 @@ export default function OrdineDetail() {
           {/* Divider */}
           <div style={{ height: 1, background: 'var(--line)', margin: '16px 0' }} />
 
-          {/* Chat */}
+          {/* Contatto cliente */}
           <div style={{ fontFamily: 'var(--mono)', fontSize: 10, color: 'var(--muted)', textTransform: 'uppercase', letterSpacing: '0.08em', marginBottom: 10 }}>
-            Chat
+            Contatto
           </div>
-          <button style={{
-            background: 'transparent', border: '1px solid var(--line-2)', color: 'var(--cyan)',
-            fontFamily: 'inherit', fontWeight: 600, fontSize: 13,
-            padding: '10px 0', borderRadius: 100, cursor: 'pointer', width: '100%',
-            display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 7,
-          }}>
-            <MessageSquare size={15} /> Apri conversazione
-          </button>
+          <a
+            href={`mailto:${order.customer.email}?subject=Ordine ${order.ordNum} — ${order.name}`}
+            style={{
+              background: 'transparent', border: '1px solid var(--line-2)', color: 'var(--cyan)',
+              fontFamily: 'inherit', fontWeight: 600, fontSize: 13,
+              padding: '10px 0', borderRadius: 100, cursor: 'pointer', width: '100%',
+              display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 7,
+              textDecoration: 'none',
+            }}>
+            <MessageSquare size={15} /> Scrivi al cliente
+          </a>
         </GlassCard>
       </div>
     </>
