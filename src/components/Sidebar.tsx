@@ -47,7 +47,7 @@ export default function Sidebar({ items, brand, user, open, onClose }: SidebarPr
             width: 38,
             height: 38,
             borderRadius: 11,
-            background: 'rgba(174,227,249,.12)',
+            background: 'rgba(63,115,8,.12)',
             border: '1px solid var(--line-2)',
             display: 'grid',
             placeItems: 'center',
@@ -111,7 +111,7 @@ export default function Sidebar({ items, brand, user, open, onClose }: SidebarPr
               gap: 13,
               padding: '11px 13px',
               borderRadius: 11,
-              color: isActive ? '#08233f' : 'var(--muted)',
+              color: isActive ? '#f4faed' : 'var(--muted)',
               background: isActive ? 'var(--cyan)' : 'transparent',
               cursor: 'pointer',
               transition: '0.18s',
@@ -121,7 +121,7 @@ export default function Sidebar({ items, brand, user, open, onClose }: SidebarPr
             }}
             onMouseEnter={e => {
               if (!isActive) {
-                ;(e.currentTarget as HTMLAnchorElement).style.color = '#fff'
+                ;(e.currentTarget as HTMLAnchorElement).style.color = 'var(--ink)'
                 ;(e.currentTarget as HTMLAnchorElement).style.background = 'var(--glass-2)'
               }
             }}
@@ -140,8 +140,8 @@ export default function Sidebar({ items, brand, user, open, onClose }: SidebarPr
               <span
                 style={{
                   marginLeft: 'auto',
-                  background: isActive ? 'rgba(8,35,63,0.25)' : 'var(--cyan)',
-                  color: '#08233f',
+                  background: isActive ? 'rgba(255,255,255,0.25)' : 'var(--cyan)',
+                  color: '#f4faed',
                   fontSize: 10.5,
                   fontWeight: 700,
                   padding: '1px 7px',
@@ -176,7 +176,7 @@ export default function Sidebar({ items, brand, user, open, onClose }: SidebarPr
             width: 36,
             height: 36,
             borderRadius: '50%',
-            background: 'rgba(174,227,249,.12)',
+            background: 'rgba(63,115,8,.12)',
             border: '1px solid var(--line-2)',
             color: 'var(--cyan)',
             display: 'grid',
@@ -240,7 +240,7 @@ export default function Sidebar({ items, brand, user, open, onClose }: SidebarPr
           position: 'fixed',
           inset: 0,
           zIndex: 40,
-          background: 'rgba(4,14,28,0.55)',
+          background: 'rgba(9,15,5,0.55)',
           backdropFilter: 'blur(2px)',
           WebkitBackdropFilter: 'blur(2px)',
           opacity: open ? 1 : 0,

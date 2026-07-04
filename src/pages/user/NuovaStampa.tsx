@@ -42,7 +42,7 @@ export default function NuovaStampa() {
                 fontWeight: 700,
                 background: isActive ? 'var(--cyan)' : isDone ? 'var(--glass-2)' : 'var(--glass)',
                 border: isActive ? '1px solid var(--cyan)' : isDone ? '1px solid var(--cyan)' : '1px solid var(--line)',
-                color: isActive ? '#08233f' : isDone ? 'var(--cyan)' : 'var(--muted)',
+                color: isActive ? '#f4faed' : isDone ? 'var(--cyan)' : 'var(--muted)',
                 transition: '0.2s',
               }}
             >
@@ -202,7 +202,7 @@ export default function NuovaStampa() {
                   style={{
                     padding: 18,
                     borderRadius: 'var(--radius-sm)',
-                    background: isSelected ? 'rgba(174,227,249,0.07)' : 'var(--glass)',
+                    background: isSelected ? 'rgba(63,115,8,0.07)' : 'var(--glass)',
                     border: `1px solid ${isSelected ? 'var(--cyan)' : 'var(--line)'}`,
                     cursor: 'pointer',
                     transition: '0.18s',

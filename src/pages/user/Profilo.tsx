@@ -35,7 +35,7 @@ export default function Profilo() {
           width: 14,
           height: 14,
           borderRadius: '50%',
-          background: on ? '#08233f' : 'var(--muted)',
+          background: on ? '#f4faed' : 'var(--muted)',
           transition: '0.2s',
         }}
       />
@@ -151,7 +151,7 @@ export default function Profilo() {
                     cursor: 'pointer',
                     transition: '0.2s',
                     background: m.on ? 'var(--cyan)' : 'transparent',
-                    color: m.on ? '#08233f' : 'var(--muted)',
+                    color: m.on ? '#f4faed' : 'var(--muted)',
                     border: m.on ? '1px solid var(--cyan)' : '1px solid var(--line)',
                   }}
                 >

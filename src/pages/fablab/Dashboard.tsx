@@ -124,9 +124,9 @@ function OrderRow({ order, onNavigate }: { order: typeof fablabOrders[0]; onNavi
             <button
               onClick={e => { e.stopPropagation(); onNavigate(order.id) }}
               style={{
-                background: '#fff',
+                background: 'var(--forest)',
                 border: 'none',
-                color: '#08233f',
+                color: '#fff',
                 fontFamily: 'inherit',
                 fontWeight: 700,
                 fontSize: 12,
@@ -145,7 +145,7 @@ function OrderRow({ order, onNavigate }: { order: typeof fablabOrders[0]; onNavi
               width: 90,
               height: 5,
               borderRadius: 100,
-              background: 'rgba(174,227,249,.14)',
+              background: 'rgba(63,115,8,.14)',
               overflow: 'hidden',
             }}
           >
@@ -390,7 +390,7 @@ export default function FablabDashboard() {
                     padding: '6px 13px',
                     borderRadius: 100,
                     border: isActive ? '1px solid var(--cyan)' : '1px solid var(--line)',
-                    background: isActive ? 'rgba(174,227,249,.10)' : 'transparent',
+                    background: isActive ? 'rgba(63,115,8,.10)' : 'transparent',
                     color: isActive ? 'var(--cyan)' : 'var(--muted)',
                     fontFamily: 'inherit',
                     fontWeight: 600,
@@ -404,7 +404,7 @@ export default function FablabDashboard() {
                     <span
                       style={{
                         background: isActive ? 'var(--cyan)' : 'var(--glass-2)',
-                        color: isActive ? '#08233f' : 'var(--muted)',
+                        color: isActive ? '#f4faed' : 'var(--muted)',
                         fontFamily: 'var(--mono)',
                         fontSize: 10,
                         fontWeight: 700,

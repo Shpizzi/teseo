@@ -35,7 +35,7 @@ export default function Produttori() {
     cursor: 'pointer',
     border: `1px solid ${active ? 'var(--cyan)' : 'var(--line)'}`,
     background: active ? 'var(--cyan)' : 'var(--glass)',
-    color: active ? '#08233f' : 'var(--muted)',
+    color: active ? '#f4faed' : 'var(--muted)',
     transition: '0.18s',
     whiteSpace: 'nowrap' as const,
   })
@@ -175,7 +175,7 @@ export default function Produttori() {
             style={{
               position: 'absolute',
               inset: 0,
-              background: '#0c2a52',
+              background: '#18280e',
             }}
           />
           <div
@@ -183,16 +183,16 @@ export default function Produttori() {
               position: 'absolute',
               inset: 0,
               backgroundImage:
-                'linear-gradient(rgba(174,227,249,.10) 1px,transparent 1px),linear-gradient(90deg,rgba(174,227,249,.10) 1px,transparent 1px)',
+                'linear-gradient(rgba(63,115,8,.10) 1px,transparent 1px),linear-gradient(90deg,rgba(63,115,8,.10) 1px,transparent 1px)',
               backgroundSize: '28px 28px',
             }}
           />
 
           {/* Roads */}
-          <div style={{ position: 'absolute', top: '44%', left: 0, right: 0, height: 8, background: 'rgba(174,227,249,.12)' }} />
-          <div style={{ position: 'absolute', top: '20%', left: 0, right: 0, height: 5, background: 'rgba(174,227,249,.08)' }} />
-          <div style={{ position: 'absolute', left: '38%', top: 0, bottom: 0, width: 8, background: 'rgba(174,227,249,.12)' }} />
-          <div style={{ position: 'absolute', left: '68%', top: 0, bottom: 0, width: 5, background: 'rgba(174,227,249,.08)' }} />
+          <div style={{ position: 'absolute', top: '44%', left: 0, right: 0, height: 8, background: 'rgba(63,115,8,.12)' }} />
+          <div style={{ position: 'absolute', top: '20%', left: 0, right: 0, height: 5, background: 'rgba(63,115,8,.08)' }} />
+          <div style={{ position: 'absolute', left: '38%', top: 0, bottom: 0, width: 8, background: 'rgba(63,115,8,.12)' }} />
+          <div style={{ position: 'absolute', left: '68%', top: 0, bottom: 0, width: 5, background: 'rgba(63,115,8,.08)' }} />
 
           {/* You */}
           <div className="mpin you" style={{ left: '50%', top: '52%' }}>

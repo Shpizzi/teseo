@@ -24,7 +24,7 @@ export default function Community() {
     cursor: 'pointer',
     border: `1px solid ${active ? 'var(--cyan)' : 'var(--line)'}`,
     background: active ? 'var(--cyan)' : 'var(--glass)',
-    color: active ? '#08233f' : 'var(--muted)',
+    color: active ? '#f4faed' : 'var(--muted)',
     transition: '0.18s',
     whiteSpace: 'nowrap' as const,
     flex: '0 0 auto',
@@ -88,7 +88,7 @@ export default function Community() {
               style={{
                 height: 180,
                 borderRadius: 13,
-                background: '#0c2a52',
+                background: '#18280e',
                 border: '1px solid var(--line-2)',
                 position: 'relative',
                 overflow: 'hidden',
@@ -99,7 +99,7 @@ export default function Community() {
                   position: 'absolute',
                   inset: 0,
                   backgroundImage:
-                    'linear-gradient(rgba(174,227,249,.28) 1px,transparent 1px),linear-gradient(90deg,rgba(174,227,249,.28) 1px,transparent 1px)',
+                    'linear-gradient(rgba(63,115,8,.28) 1px,transparent 1px),linear-gradient(90deg,rgba(63,115,8,.28) 1px,transparent 1px)',
                   backgroundSize: '9px 9px',
                   pointerEvents: 'none',
                 }}
@@ -211,7 +211,7 @@ export default function Community() {
               onMouseEnter={e => {
                 const btn = e.currentTarget as HTMLButtonElement
                 btn.style.background = 'var(--cyan)'
-                btn.style.color = '#08233f'
+                btn.style.color = '#f4faed'
               }}
               onMouseLeave={e => {
                 const btn = e.currentTarget as HTMLButtonElement

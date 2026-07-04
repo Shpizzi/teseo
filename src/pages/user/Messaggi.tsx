@@ -88,7 +88,7 @@ export default function Messaggi() {
                     <span
                       style={{
                         background: 'var(--cyan)',
-                        color: '#08233f',
+                        color: '#f4faed',
                         fontSize: 10,
                         fontWeight: 700,
                         fontFamily: 'var(--mono)',
@@ -164,7 +164,7 @@ export default function Messaggi() {
                   style={{
                     background: msg.sender === 'user' ? 'var(--cyan)' : 'var(--glass-2)',
                     border: msg.sender === 'fablab' ? '1px solid var(--line)' : 'none',
-                    color: msg.sender === 'user' ? '#08233f' : 'var(--ink)',
+                    color: msg.sender === 'user' ? '#f4faed' : 'var(--ink)',
                     borderRadius: msg.sender === 'user' ? '13px 13px 4px 13px' : '13px 13px 13px 4px',
                     padding: '10px 14px',
                     fontSize: 13.5,
@@ -219,8 +219,8 @@ export default function Messaggi() {
                 display: 'flex',
                 alignItems: 'center',
                 gap: 8,
-                background: '#fff',
-                color: '#08233f',
+                background: 'var(--forest)',
+                color: '#fff',
                 border: 'none',
                 fontFamily: 'inherit',
                 fontWeight: 700,

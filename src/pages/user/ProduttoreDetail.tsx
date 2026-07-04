@@ -190,7 +190,7 @@ export default function ProduttoreDetail() {
             <div
               className="conic-ring"
               style={{
-                background: `conic-gradient(var(--cyan) 0 ${utilizationPct}%, rgba(174,227,249,.14) ${utilizationPct}% 100%)`,
+                background: `conic-gradient(var(--cyan) 0 ${utilizationPct}%, rgba(63,115,8,.14) ${utilizationPct}% 100%)`,
               }}
             >
               <div

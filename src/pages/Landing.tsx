@@ -1,81 +1,64 @@
-import { Package, MapPin, Upload, Activity, CheckCircle2, Cpu } from 'lucide-react'
-import { useNavigate } from 'react-router-dom'
-import HeroViewer3D from '../components/HeroViewer3D'
+import { useEffect, useRef, useState } from 'react'
+import { Package, ScanLine, Cpu, Users, MapPin, Recycle, CheckCircle2, Activity, TrendingDown, XCircle } from 'lucide-react'
+import { useNavigate, Link } from 'react-router-dom'
+import gsap from 'gsap'
+import { ScrollTrigger } from 'gsap/ScrollTrigger'
+import HeroFloatingMeshes from '../components/HeroFloatingMeshes'
 import PrimaryButton from '../components/PrimaryButton'
 import GlassCard from '../components/GlassCard'
+import { LandingNav, LandingFooter, SectionTag, GhostButton } from '../components/LandingChrome'
+import PrintBuildScroll from '../components/PrintBuildScroll'
 
-/* ────────────────── NAVBAR ────────────────── */
-function LandingNav() {
-  const navigate = useNavigate()
+gsap.registerPlugin(ScrollTrigger)
+
+/* ────────────────── SLOT WORD ────────────────── */
+const SLOT_WORDS = ['rinnova', 'riusa', 'sistema', 'ripara', 'rigenera', 'recupera']
+
+// Slot-machine roll: verbs scroll vertically. A clone of the first word is
+// appended so the last→first wrap rolls forward, then snaps back with no transition.
+function SlotWord() {
+  const [i, setI] = useState(0)
+  const [anim, setAnim] = useState(true)
+  const words = [...SLOT_WORDS, SLOT_WORDS[0]]
+
+  useEffect(() => {
+    const t = setInterval(() => setI(v => v + 1), 1800)
+    return () => clearInterval(t)
+  }, [])
+
+  // after the wrap-to-clone transition, jump back to 0 without animating
+  useEffect(() => {
+    if (i > SLOT_WORDS.length - 1) {
+      const t = setTimeout(() => { setAnim(false); setI(0) }, 600)
+      return () => clearTimeout(t)
+    }
+    if (!anim) requestAnimationFrame(() => requestAnimationFrame(() => setAnim(true)))
+  }, [i, anim])
+
   return (
-    <nav
+    <span
       style={{
-        position: 'sticky',
-        top: 0,
-        zIndex: 50,
-        background: 'rgba(10,35,66,.85)',
-        backdropFilter: 'blur(20px)',
-        WebkitBackdropFilter: 'blur(20px)',
-        borderBottom: '1px solid var(--line)',
-        padding: '0 6%',
-        height: 64,
-        display: 'flex',
-        alignItems: 'center',
-        gap: 40,
+        display: 'inline-flex',
+        flexDirection: 'column',
+        height: '1.1em',
+        overflow: 'hidden',
+        verticalAlign: 'bottom',
+        color: 'var(--cyan)',
       }}
     >
-      {/* Logo */}
-      <div style={{ display: 'flex', alignItems: 'center', gap: 8, flexShrink: 0 }}>
-        <Package size={20} color="var(--cyan)" />
-        <span style={{ fontWeight: 800, fontSize: 16, letterSpacing: '0.12em', color: 'var(--ink)' }}>
-          TESEO
-        </span>
-      </div>
-
-      {/* Nav links */}
-      <div style={{ display: 'flex', alignItems: 'center', gap: 28, flex: 1 }}>
-        {['Come funziona', 'FabLab', 'Community', 'Prezzi'].map((label, i) => (
-          <a
-            key={i}
-            href={`#${label.toLowerCase().replace(/\s+/g, '-')}`}
-            style={{
-              color: 'var(--muted)',
-              textDecoration: 'none',
-              fontSize: 14,
-              fontWeight: 600,
-              cursor: 'pointer',
-              transition: 'color .2s',
-            }}
-            onMouseEnter={e => { (e.currentTarget as HTMLAnchorElement).style.color = 'var(--ink)' }}
-            onMouseLeave={e => { (e.currentTarget as HTMLAnchorElement).style.color = 'var(--muted)' }}
-          >
-            {label}
-          </a>
+      <span
+        style={{
+          display: 'flex',
+          flexDirection: 'column',
+          transform: `translateY(${-i * 1.1}em)`,
+          transition: anim ? 'transform .55s cubic-bezier(.16,1,.3,1)' : 'none',
+        }}
+      >
+        {words.map((w, k) => (
+          <span key={k} style={{ height: '1.1em', lineHeight: '1.1em' }}>{w}</span>
         ))}
-      </div>
-
-      {/* Right actions */}
-      <div style={{ display: 'flex', alignItems: 'center', gap: 16, flexShrink: 0 }}>
-        <a
-          href="#"
-          onClick={e => { e.preventDefault(); navigate('/app/dashboard') }}
-          style={{
-            fontFamily: 'var(--mono)',
-            fontSize: 13,
-            color: 'var(--muted)',
-            textDecoration: 'none',
-            transition: 'color .2s',
-          }}
-          onMouseEnter={e => { (e.currentTarget as HTMLAnchorElement).style.color = 'var(--ink)' }}
-          onMouseLeave={e => { (e.currentTarget as HTMLAnchorElement).style.color = 'var(--muted)' }}
-        >
-          Accedi
-        </a>
-        <PrimaryButton className="" style={{ height: 38, padding: '0 18px', fontSize: 13 }} onClick={() => navigate('/app/dashboard')}>
-          Inizia gratis
-        </PrimaryButton>
-      </div>
-    </nav>
+      </span>
+    </span>
   )
 }
 
@@ -86,71 +69,42 @@ function HeroSection() {
     <section
       id="hero"
       style={{
+        position: 'relative',
         padding: '0 6%',
         display: 'flex',
         alignItems: 'center',
-        gap: 60,
+        justifyContent: 'center',
         minHeight: '100svh',
       }}
     >
-      {/* Left column */}
+      {/* Mesh di oggetti riconoscibili che fluttuano attorno al titolo */}
+      <HeroFloatingMeshes />
+
+      {/* Colonna centrale */}
       <div
         style={{
-          flex: 1,
-          maxWidth: 580,
+          position: 'relative',
+          zIndex: 1,
+          maxWidth: 680,
           display: 'flex',
           flexDirection: 'column',
+          alignItems: 'center',
+          textAlign: 'center',
           gap: 28,
         }}
       >
-        {/* Tag pill */}
-        <div
-          className="anim-fadeUp"
-          style={{
-            display: 'inline-flex',
-            alignItems: 'center',
-            gap: 8,
-            border: '1px solid var(--line-2)',
-            background: 'rgba(174,227,249,.06)',
-            borderRadius: 100,
-            padding: '7px 16px',
-            alignSelf: 'flex-start',
-          }}
-        >
-          <span
-            className="anim-pulse"
-            style={{
-              width: 6,
-              height: 6,
-              borderRadius: '50%',
-              background: 'var(--cyan)',
-              flexShrink: 0,
-            }}
-          />
-          <span
-            style={{
-              fontFamily: 'var(--mono)',
-              fontSize: 11,
-              color: 'var(--ink)',
-              letterSpacing: '0.05em',
-            }}
-          >
-            INDUSTRIA 4.0 &middot; MANIFATTURA DISTRIBUITA
-          </span>
-        </div>
-
-        {/* Headline */}
+        {/* Headline — il payoff del progetto */}
         <h1
           className="anim-fadeUp-d1"
           style={{
-            fontSize: 'clamp(36px, 5vw, 62px)',
+            fontSize: 'clamp(34px, 4.6vw, 58px)',
             fontWeight: 800,
             lineHeight: 1.1,
             letterSpacing: '-.02em',
             color: 'var(--ink)',
           }}
         >
-          La stampa <span style={{ color: 'var(--cyan)' }}>3D</span> di quartiere.
+          Unisciti alla rete che <SlotWord />
         </h1>
 
         {/* Subtitle */}
@@ -160,446 +114,452 @@ function HeroSection() {
             fontSize: 17,
             color: 'var(--muted)',
             lineHeight: 1.6,
-            maxWidth: 480,
+            maxWidth: 500,
           }}
         >
-          Carica il tuo modello, scegli un FabLab vicino e ritira l&apos;oggetto stampato. Slicing AI incluso.
+          Un oggetto non deve finire in discarica per un pezzo da 30 grammi.
+          Inquadralo con il telefono: l&apos;AI ricostruisce il ricambio, un FabLab
+          vicino a te lo stampa, tu lo ritiri sotto casa.
         </p>
 
         {/* CTA row */}
-        <div className="anim-fadeUp-d3" style={{ display: 'flex', flexDirection: 'row', gap: 12 }}>
+        <div className="anim-fadeUp-d3" style={{ display: 'flex', flexDirection: 'row', gap: 12, justifyContent: 'center' }}>
           <PrimaryButton style={{ height: 48, fontSize: 15, padding: '0 28px' }} onClick={() => navigate('/app/dashboard')}>
-            <Package size={18} />
-            Inizia a stampare
+            <ScanLine size={18} />
+            Ripara il tuo primo oggetto
           </PrimaryButton>
-          <button
-            onClick={() => navigate('/fablab/dashboard')}
-            style={{
-              border: '1px solid var(--line-2)',
-              background: 'transparent',
-              color: 'var(--cyan)',
-              borderRadius: 100,
-              padding: '0 22px',
-              height: 48,
-              fontFamily: 'inherit',
-              fontWeight: 600,
-              fontSize: 15,
-              cursor: 'pointer',
-              transition: 'background .2s',
-            }}
-            onMouseEnter={e => { (e.currentTarget as HTMLButtonElement).style.background = 'rgba(174,227,249,.08)' }}
-            onMouseLeave={e => { (e.currentTarget as HTMLButtonElement).style.background = 'transparent' }}
-          >
+          <GhostButton style={{ height: 48, padding: '0 22px' }} onClick={() => navigate('/fablab/dashboard')}>
             Per i FabLab &rarr;
-          </button>
-        </div>
-
-        {/* Mini stats row */}
-        <div
-          className="anim-fadeUp-d4"
-          style={{
-            display: 'flex',
-            flexDirection: 'row',
-            alignItems: 'center',
-            gap: 24,
-            paddingTop: 8,
-          }}
-        >
-          {[
-            { num: '2.400+', label: 'stampe' },
-            { num: '12', label: 'FabLab attivi' },
-            { num: '4.8★', label: 'rating' },
-          ].map((stat, i) => (
-            <div key={i} style={{ display: 'flex', alignItems: 'center', gap: 24 }}>
-              {i > 0 && (
-                <div
-                  style={{
-                    width: 1,
-                    height: 16,
-                    background: 'var(--line)',
-                    flexShrink: 0,
-                    marginRight: -12,
-                  }}
-                />
-              )}
-              <span
-                style={{
-                  fontFamily: 'var(--mono)',
-                  fontSize: 12,
-                  color: 'var(--muted)',
-                }}
-              >
-                <span style={{ color: 'var(--ink)', fontWeight: 600 }}>{stat.num}</span>{' '}
-                {stat.label}
-              </span>
-            </div>
-          ))}
+          </GhostButton>
         </div>
       </div>
 
-      {/* Right column — 3D scene */}
-      <div
-        className="anim-fadeIn"
-        style={{
-          flex: 1,
-          position: 'relative',
-          minHeight: 520,
-        }}
-      >
-        <HeroViewer3D />
-
-        {/* Reg marks */}
-        <div className="reg-tl" />
-        <div className="reg-tr" />
-        <div className="reg-bl" />
-        <div className="reg-br" />
-
-        {/* Caption */}
-        <span
-          style={{
-            position: 'absolute',
-            top: 16,
-            left: '50%',
-            transform: 'translateX(-50%)',
-            fontFamily: 'var(--mono)',
-            fontSize: 10,
-            letterSpacing: '0.2em',
-            color: 'var(--cyan)',
-            opacity: 0.7,
-            whiteSpace: 'nowrap',
-            pointerEvents: 'none',
-          }}
-        >
-          FIG. 01 &mdash; TESEO PLATFORM &middot; SCALE 1:1
-        </span>
-
-        {/* Float card 1 — bottom-left */}
-        <div
-          className="anim-float"
-          style={{
-            position: 'absolute',
-            bottom: 48,
-            left: -20,
-            animationDuration: '7s',
-          }}
-        >
-          <div
-            style={{
-              background: 'rgba(8,29,58,.75)',
-              backdropFilter: 'blur(20px)',
-              WebkitBackdropFilter: 'blur(20px)',
-              border: '1px solid var(--line-2)',
-              borderRadius: 16,
-              padding: '14px 18px',
-              display: 'flex',
-              flexDirection: 'column',
-              gap: 6,
-              minWidth: 180,
-            }}
-          >
-            <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-              <CheckCircle2 size={16} color="var(--cyan)" />
-              <span style={{ fontSize: 13, fontWeight: 700, color: 'var(--ink)' }}>Pronto al ritiro</span>
-            </div>
-            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 12 }}>
-              <span style={{ fontFamily: 'var(--mono)', fontSize: 11, color: 'var(--muted)' }}>
-                Ricambio cardine finestra
-              </span>
-              <span className="status-pill sp-ready" style={{ fontSize: 10 }}>Pronto</span>
-            </div>
-          </div>
-        </div>
-
-        {/* Float card 2 — top-right */}
-        <div
-          className="anim-float"
-          style={{
-            position: 'absolute',
-            top: 80,
-            right: -20,
-            animationDuration: '8s',
-            animationDelay: '1s',
-          }}
-        >
-          <div
-            style={{
-              background: 'rgba(8,29,58,.75)',
-              backdropFilter: 'blur(20px)',
-              WebkitBackdropFilter: 'blur(20px)',
-              border: '1px solid var(--line-2)',
-              borderRadius: 16,
-              padding: '14px 18px',
-              display: 'flex',
-              flexDirection: 'column',
-              gap: 8,
-              minWidth: 180,
-            }}
-          >
-            <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-              <Activity size={16} color="var(--cyan)" />
-              <span style={{ fontSize: 13, fontWeight: 700, color: 'var(--ink)' }}>In stampa</span>
-            </div>
-            <span style={{ fontFamily: 'var(--mono)', fontSize: 11, color: 'var(--cyan)' }}>
-              84% &middot; ETA 2h 10m
-            </span>
-            <div
-              style={{
-                height: 4,
-                background: 'rgba(174,227,249,.14)',
-                borderRadius: 2,
-                overflow: 'hidden',
-              }}
-            >
-              <div
-                style={{
-                  height: '100%',
-                  width: '84%',
-                  background: 'var(--cyan)',
-                  borderRadius: 2,
-                }}
-              />
-            </div>
-          </div>
-        </div>
-
-        {/* Float card 3 — bottom-right */}
-        <div
-          className="anim-float"
-          style={{
-            position: 'absolute',
-            bottom: 120,
-            right: -30,
-            animationDuration: '9s',
-            animationDelay: '2s',
-          }}
-        >
-          <div
-            style={{
-              background: 'rgba(8,29,58,.75)',
-              backdropFilter: 'blur(20px)',
-              WebkitBackdropFilter: 'blur(20px)',
-              border: '1px solid var(--line-2)',
-              borderRadius: 16,
-              padding: '14px 18px',
-              display: 'flex',
-              flexDirection: 'column',
-              gap: 6,
-              minWidth: 160,
-            }}
-          >
-            <span
-              style={{
-                fontFamily: 'var(--mono)',
-                fontSize: 10,
-                color: 'var(--muted)',
-                textTransform: 'uppercase',
-                letterSpacing: '0.08em',
-              }}
-            >
-              AI Slicing
-            </span>
-            <span style={{ fontSize: 14, fontWeight: 600, color: 'var(--ink)' }}>
-              Bilanciato &middot; 20% infill
-            </span>
-            <span style={{ fontFamily: 'var(--mono)', fontSize: 11, color: 'var(--muted)' }}>
-              Prusa MK4 &middot; 02
-            </span>
-          </div>
-        </div>
-      </div>
     </section>
   )
 }
 
-/* ────────────────── STATS BAR ────────────────── */
-function StatsBar() {
+/* ────────────────── PROBLEMA (dati survey) ────────────────── */
+function ProblemBar() {
   const stats = [
-    { value: '2.400+', label: 'Oggetti stampati' },
-    { value: '12', label: 'FabLab attivi' },
-    { value: '< 48h', label: 'Consegna media' },
-    { value: '4.8★', label: 'Soddisfazione media' },
+    { value: '80%', label: 'ha cercato un ricambio e non l’ha trovato' },
+    { value: '43%', label: 'ha buttato un oggetto intero per un singolo pezzo' },
+    { value: '56%', label: 'non sa nemmeno cosa sia un FabLab' },
+    { value: '48%', label: 'proverebbe Teseo da subito' },
   ]
 
   return (
     <div
       style={{
-        padding: '32px 6%',
-        background: 'rgba(174,227,249,.04)',
+        padding: '40px 6% 12px',
+        background: 'rgba(63,115,8,.04)',
         borderTop: '1px solid var(--line)',
         borderBottom: '1px solid var(--line)',
-        display: 'grid',
-        gridTemplateColumns: 'repeat(4, 1fr)',
       }}
     >
-      {stats.map((s, i) => (
-        <div
-          key={i}
-          style={{
-            textAlign: 'center',
-            padding: '16px',
-            borderRight: i < stats.length - 1 ? '1px solid var(--line)' : 'none',
-          }}
-        >
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)' }}>
+        {stats.map((s, i) => (
           <div
+            key={i}
             style={{
-              fontFamily: 'var(--mono)',
-              fontSize: 28,
-              fontWeight: 700,
-              color: 'var(--ink)',
+              textAlign: 'center',
+              padding: '16px 20px',
+              borderRight: i < stats.length - 1 ? '1px solid var(--line)' : 'none',
             }}
           >
-            {s.value}
+            <div
+              style={{
+                fontFamily: 'var(--mono)',
+                fontSize: 30,
+                fontWeight: 700,
+                color: 'var(--ink)',
+              }}
+            >
+              {s.value}
+            </div>
+            <div
+              style={{
+                fontSize: 12.5,
+                color: 'var(--muted)',
+                marginTop: 6,
+                lineHeight: 1.45,
+              }}
+            >
+              {s.label}
+            </div>
           </div>
-          <div
-            style={{
-              fontSize: 11,
-              color: 'var(--muted)',
-              textTransform: 'uppercase',
-              letterSpacing: '0.1em',
-              marginTop: 4,
-            }}
-          >
-            {s.label}
-          </div>
-        </div>
-      ))}
+        ))}
+      </div>
+      <p
+        style={{
+          textAlign: 'center',
+          fontFamily: 'var(--mono)',
+          fontSize: 10.5,
+          color: 'var(--muted-2)',
+          letterSpacing: '0.04em',
+          padding: '18px 0 12px',
+        }}
+      >
+        INDAGINE TESEO 2026 &middot; 100 RISPOSTE &middot; MILANO, HINTERLAND E LOMBARDIA
+      </p>
     </div>
   )
 }
 
-/* ────────────────── HOW IT WORKS ────────────────── */
+/* ────────────────── DUE DESTINI ────────────────── */
+function TwoPathsSection() {
+  const withoutSteps = ['Si rompe un pezzo', 'Il ricambio non esiste più', 'Ricompri tutto', 'L’oggetto va in discarica']
+  const withSteps = ['Si rompe un pezzo', 'Lo scansioni col telefono', 'Un FabLab lo stampa vicino a te', 'L’oggetto torna a vivere']
+
+  const flow = (steps: string[], accent: boolean) => (
+    <div style={{ display: 'flex', flexDirection: 'column', gap: 10, marginTop: 18 }}>
+      {steps.map((s, i) => (
+        <div key={i} style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+          <span
+            style={{
+              fontFamily: 'var(--mono)',
+              fontSize: 10,
+              width: 22,
+              height: 22,
+              borderRadius: '50%',
+              flexShrink: 0,
+              display: 'grid',
+              placeItems: 'center',
+              background: accent ? 'var(--cyan)' : 'transparent',
+              color: accent ? '#fff' : 'var(--muted)',
+              border: accent ? 'none' : '1px solid var(--line-2)',
+            }}
+          >
+            {i + 1}
+          </span>
+          <span style={{ fontSize: 14.5, color: i === steps.length - 1 ? 'var(--ink)' : 'var(--muted)', fontWeight: i === steps.length - 1 ? 600 : 400 }}>
+            {s}
+          </span>
+        </div>
+      ))}
+    </div>
+  )
+
+  return (
+    <section style={{ padding: '100px 6%' }}>
+      <div style={{ textAlign: 'center' }}>
+        <SectionTag>DUE DESTINI</SectionTag>
+        <h2 style={{ fontSize: 36, fontWeight: 700, marginTop: 16, color: 'var(--ink)' }}>
+          Stesso oggetto, due finali diversi
+        </h2>
+        <p style={{ fontSize: 16, color: 'var(--muted)', marginTop: 8, maxWidth: 560, margin: '8px auto 0' }}>
+          Una sedia da ufficio con un componente rotto da 30 grammi. Ecco cosa succede oggi — e cosa succede con Teseo.
+        </p>
+      </div>
+
+      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 20, marginTop: 52, maxWidth: 960, margin: '52px auto 0' }}>
+        {/* Senza Teseo */}
+        <div
+          style={{
+            border: '1px dashed var(--line-2)',
+            borderRadius: 'var(--radius)',
+            padding: 28,
+            background: 'transparent',
+          }}
+        >
+          <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+            <XCircle size={18} color="var(--muted)" />
+            <span style={{ fontFamily: 'var(--mono)', fontSize: 12, letterSpacing: '0.08em', color: 'var(--muted)' }}>
+              SENZA TESEO
+            </span>
+          </div>
+          {flow(withoutSteps, false)}
+          <div style={{ marginTop: 22, paddingTop: 18, borderTop: '1px solid var(--line)' }}>
+            <span style={{ fontFamily: 'var(--mono)', fontSize: 22, fontWeight: 700, color: 'var(--ink)' }}>~20 kg CO₂</span>
+            <span style={{ fontSize: 13, color: 'var(--muted)', marginLeft: 10 }}>e ~80€ per ricomprarla</span>
+          </div>
+        </div>
+
+        {/* Con Teseo */}
+        <div
+          className="glass-panel"
+          style={{
+            padding: 28,
+            border: '1px solid var(--line-2)',
+          }}
+        >
+          <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+            <Recycle size={18} color="var(--cyan)" />
+            <span style={{ fontFamily: 'var(--mono)', fontSize: 12, letterSpacing: '0.08em', color: 'var(--cyan)' }}>
+              CON TESEO
+            </span>
+          </div>
+          {flow(withSteps, true)}
+          <div style={{ marginTop: 22, paddingTop: 18, borderTop: '1px solid var(--line)' }}>
+            <span style={{ fontFamily: 'var(--mono)', fontSize: 22, fontWeight: 700, color: 'var(--cyan)' }}>~0,5 kg CO₂</span>
+            <span style={{ fontSize: 13, color: 'var(--muted)', marginLeft: 10 }}>e ~10€ per il ricambio</span>
+          </div>
+        </div>
+      </div>
+
+      <p style={{ textAlign: 'center', marginTop: 28 }}>
+        <Link
+          to="/impatto"
+          style={{ fontFamily: 'var(--mono)', fontSize: 13, color: 'var(--cyan)', textDecoration: 'none', letterSpacing: '0.04em' }}
+        >
+          VEDI TUTTI I NUMERI DELL&apos;IMPATTO &rsaquo;
+        </Link>
+      </p>
+    </section>
+  )
+}
+
+/* ────────────────── HOW IT WORKS (scroll orizzontale pinnato) ────────────────── */
 function HowItWorksSection() {
   const steps = [
     {
       num: '01',
-      icon: <Upload size={28} color="var(--cyan)" />,
-      title: 'Carica il modello',
-      desc: 'STL, OBJ, 3MF. Carica il file o scansiona l\'oggetto con la fotocamera del telefono.',
+      icon: <ScanLine size={64} color="var(--lemongrass)" strokeWidth={1.2} />,
+      title: 'Scansiona il pezzo',
+      desc: 'Inquadra l’oggetto rotto con la fotocamera. L’AI lo riconosce: non serve saper modellare.',
+      stats: [
+        { v: '30s', l: 'Per la scansione' },
+        { v: '98%', l: 'Riconoscimento' },
+        { v: '0', l: 'Competenze richieste' },
+      ],
+      intel: ['Computer vision zero-shot sull’oggetto', 'Funziona anche coi ricambi fuori produzione'],
     },
     {
       num: '02',
-      icon: <MapPin size={28} color="var(--cyan)" />,
-      title: 'Scegli il FabLab',
-      desc: 'Trova il produttore più vicino filtrato per materiale, tecnologia e disponibilità.',
+      icon: <Cpu size={64} color="var(--lemongrass)" strokeWidth={1.2} />,
+      title: 'L’AI ricostruisce',
+      desc: 'Il modello 3D del ricambio viene generato e corretto nelle tolleranze. Se serve, la community dà una mano.',
+      stats: [
+        { v: '±0,1mm', l: 'Tolleranza' },
+        { v: '2Wh', l: 'Da archivio' },
+        { v: 'v3', l: 'Versioning community' },
+      ],
+      intel: ['Ogni modello ha uno storico verificabile', 'I maker validano e certificano i file'],
     },
     {
       num: '03',
-      icon: <Package size={28} color="var(--cyan)" />,
-      title: 'Ritira l\'oggetto',
-      desc: 'Ricevi la notifica quando è pronto e passa a ritirarlo. Oppure richiedi la spedizione.',
+      icon: <MapPin size={64} color="var(--lemongrass)" strokeWidth={1.2} />,
+      title: 'Un FabLab lo stampa',
+      desc: 'La rete trova il produttore più adatto per materiale, tecnologia e distanza. Bio-materiali dove possibile.',
+      stats: [
+        { v: '<2km', l: 'Distanza media' },
+        { v: 'PETG', l: 'Riciclato' },
+        { v: '<48h', l: 'Alla consegna' },
+      ],
+      intel: ['Matchmaking su materiale, tecnologia e coda', 'Se un nodo è pieno, il carico si ridistribuisce'],
+    },
+    {
+      num: '04',
+      icon: <Recycle size={64} color="var(--lemongrass)" strokeWidth={1.2} />,
+      title: 'Ritiri e chiudi il cerchio',
+      desc: 'Ritiro a mano o hub di quartiere. A fine vita il pezzo si tritura e torna filamento per la prossima stampa.',
+      stats: [
+        { v: '−95%', l: 'CO₂ vs ricomprare' },
+        { v: '~10€', l: 'Costo medio' },
+        { v: 'R7', l: 'Riciclo → filamento' },
+      ],
+      intel: ['Ritiro sotto casa o negli hub di quartiere', 'Il materiale rientra nel ciclo produttivo'],
     },
   ]
 
-  return (
-    <section id="come-funziona" style={{ padding: '100px 6%' }}>
-      {/* Header */}
-      <div style={{ textAlign: 'center' }}>
-        <span
-          style={{
-            display: 'inline-block',
-            fontFamily: 'var(--mono)',
-            fontSize: 11,
-            border: '1px solid var(--line-2)',
-            borderRadius: 100,
-            padding: '6px 16px',
-            color: 'var(--cyan)',
-            letterSpacing: '0.08em',
-          }}
-        >
-          COME FUNZIONA
-        </span>
-        <h2
-          style={{
-            fontSize: 36,
-            fontWeight: 700,
-            marginTop: 16,
-            color: 'var(--ink)',
-          }}
-        >
-          Dall&apos;idea all&apos;oggetto in 3 passi
-        </h2>
-        <p style={{ fontSize: 16, color: 'var(--muted)', marginTop: 8 }}>
-          Nessuna stampante richiesta. Solo il tuo modello.
-        </p>
-      </div>
+  const sectionRef = useRef<HTMLElement>(null)
+  const trackRef = useRef<HTMLDivElement>(null)
 
-      {/* Steps */}
-      <div style={{ position: 'relative', marginTop: 60 }}>
-        {/* Connector line */}
+  useEffect(() => {
+    const section = sectionRef.current
+    const track = trackRef.current
+    if (!section || !track) return
+    const scroller = section.closest('.landing-scroll') as HTMLElement | null
+
+    const tween = gsap.to(track, {
+      x: () => -(track.scrollWidth - window.innerWidth),
+      ease: 'none',
+      scrollTrigger: {
+        trigger: section,
+        scroller: scroller ?? undefined,
+        start: 'top top',
+        end: 'bottom bottom',
+        scrub: 0.4,
+        invalidateOnRefresh: true,
+      },
+    })
+    return () => {
+      tween.scrollTrigger?.kill()
+      tween.kill()
+    }
+  }, [])
+
+  return (
+    /* 300vh di scroll verticale: la viewport resta pinnata (sticky) e il track scorre in orizzontale */
+    <section ref={sectionRef} id="come-funziona" style={{ height: '300vh', position: 'relative', background: 'rgba(63,115,8,.02)' }}>
+      <div
+        style={{
+          position: 'sticky',
+          top: 0,
+          height: '100vh',
+          overflow: 'hidden',
+          display: 'flex',
+          flexDirection: 'column',
+          justifyContent: 'center',
+          gap: 40,
+        }}
+      >
+        {/* Header */}
+        <div style={{ padding: '0 6%' }}>
+          <SectionTag>COME FUNZIONA</SectionTag>
+          <h2 style={{ fontSize: 36, fontWeight: 700, marginTop: 16, color: 'var(--ink)' }}>
+            Dal guasto al ritiro in 4 passi
+          </h2>
+          <p style={{ fontSize: 16, color: 'var(--muted)', marginTop: 8 }}>
+            Nessuna stampante, nessuna competenza tecnica. Solo il telefono.
+          </p>
+        </div>
+
+        {/* Track orizzontale */}
         <div
+          ref={trackRef}
           style={{
-            position: 'absolute',
-            top: '50%',
-            left: 0,
-            right: 0,
-            height: 1,
-            background:
-              'linear-gradient(90deg, transparent 15%, var(--line-2) 35%, var(--line-2) 65%, transparent 85%)',
-            zIndex: 0,
-            pointerEvents: 'none',
+            display: 'flex',
+            gap: 24,
+            padding: '0 6%',
+            alignItems: 'stretch',
+            width: 'max-content',
+            willChange: 'transform',
           }}
-        />
-        <div style={{ display: 'flex', gap: 24, position: 'relative', zIndex: 1 }}>
+        >
           {steps.map((step, i) => (
-            <GlassCard
+            <div
               key={i}
+              className="glass-panel"
               style={{
-                flex: 1,
-                textAlign: 'center',
-                padding: '36px 28px',
+                width: 'min(72vw, 960px)',
+                flexShrink: 0,
                 display: 'flex',
-                flexDirection: 'column',
-                alignItems: 'center',
-                gap: 16,
-                position: 'relative',
+                overflow: 'hidden',
+                padding: 0,
               }}
             >
-              {/* Step number badge */}
+              {/* Pannello visual scuro */}
               <div
                 style={{
-                  position: 'absolute',
-                  top: -18,
-                  left: '50%',
-                  transform: 'translateX(-50%)',
-                  width: 36,
-                  height: 36,
-                  borderRadius: '50%',
-                  background: 'var(--cyan)',
-                  color: '#08233f',
-                  fontFamily: 'var(--mono)',
-                  fontSize: 14,
-                  fontWeight: 700,
+                  flex: '0 0 36%',
+                  background: 'var(--forest)',
+                  position: 'relative',
                   display: 'grid',
                   placeItems: 'center',
                 }}
               >
-                {step.num}
-              </div>
-
-              {/* Icon */}
-              <div
-                style={{
-                  width: 48,
-                  height: 48,
-                  background: 'var(--glass-2)',
-                  border: '1px solid var(--line)',
-                  borderRadius: 16,
-                  display: 'grid',
-                  placeItems: 'center',
-                }}
-              >
+                <div
+                  style={{
+                    position: 'absolute',
+                    inset: 0,
+                    pointerEvents: 'none',
+                    backgroundImage:
+                      'linear-gradient(rgba(178,235,118,.07) 1px, transparent 1px), linear-gradient(90deg, rgba(178,235,118,.07) 1px, transparent 1px)',
+                    backgroundSize: '28px 28px',
+                  }}
+                />
                 {step.icon}
+                <span
+                  style={{
+                    position: 'absolute',
+                    top: 18,
+                    left: 20,
+                    fontFamily: 'var(--mono)',
+                    fontSize: 11,
+                    letterSpacing: '0.15em',
+                    color: 'var(--lemongrass)',
+                    opacity: 0.7,
+                  }}
+                >
+                  PASSO {step.num} / 04
+                </span>
+                <span
+                  style={{
+                    position: 'absolute',
+                    bottom: 14,
+                    right: 20,
+                    fontFamily: 'var(--mono)',
+                    fontSize: 44,
+                    fontWeight: 700,
+                    color: 'rgba(178,235,118,.18)',
+                  }}
+                >
+                  {step.num}
+                </span>
               </div>
 
-              <h3 style={{ fontSize: 18, fontWeight: 700, color: 'var(--ink)' }}>
-                {step.title}
-              </h3>
-              <p style={{ fontSize: 14, color: 'var(--muted)', lineHeight: 1.6 }}>
-                {step.desc}
-              </p>
-            </GlassCard>
+              {/* Contenuto */}
+              <div style={{ flex: 1, display: 'flex', flexDirection: 'column' }}>
+                <div style={{ padding: '28px 32px' }}>
+                  <h3 style={{ fontSize: 24, fontWeight: 700, color: 'var(--ink)' }}>{step.title}</h3>
+                  <p style={{ fontSize: 15, color: 'var(--muted)', lineHeight: 1.6, marginTop: 10, maxWidth: 480 }}>
+                    {step.desc}
+                  </p>
+                </div>
+
+                {/* Celle stat, stile registro */}
+                <div style={{ display: 'flex', borderTop: '1px solid var(--line)' }}>
+                  {step.stats.map((s, j) => (
+                    <div
+                      key={j}
+                      style={{
+                        flex: 1,
+                        padding: '18px 12px',
+                        textAlign: 'center',
+                        borderRight: j < step.stats.length - 1 ? '1px solid var(--line)' : 'none',
+                      }}
+                    >
+                      <div style={{ fontFamily: 'var(--mono)', fontSize: 26, fontWeight: 700, color: 'var(--ink)' }}>
+                        {s.v}
+                      </div>
+                      <div
+                        style={{
+                          fontFamily: 'var(--mono)',
+                          fontSize: 10.5,
+                          color: 'var(--muted)',
+                          marginTop: 6,
+                          letterSpacing: '0.06em',
+                          textTransform: 'uppercase',
+                        }}
+                      >
+                        {s.l}
+                      </div>
+                    </div>
+                  ))}
+                </div>
+
+                {/* Dettagli */}
+                <div style={{ borderTop: '1px solid var(--line)', padding: '18px 32px 24px', marginTop: 'auto' }}>
+                  <span
+                    style={{
+                      fontFamily: 'var(--mono)',
+                      fontSize: 10.5,
+                      letterSpacing: '0.08em',
+                      color: 'var(--muted-2)',
+                      textTransform: 'uppercase',
+                    }}
+                  >
+                    In dettaglio
+                  </span>
+                  {step.intel.map((line, j) => (
+                    <p key={j} style={{ fontSize: 14, color: 'var(--ink)', lineHeight: 1.6, marginTop: j === 0 ? 8 : 2 }}>
+                      {line}
+                    </p>
+                  ))}
+                </div>
+              </div>
+            </div>
           ))}
         </div>
+
+        <p style={{ padding: '0 6%' }}>
+          <Link
+            to="/come-funziona"
+            style={{ fontFamily: 'var(--mono)', fontSize: 13, color: 'var(--cyan)', textDecoration: 'none', letterSpacing: '0.04em' }}
+          >
+            IL PERCORSO COMPLETO, PASSO PER PASSO &rsaquo;
+          </Link>
+        </p>
       </div>
     </section>
   )
@@ -609,24 +569,24 @@ function HowItWorksSection() {
 function FeaturesSection() {
   const features = [
     {
-      icon: <Upload size={20} color="var(--cyan)" />,
-      title: 'Upload istantaneo',
-      desc: 'Carica STL, OBJ o 3MF in secondi. Supporto drag-and-drop e scansione da mobile.',
+      icon: <ScanLine size={20} color="var(--cyan)" />,
+      title: 'Riconoscimento istantaneo',
+      desc: 'La computer vision identifica l’oggetto dalla fotocamera e recupera o genera il modello 3D del pezzo. Anche per i ricambi che i produttori non fabbricano più.',
     },
     {
-      icon: <MapPin size={20} color="var(--cyan)" />,
-      title: 'FabLab di quartiere',
-      desc: 'Trova il produttore più vicino con filtri per materiale (PLA, ABS, Resina, Nylon) e tecnologia (FDM, SLA, SLS).',
+      icon: <Users size={20} color="var(--cyan)" />,
+      title: 'L’AI genera, le persone validano',
+      desc: 'Ogni modello ha uno storico: la community di maker verifica, corregge e certifica i file. Il catalogo cresce come bene comune.',
     },
     {
-      icon: <Cpu size={20} color="var(--cyan)" />,
-      title: 'AI Slicing',
-      desc: "L'intelligenza artificiale ottimizza orientazione, supporti e parametri di stampa per ogni oggetto.",
+      icon: <TrendingDown size={20} color="var(--cyan)" />,
+      title: 'Dashboard d’impatto',
+      desc: 'Per ogni riparazione vedi kg di CO₂ evitati, euro risparmiati e oggetti salvati dalla discarica. Numeri veri, non greenwashing.',
     },
     {
       icon: <Activity size={20} color="var(--cyan)" />,
-      title: 'Tracciamento live',
-      desc: 'Segui l\'avanzamento della stampa con il viewer 3D integrato e ricevi notifiche in tempo reale.',
+      title: 'Rete resiliente',
+      desc: 'Se un FabLab è pieno o chiude, il carico si distribuisce sugli altri nodi. Nessuna dipendenza dal produttore originale del pezzo.',
     },
   ]
 
@@ -634,27 +594,13 @@ function FeaturesSection() {
     <section
       style={{
         padding: '80px 6%',
-        background: 'rgba(174,227,249,.02)',
       }}
     >
       {/* Header */}
       <div style={{ textAlign: 'center' }}>
-        <span
-          style={{
-            display: 'inline-block',
-            fontFamily: 'var(--mono)',
-            fontSize: 11,
-            border: '1px solid var(--line-2)',
-            borderRadius: 100,
-            padding: '6px 16px',
-            color: 'var(--cyan)',
-            letterSpacing: '0.08em',
-          }}
-        >
-          FUNZIONALITÀ
-        </span>
+        <SectionTag>PERCHÉ TESEO</SectionTag>
         <h2 style={{ fontSize: 34, fontWeight: 700, marginTop: 12, color: 'var(--ink)' }}>
-          Tutto quello che ti serve, integrato.
+          Riparare, senza doverci capire qualcosa.
         </h2>
       </div>
 
@@ -702,46 +648,33 @@ function FeaturesSection() {
   )
 }
 
-/* ────────────────── FOR FABLAB ────────────────── */
+/* ────────────────── FOR FABLAB / MAKER ────────────────── */
 function ForFablabSection() {
   const navigate = useNavigate()
   const featureList = [
-    'Dashboard ordini con priorità e scadenze',
-    'Slicing AI integrato con preset configurabili',
-    'Chat diretta con i clienti',
+    'Ordini in automatico dal matchmaking di rete',
+    'Compenso e reputazione per ogni stampa validata',
+    'Slicing AI integrato e certificazione qualità',
   ]
 
   const orders = [
-    { dot: 'pdot-active', num: '#TES-0041', name: 'Staffa motore CNC', status: 'sp-print', statusLabel: 'In stampa' },
-    { dot: 'pdot-idle', num: '#TES-0040', name: 'Cover Raspberry Pi 4', status: 'sp-new', statusLabel: 'In coda' },
-    { dot: 'pdot-active', num: '#TES-0039', name: 'Tappo filettato M22', status: 'sp-ready', statusLabel: 'Pronto' },
+    { dot: 'pdot-active', num: '#TES-0041', name: 'Cardine finestra · PETG riciclato', status: 'sp-print', statusLabel: 'In stampa' },
+    { dot: 'pdot-idle', num: '#TES-0040', name: 'Manopola forno · ABS', status: 'sp-new', statusLabel: 'In coda' },
+    { dot: 'pdot-active', num: '#TES-0039', name: 'Ingranaggio tapparella · Nylon', status: 'sp-ready', statusLabel: 'Pronto' },
   ]
 
   return (
-    <section id="fablab" style={{ padding: '80px 6%', display: 'flex', gap: 60, alignItems: 'center' }}>
+    <section id="fablab" style={{ padding: '80px 6%', display: 'flex', gap: 60, alignItems: 'center', background: 'rgba(63,115,8,.02)' }}>
       {/* Left */}
       <div style={{ flex: 1, display: 'flex', flexDirection: 'column', gap: 20, maxWidth: 480 }}>
-        <span
-          style={{
-            display: 'inline-block',
-            fontFamily: 'var(--mono)',
-            fontSize: 11,
-            border: '1px solid var(--line-2)',
-            borderRadius: 100,
-            padding: '6px 16px',
-            color: 'var(--cyan)',
-            letterSpacing: '0.08em',
-            alignSelf: 'flex-start',
-          }}
-        >
-          PER I FABLAB
-        </span>
+        <SectionTag>PER FABLAB E MAKER</SectionTag>
         <h2 style={{ fontSize: 34, fontWeight: 700, color: 'var(--ink)' }}>
-          Hai un laboratorio? Entra nella rete.
+          Hai una stampante? Sei già parte della rete.
         </h2>
         <p style={{ fontSize: 15, color: 'var(--muted)', lineHeight: 1.6 }}>
-          Gestisci ordini, stampanti e coda di stampa da un&apos;unica dashboard. Slicing assistito da AI.
-          Notifiche automatiche ai clienti.
+          Il 44% degli appassionati stamperebbe volentieri per gli altri, ma resta un hobby isolato:
+          nessun canale, nessun compenso, nessun riconoscimento. Teseo trasforma chi sa stampare
+          in un nodo attivo della rete di quartiere.
         </p>
 
         {/* Feature list */}
@@ -754,28 +687,9 @@ function ForFablabSection() {
           ))}
         </div>
 
-        <button
-          onClick={() => navigate('/fablab/dashboard')}
-          style={{
-            alignSelf: 'flex-start',
-            border: '1px solid var(--cyan)',
-            color: 'var(--cyan)',
-            background: 'transparent',
-            borderRadius: 100,
-            padding: '0 24px',
-            height: 46,
-            fontFamily: 'inherit',
-            fontWeight: 600,
-            fontSize: 15,
-            cursor: 'pointer',
-            transition: 'background .2s',
-            marginTop: 4,
-          }}
-          onMouseEnter={e => { (e.currentTarget as HTMLButtonElement).style.background = 'rgba(174,227,249,.08)' }}
-          onMouseLeave={e => { (e.currentTarget as HTMLButtonElement).style.background = 'transparent' }}
-        >
-          Registra il tuo FabLab &rarr;
-        </button>
+        <GhostButton style={{ alignSelf: 'flex-start', marginTop: 4 }} onClick={() => navigate('/fablab/dashboard')}>
+          Registra il tuo laboratorio &rarr;
+        </GhostButton>
       </div>
 
       {/* Right — Dashboard mockup */}
@@ -785,7 +699,7 @@ function ForFablabSection() {
             border: '1px solid var(--line-2)',
             borderRadius: 18,
             padding: 18,
-            background: 'rgba(174,227,249,.04)',
+            background: 'rgba(63,115,8,.04)',
             backdropFilter: 'blur(14px)',
             WebkitBackdropFilter: 'blur(14px)',
             position: 'relative',
@@ -837,7 +751,7 @@ function ForFablabSection() {
               <div
                 key={i}
                 style={{
-                  background: 'rgba(174,227,249,.06)',
+                  background: 'rgba(63,115,8,.06)',
                   borderRadius: 10,
                   padding: '10px 12px',
                   textAlign: 'center',
@@ -861,7 +775,7 @@ function ForFablabSection() {
                   alignItems: 'center',
                   gap: 10,
                   padding: '8px 10px',
-                  background: 'rgba(174,227,249,.04)',
+                  background: 'rgba(63,115,8,.04)',
                   borderRadius: 10,
                   border: '1px solid var(--line)',
                 }}
@@ -918,7 +832,7 @@ function FinalCtaSection() {
           transform: 'translate(-50%, -50%)',
           width: 600,
           height: 400,
-          background: 'radial-gradient(circle, rgba(174,227,249,.08), transparent 70%)',
+          background: 'radial-gradient(circle, rgba(63,115,8,.08), transparent 70%)',
           pointerEvents: 'none',
         }}
       />
@@ -932,10 +846,10 @@ function FinalCtaSection() {
           position: 'relative',
         }}
       >
-        Inizia a stampare oggi.
+        L&apos;80% dei ricambi non si trova.<br />Il tuo si stampa.
       </h2>
       <p style={{ fontSize: 16, color: 'var(--muted)', marginTop: 12, position: 'relative' }}>
-        Gratis per i primi 3 mesi. Nessuna carta di credito.
+        Gratis per i primi 3 mesi. Nessuna carta di credito, nessuna stampante richiesta.
       </p>
 
       <div
@@ -950,80 +864,13 @@ function FinalCtaSection() {
       >
         <PrimaryButton style={{ height: 52, fontSize: 16, padding: '0 32px' }} onClick={() => navigate('/app/dashboard')}>
           <Package size={20} />
-          Crea account gratuito
+          Ripara il primo oggetto
         </PrimaryButton>
-        <button
-          onClick={() => navigate('/fablab/dashboard')}
-          style={{
-            border: '1px solid var(--cyan)',
-            color: 'var(--cyan)',
-            background: 'transparent',
-            borderRadius: 100,
-            padding: '0 28px',
-            height: 52,
-            fontFamily: 'inherit',
-            fontWeight: 600,
-            fontSize: 15,
-            cursor: 'pointer',
-            transition: 'background .2s',
-          }}
-          onMouseEnter={e => { (e.currentTarget as HTMLButtonElement).style.background = 'rgba(174,227,249,.08)' }}
-          onMouseLeave={e => { (e.currentTarget as HTMLButtonElement).style.background = 'transparent' }}
-        >
+        <GhostButton style={{ height: 52, padding: '0 28px' }} onClick={() => navigate('/fablab/dashboard')}>
           Sono un FabLab &rarr;
-        </button>
+        </GhostButton>
       </div>
     </section>
-  )
-}
-
-/* ────────────────── FOOTER ────────────────── */
-function LandingFooter() {
-  return (
-    <footer
-      style={{
-        padding: '32px 6%',
-        borderTop: '1px solid var(--line)',
-        display: 'flex',
-        flexDirection: 'row',
-        alignItems: 'center',
-        gap: 24,
-      }}
-    >
-      {/* Logo */}
-      <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
-        <Package size={16} color="var(--cyan)" />
-        <span style={{ fontWeight: 700, fontSize: 14, color: 'var(--ink)' }}>TESEO</span>
-      </div>
-
-      <div style={{ flex: 1 }} />
-
-      {/* Links */}
-      <div style={{ display: 'flex', gap: 20 }}>
-        {['Privacy', 'Termini', 'GitHub', 'Contact'].map((link, i) => (
-          <a
-            key={i}
-            href="#"
-            style={{
-              fontFamily: 'var(--mono)',
-              fontSize: 12,
-              color: 'var(--muted)',
-              textDecoration: 'none',
-              transition: 'color .2s',
-            }}
-            onMouseEnter={e => { (e.currentTarget as HTMLAnchorElement).style.color = 'var(--ink)' }}
-            onMouseLeave={e => { (e.currentTarget as HTMLAnchorElement).style.color = 'var(--muted)' }}
-          >
-            {link}
-          </a>
-        ))}
-      </div>
-
-      {/* Copyright */}
-      <span style={{ fontFamily: 'var(--mono)', fontSize: 12, color: 'var(--muted)' }}>
-        &copy; 2025 Teseo
-      </span>
-    </footer>
   )
 }
 
@@ -1033,8 +880,10 @@ export default function Landing() {
     <div className="landing-scroll">
       <LandingNav />
       <HeroSection />
-      <StatsBar />
+      <ProblemBar />
       <HowItWorksSection />
+      <PrintBuildScroll />
+      <TwoPathsSection />
       <FeaturesSection />
       <ForFablabSection />
       <FinalCtaSection />

@@ -31,7 +31,7 @@ export default function Coda() {
           padding: '0 20px', height: 44, borderRadius: 100, cursor: 'pointer',
           transition: '0.18s', whiteSpace: 'nowrap',
         }}
-          onMouseEnter={e => { (e.currentTarget as HTMLButtonElement).style.background = 'rgba(174,227,249,.10)' }}
+          onMouseEnter={e => { (e.currentTarget as HTMLButtonElement).style.background = 'rgba(63,115,8,.10)' }}
           onMouseLeave={e => { (e.currentTarget as HTMLButtonElement).style.background = 'transparent' }}
         >
           <Zap size={16} /> Ottimizza coda
@@ -89,7 +89,7 @@ export default function Coda() {
                   border: item.status === 'printing' ? 'none' : '1px solid var(--line-2)',
                   display: 'grid', placeItems: 'center',
                   fontFamily: 'var(--mono)', fontSize: 10, fontWeight: 700,
-                  color: item.status === 'printing' ? '#08233f' : 'var(--muted)',
+                  color: item.status === 'printing' ? '#f4faed' : 'var(--muted)',
                   flex: '0 0 24px',
                 }}>
                   {String(item.position + 1).padStart(2, '0')}
@@ -116,7 +116,7 @@ export default function Coda() {
                 {/* Progress (printing) or ETA + reorder (queued) */}
                 {item.status === 'printing' && item.progress !== undefined && (
                   <div style={{ display: 'flex', alignItems: 'center', gap: 8, flex: '0 0 auto' }}>
-                    <div style={{ width: 60, height: 4, borderRadius: 4, background: 'rgba(174,227,249,.14)', overflow: 'hidden' }}>
+                    <div style={{ width: 60, height: 4, borderRadius: 4, background: 'rgba(63,115,8,.14)', overflow: 'hidden' }}>
                       <div style={{ height: '100%', width: `${item.progress}%`, background: 'var(--cyan)' }} />
                     </div>
                     <span style={{ fontFamily: 'var(--mono)', fontSize: 12, fontWeight: 700, color: 'var(--cyan)', flex: '0 0 auto' }}>

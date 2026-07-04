@@ -67,34 +67,39 @@ teseo/
 
 ### CSS Custom Properties (defined in `src/index.css`)
 
+Palette ispirata a spade.com (luglio 2026): sage chiaro + verde moss/forest.
+NB: la variabile si chiama ancora `--cyan` per compatibilità storica, ma il valore è il verde moss.
+
 ```css
---bg:      #0a2342          /* primary background */
---bg-2:    #0c2a52          /* secondary background (cards, panels) */
---ink:     #eaf4fb          /* primary text */
---cyan:    #AFE3F9          /* brand accent, interactive elements */
+--bg:      #f4faed          /* sage-1: primary background */
+--bg-2:    #f0fae6          /* sage-2: secondary background */
+--ink:     #090f05          /* near-black green: primary text */
+--cyan:    #3f7308          /* moss: brand accent (nome legacy!) */
+--forest:  #18280e          /* dark surfaces, primary buttons */
+--lemongrass: #b2eb76       /* hover/highlight su superfici scure */
 --white:   #fff
---muted:   rgba(234,244,251,.62)  /* secondary text */
---muted-2: rgba(234,244,251,.42)  /* tertiary text */
---line:    rgba(174,227,249,.20)  /* borders (weak) */
---line-2:  rgba(174,227,249,.36)  /* borders (strong, interactive) */
---glass:   rgba(174,227,249,.035) /* card backgrounds (subtle) */
---glass-2: rgba(174,227,249,.07)  /* card backgrounds (hover/active) */
+--muted:   rgba(9,15,5,.60)   /* secondary text */
+--muted-2: rgba(9,15,5,.40)   /* tertiary text */
+--line:    #d8e5ca          /* sage-3: borders (weak) */
+--line-2:  #b3c5a0          /* sage-4: borders (strong, interactive) */
+--glass:   #ffffff          /* card backgrounds */
+--glass-2: #eaf6dc          /* card hover/active */
 --mono:    'IBM Plex Mono', monospace
---radius:  18px
---radius-sm: 13px
+--radius:  12px
+--radius-sm: 8px
 ```
 
-### Blueprint Aesthetic Signatures
+### Spade Aesthetic Signatures
 
-1. **Body gradient** — `linear-gradient(160deg, #0a2342, #081d3a 60%, #0a2645)` with `overflow: hidden`
-2. **Radial glows** (`body::before`) — two soft radial gradients at top-right and bottom-left
-3. **Blueprint grid** (`body::after`) — 4-layer grid: fine 26px lines (5% opacity) + master 130px lines (10% opacity), masked with radial gradient so it fades at edges
-4. **Registration marks** (`.reg-tl/tr/bl/br`) — 18×18 L-shaped corner marks in cyan, opacity 0.55
-5. **Glass panels** — `backdrop-filter: blur(14px)`, semi-transparent bg, 1px cyan border at 20% opacity
-6. **Hero card** — `.glass-panel` with stronger border (line-2) + `::before` inset dashed border at 8px inset
-7. **Status pills** — all-caps, pill shape; printing=cyan tinted, ready=solid cyan, draft=ghost, error=dashed cyan
-8. **Mono numbers** — all KPI values, ETAs, order IDs, percentages use IBM Plex Mono
-9. **UPPERCASE section titles** with letter-spacing
+1. **Fondo flat sage** (`--bg`) con blueprint grid in inchiostro a bassissima opacità (`body::after`)
+2. **Card bianche** — bordo 1px sage-3, radius 12px, niente blur, ombra minima
+3. **Registration marks** (`.reg-tl/tr/bl/br`) — tick angolari 18×18 in moss, opacity 0.5
+4. **Bottone spade** (`.btn-spade`) — layer `::before` forest che scala a 0.98 in hover, testo → lemongrass; variante ghost `.btn-spade--light`
+5. **Status pills** — mono, uppercase, squadrate (radius 6px); printing=moss tinted, ready=solid moss, draft=ghost, error=dashed red #e40014
+6. **Superfici scure** (mappe, viewport 3D, hero landing) — forest `#18280e`/`#122006` con linee/pin lemongrass
+7. **Mono numbers** — KPI, ETA, order IDs, percentuali in IBM Plex Mono
+8. **Label di sezione** — mono, UPPERCASE, 12px, letter-spacing 0.08em, colore muted
+9. **Animazioni** — fadeUp a cascata (`.anim-fadeUp`, `-d1`…`-d6`), `.anim-marquee`, transizioni con `cubic-bezier(.4,0,.2,1)`
 
 ---
 
@@ -103,8 +108,18 @@ teseo/
 ### Public routes
 | Route | Page | Status |
 |---|---|---|
-| `/` | Landing page SaaS (hero 3D, how it works, features, CTA) | **done** |
+| `/` | Landing (payoff, survey, scroll-print GSAP, due destini, CTA) | **done** |
+| `/come-funziona` | Percorso in 5 step, i 5 layer, FAQ dalle barriere survey | **done** |
+| `/impatto` | Caso sedia, digital footprint, circolarità R4/R7 | **done** |
+| `/community` | Versioning collaborativo, ruoli della rete | **done** |
 | `*` | Redirect → `/app/dashboard` | done |
+
+Contenuti pubblici basati sulla ricerca Miro (luglio 2026): payoff «Non è rotto: è stato
+progettato per rompersi», survey 100 risposte Milano (80% ricambio introvabile, 43% butta
+per un pezzo, 56% non sa cos'è un FabLab), personas Marco/Giulia/Roberto, caso sedia
+(−95% CO₂, −70€), digital footprint (28Wh pezzo nuovo / 2Wh da archivio).
+La sezione scroll-stampa della landing usa **gsap ScrollTrigger** (scroller `.landing-scroll`,
+sticky pin) + clipping plane di `PrintViewer3D` (`buildDisplacedGeo` esportata).
 
 ### User branch `/app/...`
 | Route | Page | Status |
@@ -143,7 +158,7 @@ teseo/
   2. Add a `<Route path="<slug>" element={<PageName />} />` inside the matching layout in `src/App.tsx`
   3. Add a nav item to the relevant layout's sidebar items array
 - **CSS:** Blueprint background + grid stays in `src/index.css` global scope. Component-level glass/pill/reg-mark styles are in `@layer components` in `src/index.css`. Tailwind utilities for layout/spacing only.
-- **No yellow, no warm colors.** Palette is strictly: deep navy, white, and cyan (#AFE3F9).
+- **Palette spade**: sage (#f4faed), bianco, moss (#3f7308), forest (#18280e), lemongrass (#b2eb76). No blu, no colori caldi (il rosso #e40014 solo per errori).
 - **Fonts:** Urbanist for all body text. IBM Plex Mono for numbers, ETAs, order codes, labels with letter-spacing.
 - **Italian everywhere** — all UI copy, labels, status text, buttons, tooltips.
 

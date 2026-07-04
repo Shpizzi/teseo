@@ -27,7 +27,7 @@ export default function KpiCard({ value, label, trend, trendUp, icon }: KpiCardP
             width: 34,
             height: 34,
             borderRadius: 9,
-            background: 'rgba(174,227,249,.14)',
+            background: 'rgba(63,115,8,.14)',
             border: '1px solid var(--line-2)',
             display: 'grid',
             placeItems: 'center',

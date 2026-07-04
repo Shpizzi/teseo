@@ -1,5 +1,9 @@
 import { Routes, Route, Navigate } from 'react-router-dom'
 import Landing from './pages/Landing'
+import ComeFunziona from './pages/ComeFunziona'
+import Impatto from './pages/Impatto'
+import CommunityPublic from './pages/CommunityPublic'
+import Componenti from './pages/Componenti'
 import UserLayout from './layouts/UserLayout'
 import FablabLayout from './layouts/FablabLayout'
 import FablabSlicingLayout from './layouts/FablabSlicingLayout'
@@ -25,6 +29,10 @@ export default function App() {
   return (
     <Routes>
       <Route path="/" element={<Landing />} />
+      <Route path="/come-funziona" element={<ComeFunziona />} />
+      <Route path="/impatto" element={<Impatto />} />
+      <Route path="/community" element={<CommunityPublic />} />
+      <Route path="/componenti" element={<Componenti />} />
       <Route path="/app" element={<UserLayout />}>
         <Route index element={<Navigate to="dashboard" replace />} />
         <Route path="dashboard" element={<UserDashboard />} />

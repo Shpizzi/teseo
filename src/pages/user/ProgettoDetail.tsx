@@ -32,8 +32,8 @@ export default function ProgettoDetail() {
     <>
       <style>{`
         @keyframes pulseRing {
-          0%, 100% { box-shadow: 0 0 0 0 rgba(174,227,249,0.5); }
-          50% { box-shadow: 0 0 0 6px rgba(174,227,249,0); }
+          0%, 100% { box-shadow: 0 0 0 0 rgba(63,115,8,0.5); }
+          50% { box-shadow: 0 0 0 6px rgba(63,115,8,0); }
         }
       `}</style>
 
@@ -127,8 +127,8 @@ export default function ProgettoDetail() {
                 alignItems: 'center',
                 justifyContent: 'center',
                 gap: 8,
-                background: '#fff',
-                color: '#08233f',
+                background: 'var(--forest)',
+                color: '#fff',
                 border: 'none',
                 fontFamily: 'inherit',
                 fontWeight: 700,
@@ -198,7 +198,7 @@ export default function ProgettoDetail() {
               left: '50%',
               transform: 'translateX(-50%)',
               zIndex: 10,
-              background: 'rgba(8,35,63,0.85)',
+              background: 'rgba(255,255,255,0.85)',
               border: '1px solid var(--line-2)',
               borderRadius: 100,
               padding: '6px 16px',
@@ -216,7 +216,7 @@ export default function ProgettoDetail() {
                 width: 80,
                 height: 5,
                 borderRadius: 0,
-                background: 'rgba(174,227,249,.14)',
+                background: 'rgba(63,115,8,.14)',
                 overflow: 'hidden',
                 position: 'relative',
               }}

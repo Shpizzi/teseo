@@ -40,8 +40,8 @@ export default function ScanOverlay({ progress }: { progress: number }) {
           fontFamily: 'var(--mono)',
           fontSize: 11,
           letterSpacing: '0.06em',
-          color: 'var(--cyan)',
-          textShadow: '0 1px 4px rgba(8,29,58,0.8)',
+          color: 'var(--lemongrass)',
+          textShadow: '0 1px 4px rgba(9,15,5,0.8)',
         }}
       >
         SCANSIONE DIMENSIONALE · GAUSSIAN SPLAT
@@ -54,8 +54,8 @@ export default function ScanOverlay({ progress }: { progress: number }) {
           fontFamily: 'var(--mono)',
           fontSize: 22,
           fontWeight: 700,
-          color: 'var(--cyan)',
-          textShadow: '0 1px 4px rgba(8,29,58,0.8)',
+          color: 'var(--lemongrass)',
+          textShadow: '0 1px 4px rgba(9,15,5,0.8)',
         }}
       >
         {String(Math.min(100, Math.round(progress))).padStart(3, '0')}%

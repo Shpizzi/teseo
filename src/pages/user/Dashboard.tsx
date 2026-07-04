@@ -22,6 +22,7 @@ export default function Dashboard() {
     <>
       {/* ── Topbar ── */}
       <div
+        className="anim-fadeUp"
         style={{
           display: 'flex',
           alignItems: 'center',
@@ -69,6 +70,7 @@ export default function Dashboard() {
 
       {/* ── KPI strip ── */}
       <div
+        className="anim-fadeUp-d1"
         style={{
           display: 'grid',
           gridTemplateColumns: 'repeat(4,1fr)',
@@ -90,6 +92,7 @@ export default function Dashboard() {
 
       {/* ── Main grid ── */}
       <div
+        className="anim-fadeUp-d2"
         style={{
           flex: 1,
           display: 'grid',
@@ -123,10 +126,11 @@ export default function Dashboard() {
             <h3
               style={{
                 fontWeight: 600,
-                fontSize: 15,
-                letterSpacing: '0.04em',
+                fontSize: 12,
+                letterSpacing: '0.08em',
                 textTransform: 'uppercase',
-                color: 'var(--ink)',
+                color: 'var(--muted)',
+                fontFamily: 'var(--mono)',
               }}
             >
               Progetti in corso
@@ -258,7 +262,7 @@ export default function Dashboard() {
           {/* Alert card: pickup ready */}
           <div
             style={{
-              background: 'rgba(174,227,249,.10)',
+              background: 'rgba(63,115,8,.10)',
               border: '1px solid var(--line-2)',
               borderRadius: 'var(--radius)',
               padding: 20,
@@ -293,7 +297,7 @@ export default function Dashboard() {
                   width: 32,
                   height: 32,
                   borderRadius: 9,
-                  background: 'rgba(174,227,249,.18)',
+                  background: 'rgba(63,115,8,.18)',
                   border: '1px solid var(--line-2)',
                   display: 'grid',
                   placeItems: 'center',
@@ -304,11 +308,12 @@ export default function Dashboard() {
               </span>
               <h4
                 style={{
-                  fontSize: 13,
-                  fontWeight: 700,
-                  letterSpacing: '0.04em',
+                  fontSize: 12,
+                  fontWeight: 600,
+                  letterSpacing: '0.08em',
                   textTransform: 'uppercase',
                   color: 'var(--ink)',
+                  fontFamily: 'var(--mono)',
                 }}
               >
                 Pronto al ritiro
@@ -336,25 +341,15 @@ export default function Dashboard() {
                 position: 'relative',
               }}
             >
-              <b style={{ color: '#fff', fontWeight: 600 }}>Ricambio cardine finestra</b>{' '}
+              <b style={{ color: 'var(--ink)', fontWeight: 600 }}>Ricambio cardine finestra</b>{' '}
               completato da{' '}
-              <b style={{ color: '#fff', fontWeight: 600 }}>MakerSpace Navigli</b>.
+              <b style={{ color: 'var(--ink)', fontWeight: 600 }}>MakerSpace Navigli</b>.
               Ritiro disponibile fino a venerdì 18:00.
             </p>
 
             <button
-              style={{
-                background: 'var(--cyan)',
-                color: '#08233f',
-                border: 'none',
-                fontFamily: 'inherit',
-                fontWeight: 700,
-                fontSize: 13,
-                padding: '11px 18px',
-                borderRadius: '100px',
-                cursor: 'pointer',
-                position: 'relative',
-              }}
+              className="btn-spade"
+              style={{ fontSize: 13, height: 38, padding: '0 18px' }}
             >
               Prenota ritiro
             </button>
@@ -416,7 +411,7 @@ export default function Dashboard() {
                 flex: 1,
                 minHeight: 140,
                 border: '1px solid var(--line-2)',
-                background: '#0c2a52',
+                background: '#18280e',
                 marginBottom: 14,
               }}
             >
@@ -426,7 +421,7 @@ export default function Dashboard() {
                   position: 'absolute',
                   inset: 0,
                   backgroundImage:
-                    'linear-gradient(rgba(174,227,249,.10) 1px,transparent 1px),linear-gradient(90deg,rgba(174,227,249,.10) 1px,transparent 1px)',
+                    'linear-gradient(rgba(178,235,118,.10) 1px,transparent 1px),linear-gradient(90deg,rgba(178,235,118,.10) 1px,transparent 1px)',
                   backgroundSize: '28px 28px',
                 }}
               />
@@ -439,7 +434,7 @@ export default function Dashboard() {
                   left: 0,
                   right: 0,
                   height: 6,
-                  background: 'rgba(174,227,249,.12)',
+                  background: 'rgba(178,235,118,.10)',
                 }}
               />
               <div
@@ -449,7 +444,7 @@ export default function Dashboard() {
                   top: 0,
                   bottom: 0,
                   width: 6,
-                  background: 'rgba(174,227,249,.12)',
+                  background: 'rgba(178,235,118,.10)',
                 }}
               />
 

@@ -29,7 +29,7 @@ export default function IconButton({ children, title, badge, onClick }: IconButt
         WebkitBackdropFilter: 'blur(12px)',
       }}
       onMouseEnter={e => {
-        ;(e.currentTarget as HTMLButtonElement).style.color = '#fff'
+        ;(e.currentTarget as HTMLButtonElement).style.color = 'var(--ink)'
         ;(e.currentTarget as HTMLButtonElement).style.borderColor = 'var(--line-2)'
       }}
       onMouseLeave={e => {
@@ -48,7 +48,7 @@ export default function IconButton({ children, title, badge, onClick }: IconButt
             height: 17,
             borderRadius: '50%',
             background: 'var(--cyan)',
-            color: '#08233f',
+            color: '#f4faed',
             fontSize: 10,
             fontWeight: 700,
             display: 'grid',

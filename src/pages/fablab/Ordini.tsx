@@ -95,7 +95,7 @@ export default function Ordini() {
                   display: 'flex', alignItems: 'center', gap: 6,
                   padding: '6px 13px', borderRadius: 100,
                   border: isActive ? '1px solid var(--cyan)' : '1px solid var(--line)',
-                  background: isActive ? 'rgba(174,227,249,.10)' : 'transparent',
+                  background: isActive ? 'rgba(63,115,8,.10)' : 'transparent',
                   color: isActive ? 'var(--cyan)' : 'var(--muted)',
                   fontFamily: 'inherit', fontWeight: 600, fontSize: 12.5,
                   cursor: 'pointer', transition: '0.18s',
@@ -105,7 +105,7 @@ export default function Ordini() {
                 {tab.key !== 'all' && (
                   <span style={{
                     background: isActive ? 'var(--cyan)' : 'var(--glass-2)',
-                    color: isActive ? '#08233f' : 'var(--muted)',
+                    color: isActive ? '#f4faed' : 'var(--muted)',
                     fontFamily: 'var(--mono)', fontSize: 10, fontWeight: 700,
                     padding: '1px 6px', borderRadius: 100,
                   }}>
@@ -201,7 +201,7 @@ export default function Ordini() {
                       Rifiuta
                     </button>
                     <button style={{
-                      background: '#fff', border: 'none', color: '#08233f',
+                      background: 'var(--forest)', border: 'none', color: '#fff',
                       fontFamily: 'inherit', fontWeight: 700, fontSize: 12,
                       padding: '5px 13px', borderRadius: '100px', cursor: 'pointer',
                     }}>
@@ -210,7 +210,7 @@ export default function Ordini() {
                   </>
                 )}
                 {order.status === 'printing' && (
-                  <div style={{ width: 70, height: 5, borderRadius: 100, background: 'rgba(174,227,249,.14)', overflow: 'hidden' }}>
+                  <div style={{ width: 70, height: 5, borderRadius: 100, background: 'rgba(63,115,8,.14)', overflow: 'hidden' }}>
                     <div style={{ height: '100%', width: `${order.progress ?? 0}%`, background: 'var(--cyan)', transition: 'width 0.3s ease' }} />
                   </div>
                 )}

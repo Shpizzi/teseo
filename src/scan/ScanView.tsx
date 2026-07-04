@@ -141,7 +141,7 @@ export default function ScanView({ onClose }: { onClose?: () => void }) {
         position: 'fixed',
         inset: 0,
         zIndex: 50,
-        background: 'linear-gradient(160deg, #0a2342, #081d3a 60%, #0a2645)',
+        background: 'linear-gradient(160deg, #122006, #0d1804 60%, #132408)',
         display: 'flex',
         flexDirection: 'column',
         gap: 14,

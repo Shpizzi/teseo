@@ -4,7 +4,7 @@ import { useGLTF, Html } from '@react-three/drei'
 import * as THREE from 'three'
 
 // The displaced icosahedron mesh — byte-identical to prototype
-function buildDisplacedGeo(): THREE.BufferGeometry {
+export function buildDisplacedGeo(): THREE.BufferGeometry {
   const geo = new THREE.IcosahedronGeometry(1, 5)
   const pos = geo.attributes.position
   const v = new THREE.Vector3()
@@ -100,19 +100,19 @@ function PrintBody({ geo, onProgressChange }: BodyProps) {
     <group ref={groupRef}>
       {/* printed part — cyan fill */}
       <mesh geometry={geo}>
-        <meshBasicMaterial color={0xafe3f9} transparent opacity={0.10} clippingPlanes={[clipSolid]} side={THREE.DoubleSide} />
+        <meshBasicMaterial color={0xb2eb76} transparent opacity={0.10} clippingPlanes={[clipSolid]} side={THREE.DoubleSide} />
       </mesh>
       {/* printed part — white wireframe */}
       <mesh geometry={geo}>
-        <meshBasicMaterial color={0xeaf4fb} wireframe transparent opacity={0.50} clippingPlanes={[clipSolid]} />
+        <meshBasicMaterial color={0xf4faed} wireframe transparent opacity={0.50} clippingPlanes={[clipSolid]} />
       </mesh>
       {/* to-print — faint cyan wireframe */}
       <mesh geometry={geo}>
-        <meshBasicMaterial color={0xafe3f9} wireframe transparent opacity={0.16} clippingPlanes={[clipWire]} />
+        <meshBasicMaterial color={0xb2eb76} wireframe transparent opacity={0.16} clippingPlanes={[clipWire]} />
       </mesh>
       {/* build plate */}
       <mesh geometry={plateGeo} position={[0, -1.32, 0]}>
-        <meshBasicMaterial color={0xafe3f9} wireframe transparent opacity={0.3} />
+        <meshBasicMaterial color={0xb2eb76} wireframe transparent opacity={0.3} />
       </mesh>
     </group>
   )

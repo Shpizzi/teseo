@@ -4,24 +4,27 @@ export default {
   theme: {
     extend: {
       colors: {
-        bg: '#0a2342',
-        'bg-2': '#0c2a52',
-        ink: '#eaf4fb',
-        cyan: '#AFE3F9',
-        line: 'rgba(174,227,249,0.28)',
-        'line-2': 'rgba(174,227,249,0.50)',
-        glass: 'rgba(255,255,255,0.055)',
-        'glass-2': 'rgba(255,255,255,0.10)',
-        muted: 'rgba(234,244,251,0.68)',
-        'muted-2': 'rgba(234,244,251,0.45)',
+        bg: '#f4faed',
+        'bg-2': '#f0fae6',
+        ink: '#090f05',
+        cyan: '#3f7308', // ponytail: vecchio nome, ora è il moss di spade
+        moss: '#3f7308',
+        forest: '#18280e',
+        lemongrass: '#b2eb76',
+        line: '#d8e5ca',
+        'line-2': '#b3c5a0',
+        glass: '#ffffff',
+        'glass-2': '#eaf6dc',
+        muted: 'rgba(9,15,5,0.60)',
+        'muted-2': 'rgba(9,15,5,0.40)',
       },
       fontFamily: {
         sans: ['Urbanist', 'sans-serif'],
         mono: ['"IBM Plex Mono"', 'monospace'],
       },
       borderRadius: {
-        card: '18px',
-        inner: '13px',
+        card: '12px',
+        inner: '8px',
         pill: '100px',
       },
       backdropBlur: {

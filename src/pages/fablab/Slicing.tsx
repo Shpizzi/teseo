@@ -65,7 +65,7 @@ export default function Slicing() {
   ]
 
   const floatPanelStyle: React.CSSProperties = {
-    background: 'rgba(8,29,58,.6)',
+    background: 'rgba(244,250,237,.6)',
     backdropFilter: 'blur(20px)',
     WebkitBackdropFilter: 'blur(20px)',
     border: '1px solid var(--line-2)',
@@ -84,7 +84,7 @@ export default function Slicing() {
         overflow: 'hidden',
         marginLeft: 16,
         border: '1px solid var(--line-2)',
-        background: '#0a2545',
+        background: '#122006',
       }}
     >
       {/* Blueprint grid overlay */}
@@ -94,7 +94,7 @@ export default function Slicing() {
           inset: 0,
           pointerEvents: 'none',
           backgroundImage:
-            'linear-gradient(rgba(174,227,249,.06) 1px, transparent 1px), linear-gradient(90deg, rgba(174,227,249,.06) 1px, transparent 1px)',
+            'linear-gradient(rgba(178,235,118,.07) 1px, transparent 1px), linear-gradient(90deg, rgba(178,235,118,.07) 1px, transparent 1px)',
           backgroundSize: '34px 34px',
           transform: 'perspective(420px) rotateX(7deg)',
           transformOrigin: 'center 80%',
@@ -178,7 +178,7 @@ export default function Slicing() {
             border: 'none',
             borderRadius: 100,
             padding: '8px 14px',
-            color: '#08233f',
+            color: '#f4faed',
             fontFamily: 'inherit',
             fontWeight: 700,
             fontSize: 12.5,
@@ -193,7 +193,7 @@ export default function Slicing() {
         {/* Position card */}
         <div
           style={{
-            background: 'rgba(174,227,249,.04)',
+            background: 'rgba(63,115,8,.04)',
             border: '1px solid var(--line)',
             borderRadius: 14,
             padding: 16,
@@ -238,7 +238,7 @@ export default function Slicing() {
                 height: 96,
                 borderRadius: '50%',
                 border: '1px solid var(--line-2)',
-                background: 'radial-gradient(circle at 50% 50%, rgba(174,227,249,.08), transparent 70%)',
+                background: 'radial-gradient(circle at 50% 50%, rgba(63,115,8,.08), transparent 70%)',
                 position: 'relative',
               }}
             >
@@ -314,7 +314,7 @@ export default function Slicing() {
                 onClick={() => setActivePreset(key)}
                 style={{
                   border: `1px solid ${isActive ? 'var(--cyan)' : 'var(--line)'}`,
-                  background: isActive ? 'rgba(174,227,249,.08)' : 'transparent',
+                  background: isActive ? 'rgba(63,115,8,.08)' : 'transparent',
                   borderRadius: 13,
                   padding: '14px 10px',
                   textAlign: 'center',
@@ -358,7 +358,7 @@ export default function Slicing() {
                 borderRadius: 100,
                 border: 'none',
                 background: aiMode === val ? 'var(--cyan)' : 'transparent',
-                color: aiMode === val ? '#08233f' : 'var(--muted)',
+                color: aiMode === val ? '#f4faed' : 'var(--muted)',
                 fontFamily: 'inherit',
                 fontWeight: 700,
                 fontSize: 11.5,
@@ -417,7 +417,7 @@ export default function Slicing() {
               style={{
                 height: 34,
                 borderRadius: 100,
-                background: 'rgba(174,227,249,.08)',
+                background: 'rgba(63,115,8,.08)',
                 position: 'relative',
                 cursor: 'pointer',
                 overflow: 'hidden',
@@ -438,7 +438,7 @@ export default function Slicing() {
                   paddingLeft: 16,
                   fontFamily: 'var(--mono)',
                   fontWeight: 700,
-                  color: '#08233f',
+                  color: '#f4faed',
                   fontSize: 12,
                   transition: isDragging.current ? 'none' : 'width 0.1s ease',
                 }}
@@ -454,7 +454,7 @@ export default function Slicing() {
                     width: 4,
                     height: 16,
                     borderRadius: 3,
-                    background: '#08233f',
+                    background: '#f4faed',
                     opacity: 0.7,
                   }}
                 />
@@ -488,7 +488,7 @@ export default function Slicing() {
           left: '50%',
           transform: 'translate(-50%, -50%)',
           zIndex: 10,
-          background: 'rgba(8,29,58,.5)',
+          background: 'rgba(244,250,237,.5)',
           backdropFilter: 'blur(10px)',
           WebkitBackdropFilter: 'blur(10px)',
           border: '1px solid var(--line-2)',
@@ -518,7 +518,7 @@ export default function Slicing() {
             flex: 1,
             height: 13,
             borderRadius: 100,
-            background: 'rgba(174,227,249,.08)',
+            background: 'rgba(63,115,8,.08)',
             overflow: 'hidden',
           }}
         >
@@ -526,7 +526,7 @@ export default function Slicing() {
             style={{
               height: '100%',
               width: `${progress}%`,
-              background: `repeating-linear-gradient(90deg, var(--cyan) 0 3px, transparent 3px 6px), linear-gradient(90deg, var(--cyan), rgba(174,227,249,.35))`,
+              background: `repeating-linear-gradient(90deg, var(--cyan) 0 3px, transparent 3px 6px), linear-gradient(90deg, var(--cyan), rgba(63,115,8,.35))`,
               transition: 'width 0.4s ease',
             }}
           />
@@ -538,8 +538,8 @@ export default function Slicing() {
             width: 46,
             height: 46,
             borderRadius: '50%',
-            background: '#fff',
-            color: '#08233f',
+            background: 'var(--forest)',
+            color: '#fff',
             display: 'grid',
             placeItems: 'center',
             fontFamily: 'var(--mono)',
@@ -575,7 +575,7 @@ export default function Slicing() {
             border: 'none',
             display: 'grid',
             placeItems: 'center',
-            color: '#08233f',
+            color: '#f4faed',
             cursor: 'pointer',
           }}
         >
@@ -607,7 +607,7 @@ export default function Slicing() {
               width: 48,
               height: 48,
               borderRadius: '50%',
-              background: 'rgba(8,29,58,.6)',
+              background: 'rgba(244,250,237,.6)',
               backdropFilter: 'blur(12px)',
               WebkitBackdropFilter: 'blur(12px)',
               border: '1px solid var(--line)',
@@ -625,7 +625,7 @@ export default function Slicing() {
         <div
           style={{
             display: 'flex',
-            background: 'rgba(8,29,58,.6)',
+            background: 'rgba(244,250,237,.6)',
             backdropFilter: 'blur(12px)',
             WebkitBackdropFilter: 'blur(12px)',
             border: '1px solid var(--line)',
@@ -643,7 +643,7 @@ export default function Slicing() {
                 borderRadius: 100,
                 border: 'none',
                 background: dockAi === val ? 'var(--cyan)' : 'transparent',
-                color: dockAi === val ? '#08233f' : 'var(--muted)',
+                color: dockAi === val ? '#f4faed' : 'var(--muted)',
                 fontFamily: 'inherit',
                 fontWeight: 700,
                 fontSize: 11.5,
@@ -700,7 +700,7 @@ export default function Slicing() {
               style={{
                 width: 2,
                 height: tick.h,
-                background: tick.white ? 'rgba(234,244,251,.7)' : 'rgba(174,227,249,.3)',
+                background: tick.white ? 'rgba(234,244,251,.7)' : 'rgba(63,115,8,.3)',
                 borderRadius: 1,
                 flex: '0 0 auto',
               }}

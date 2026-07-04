@@ -141,7 +141,7 @@ export default function OrdineDetail() {
             <FieldRow label="Infill">
               <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
                 <span style={{ fontFamily: 'var(--mono)', fontSize: 12, color: 'var(--ink)' }}>{order.infill}%</span>
-                <div style={{ width: 40, height: 4, borderRadius: 4, background: 'rgba(174,227,249,.14)', overflow: 'hidden' }}>
+                <div style={{ width: 40, height: 4, borderRadius: 4, background: 'rgba(63,115,8,.14)', overflow: 'hidden' }}>
                   <div style={{ height: '100%', width: `${order.infill}%`, background: 'var(--cyan)' }} />
                 </div>
               </div>
@@ -180,7 +180,7 @@ export default function OrdineDetail() {
 
           {/* Action buttons */}
           <button style={{
-            background: '#fff', border: 'none', color: '#08233f',
+            background: 'var(--forest)', border: 'none', color: '#fff',
             fontFamily: 'inherit', fontWeight: 700, fontSize: 14,
             padding: '11px 0', borderRadius: 100, cursor: 'pointer',
             width: '100%', marginBottom: 8, transition: '0.18s',
@@ -233,7 +233,7 @@ export default function OrdineDetail() {
             position: 'absolute', bottom: 20, left: 20, right: 20, zIndex: 5,
           }}>
             <div style={{
-              background: 'rgba(10,35,66,0.82)', backdropFilter: 'blur(10px)',
+              background: 'rgba(244,250,237,0.9)', backdropFilter: 'blur(10px)',
               border: '1px solid var(--line)', borderRadius: 10,
               padding: '10px 14px',
             }}>

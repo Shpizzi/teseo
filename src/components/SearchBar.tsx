@@ -15,10 +15,9 @@ export default function SearchBar({ placeholder = 'Cerca…', className = '' }: 
         gap: 11,
         background: 'var(--glass)',
         border: '1px solid var(--line)',
-        borderRadius: '100px',
+        borderRadius: 10,
         padding: '11px 11px 11px 18px',
-        backdropFilter: 'blur(12px)',
-        WebkitBackdropFilter: 'blur(12px)',
+        transition: 'border-color 0.2s ease',
         width: 330,
       }}
     >
@@ -31,7 +30,7 @@ export default function SearchBar({ placeholder = 'Cerca…', className = '' }: 
           background: 'none',
           border: 'none',
           outline: 'none',
-          color: '#fff',
+          color: 'var(--ink)',
           fontFamily: 'inherit',
           fontSize: 13.5,
           minWidth: 0,

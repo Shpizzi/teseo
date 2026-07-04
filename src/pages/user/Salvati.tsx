@@ -57,7 +57,7 @@ export default function Salvati() {
               style={{
                 height: 150,
                 borderRadius: 13,
-                background: '#0c2a52',
+                background: '#18280e',
                 border: '1px solid var(--line-2)',
                 position: 'relative',
                 overflow: 'hidden',
@@ -77,7 +77,7 @@ export default function Salvati() {
                   position: 'absolute',
                   inset: 0,
                   backgroundImage:
-                    'linear-gradient(rgba(174,227,249,.28) 1px,transparent 1px),linear-gradient(90deg,rgba(174,227,249,.28) 1px,transparent 1px)',
+                    'linear-gradient(rgba(63,115,8,.28) 1px,transparent 1px),linear-gradient(90deg,rgba(63,115,8,.28) 1px,transparent 1px)',
                   backgroundSize: '9px 9px',
                   pointerEvents: 'none',
                 }}

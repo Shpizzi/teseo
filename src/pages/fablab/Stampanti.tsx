@@ -10,7 +10,7 @@ function PrinterStatusPill({ status }: { status: PrinterFull['status'] }) {
   // maintenance: sp-new variant with dashed border
   return (
     <span className="status-pill" style={{
-      background: 'transparent', border: '1px dashed var(--line-2)', color: '#fff',
+      background: 'transparent', border: '1px dashed var(--line-2)', color: 'var(--muted)',
     }}>
       Manutenzione
     </span>
@@ -123,7 +123,7 @@ export default function Stampanti() {
             {/* Active: progress bar */}
             {printer.status === 'active' && printer.progress !== undefined && (
               <div style={{ marginBottom: 8 }}>
-                <div style={{ height: 4, borderRadius: 4, background: 'rgba(174,227,249,.14)', overflow: 'hidden', marginBottom: 5 }}>
+                <div style={{ height: 4, borderRadius: 4, background: 'rgba(63,115,8,.14)', overflow: 'hidden', marginBottom: 5 }}>
                   <div style={{ height: '100%', width: `${printer.progress}%`, background: 'var(--cyan)', transition: 'width 0.3s' }} />
                 </div>
                 <span style={{ fontFamily: 'var(--mono)', fontSize: 10, color: 'var(--cyan)', letterSpacing: '0.04em' }}>
@@ -180,7 +180,7 @@ export default function Stampanti() {
               padding: '8px 0', borderRadius: 100, cursor: 'pointer', width: '100%',
               transition: '0.18s',
             }}
-              onMouseEnter={e => { (e.currentTarget as HTMLButtonElement).style.background = 'rgba(174,227,249,.10)' }}
+              onMouseEnter={e => { (e.currentTarget as HTMLButtonElement).style.background = 'rgba(63,115,8,.10)' }}
               onMouseLeave={e => { (e.currentTarget as HTMLButtonElement).style.background = 'transparent' }}
             >
               Gestisci

@@ -23,7 +23,7 @@ export default function Progetti() {
     transition: '0.18s',
     border: 'none',
     background: activeTab === tab ? 'var(--cyan)' : 'transparent',
-    color: activeTab === tab ? '#08233f' : 'var(--muted)',
+    color: activeTab === tab ? '#f4faed' : 'var(--muted)',
   })
 
   return (
