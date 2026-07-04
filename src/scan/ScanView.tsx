@@ -23,7 +23,9 @@ const outlineBtn: React.CSSProperties = {
   borderRadius: 100, cursor: 'pointer', transition: '0.2s', flex: '0 0 auto',
 }
 
-export default function ScanView({ onClose }: { onClose?: () => void }) {
+type ScanRequest = { fileName: string; producerId: string; material: string }
+
+export default function ScanView({ onClose, onRequest }: { onClose?: () => void; onRequest?: (req: ScanRequest) => void }) {
   const [phase, setPhase] = useState<Phase>('capture')
   const [progress, setProgress] = useState(0)
   const [cameraOn, setCameraOn] = useState(false)
@@ -306,7 +308,7 @@ export default function ScanView({ onClose }: { onClose?: () => void }) {
                 </GlassCard>
                 <div style={{ display: 'flex', gap: 10, flexWrap: 'wrap' }}>
                   <PrimaryButton onClick={() => setPhase('match')}><Radar size={16} /> Cerca nella rete</PrimaryButton>
-                  <button style={outlineBtn}><Sparkles size={16} /> Genera con AI</button>
+                  <button style={outlineBtn} onClick={() => setPhase('ai-generate')}><Sparkles size={16} /> Genera con AI</button>
                 </div>
                 <button style={{ ...outlineBtn, color: 'var(--muted)', borderColor: 'var(--line)' }} onClick={reset}>
                   <RotateCcw size={15} /> Nuova scansione
@@ -334,7 +336,7 @@ export default function ScanView({ onClose }: { onClose?: () => void }) {
               <span>scansione 0 / 3</span>
             </div>
             <p style={{ fontSize: 12, color: 'var(--muted)', fontStyle: 'italic', lineHeight: 1.5 }}>
-              Al termine il modello viene validato e messo in coda; puoi attivare una <span style={{ color: 'var(--cyan)' }}>bounty all'esperto</span> della rete.
+              Al termine il modello viene validato e messo in coda; puoi anche <span style={{ color: 'var(--cyan)' }}>chiedere aiuto a un esperto</span> della community.
             </p>
             <button style={{ ...outlineBtn, opacity: 0.55, cursor: 'not-allowed' }} disabled>
               <Camera size={16} /> Avvia scansione componente
@@ -351,7 +353,7 @@ export default function ScanView({ onClose }: { onClose?: () => void }) {
       {phase === 'match' && match && (
         <div style={{ flex: 1, display: 'flex', flexDirection: 'column', gap: 12, minHeight: 0 }}>
           <span style={{ fontFamily: 'var(--mono)', fontSize: 11, letterSpacing: '0.06em', color: 'var(--muted)' }}>
-            NODI COMPATIBILI · {match.entry.part} · {match.entry.material}
+            FABLAB COMPATIBILI · {match.entry.part} · {match.entry.material}
           </span>
           <div style={{ flex: 1, display: 'flex', flexDirection: 'column', gap: 11, overflow: 'auto' }}>
             {producers.map((p, i) => {
@@ -373,13 +375,18 @@ export default function ScanView({ onClose }: { onClose?: () => void }) {
                       {p.technologies.join(' · ')} · ★ {p.rating}
                     </div>
                   </div>
-                  <PrimaryButton style={{ height: 38 }}>Richiedi</PrimaryButton>
+                  <PrimaryButton
+                    style={{ height: 38 }}
+                    onClick={() => onRequest?.({ fileName: match.entry.part, producerId: p.id, material: match.entry.material })}
+                  >
+                    Richiedi preventivo
+                  </PrimaryButton>
                 </div>
               )
             })}
           </div>
           <p style={{ fontSize: 12, color: 'var(--muted)', fontStyle: 'italic', flex: '0 0 auto' }}>
-            Nessun nodo copre il pezzo? Attiva <span style={{ color: 'var(--cyan)' }}>generazione AI + bounty all'esperto</span>.
+            Nessun FabLab copre il pezzo? Prova la <span style={{ color: 'var(--cyan)' }}>generazione AI</span> o chiedi a un esperto della community.
           </p>
           <button style={{ ...outlineBtn, alignSelf: 'flex-start', color: 'var(--muted)', borderColor: 'var(--line)' }} onClick={reset}>
             <RotateCcw size={15} /> Nuova scansione

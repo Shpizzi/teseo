@@ -395,6 +395,9 @@ body::after {
   .btn-spade:hover::before { transform: scale(0.98); }
   .btn-spade:active::before { transform: scale(0.96); }
 
+  .btn-spade:disabled { opacity: 0.45; cursor: not-allowed; color: #fff; }
+  .btn-spade:disabled::before { transform: none; }
+
   /* Variante chiara (ghost) */
   .btn-spade--light { color: var(--ink); }
   .btn-spade--light::before { background: rgba(9, 15, 5, 0.06); }

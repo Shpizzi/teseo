@@ -1,27 +1,38 @@
 import { useState, useRef } from 'react'
 import { Upload, Camera, Check, Star } from 'lucide-react'
-import { useNavigate } from 'react-router-dom'
+import { useNavigate, useLocation } from 'react-router-dom'
 import GlassCard from '../../components/GlassCard'
 import PrimaryButton from '../../components/PrimaryButton'
 import SearchBar from '../../components/SearchBar'
 import ScanView from '../../scan/ScanView'
 import { producers } from '../../mock/user-pages'
+import { toast } from '../../components/Toast'
 
 type Step = 1 | 2 | 3
 
+// Contesto in ingresso (da Community, Salvati, Produttori, Scan): il wizard
+// non deve far ripartire l'utente da zero se modello/produttore sono già noti.
+type IncomingState = { modelName?: string; producerId?: string } | null
+
 export default function NuovaStampa() {
-  const [step, setStep] = useState<Step>(1)
-  const [selectedProducer, setSelectedProducer] = useState(producers[0].id)
+  const navigate = useNavigate()
+  const incoming = (useLocation().state as IncomingState) ?? {}
+  const [step, setStep] = useState<Step>(incoming.modelName ? 2 : 1)
+  const [selectedProducer, setSelectedProducer] = useState(incoming.producerId ?? '')
   const [notes, setNotes] = useState('')
-  const [fileName, setFileName] = useState('')
+  const [fileName, setFileName] = useState(incoming.modelName ?? '')
+  const [producerQuery, setProducerQuery] = useState('')
   const [scanMode, setScanMode] = useState(false)
   const fileInputRef = useRef<HTMLInputElement>(null)
-  const navigate = useNavigate()
 
   const openPicker = () => fileInputRef.current?.click()
   const pickFile = (f?: File) => { if (f) setFileName(f.name) }
 
-  const currentProducer = producers.find(p => p.id === selectedProducer) ?? producers[0]
+  const currentProducer = producers.find(p => p.id === selectedProducer)
+  const visibleProducers = producerQuery
+    ? producers.filter(p =>
+        [p.name, p.city, ...p.materials, ...p.technologies].join(' ').toLowerCase().includes(producerQuery.toLowerCase()))
+    : producers
 
   const StepIndicator = () => (
     <div style={{ display: 'flex', alignItems: 'center', gap: 10, flex: '0 0 auto' }}>
@@ -67,19 +78,49 @@ export default function NuovaStampa() {
     </div>
   )
 
-  if (scanMode) return <ScanView onClose={() => setScanMode(false)} />
+  if (scanMode) {
+    return (
+      <ScanView
+        onClose={() => setScanMode(false)}
+        onRequest={({ fileName: piece, producerId }) => {
+          setFileName(piece)
+          setSelectedProducer(producerId)
+          setScanMode(false)
+          setStep(3)
+        }}
+      />
+    )
+  }
 
   return (
     <>
       {/* Topbar */}
-      <div style={{ display: 'flex', alignItems: 'center', gap: 14, flex: '0 0 auto' }}>
+      <div style={{ display: 'flex', alignItems: 'center', gap: 14, flex: '0 0 auto', flexWrap: 'wrap' }}>
         <div>
           <h1 style={{ fontWeight: 600, fontSize: 25, letterSpacing: '-0.01em', color: 'var(--ink)' }}>
             Nuova stampa
           </h1>
+          {/* Contesto sempre visibile tra gli step (riconoscere, non ricordare) */}
+          {(fileName || currentProducer) && (
+            <p style={{ fontFamily: 'var(--mono)', fontSize: 11, color: 'var(--muted)', letterSpacing: '0.04em', marginTop: 3 }}>
+              {fileName && <>MODELLO · <span style={{ color: 'var(--cyan)' }}>{fileName}</span></>}
+              {fileName && currentProducer && ' — '}
+              {currentProducer && <>PRODUTTORE · <span style={{ color: 'var(--cyan)' }}>{currentProducer.name}</span></>}
+            </p>
+          )}
         </div>
         <div style={{ flex: 1 }} />
         <StepIndicator />
+        <button
+          onClick={() => navigate(-1)}
+          style={{
+            background: 'transparent', color: 'var(--muted)', border: '1px solid var(--line)',
+            fontFamily: 'inherit', fontWeight: 600, fontSize: 13, padding: '0 16px',
+            height: 36, borderRadius: 100, cursor: 'pointer', transition: '0.2s',
+          }}
+        >
+          Annulla
+        </button>
       </div>
 
       {/* Step 1: upload */}
@@ -181,7 +222,11 @@ export default function NuovaStampa() {
             Scansiona con fotocamera
           </button>
 
-          <PrimaryButton onClick={() => setStep(2)}>
+          <PrimaryButton
+            onClick={() => setStep(2)}
+            disabled={!fileName}
+            title={fileName ? undefined : 'Carica un file 3D o scansiona un oggetto per continuare'}
+          >
             Avanti →
           </PrimaryButton>
         </div>
@@ -190,21 +235,33 @@ export default function NuovaStampa() {
       {/* Step 2: choose producer */}
       {step === 2 && (
         <div style={{ flex: 1, display: 'flex', flexDirection: 'column', gap: 14, minHeight: 0 }}>
-          <SearchBar placeholder="Filtra per materiale o distanza" />
+          <SearchBar placeholder="Filtra per nome, materiale o tecnologia" value={producerQuery} onChange={setProducerQuery} />
 
           <div style={{ flex: 1, display: 'flex', flexDirection: 'column', gap: 11, overflow: 'auto' }}>
-            {producers.map(producer => {
+            {visibleProducers.length === 0 && (
+              <div style={{ padding: 28, textAlign: 'center', color: 'var(--muted)', fontSize: 13 }}>
+                Nessun produttore corrisponde a «{producerQuery}».{' '}
+                <button
+                  onClick={() => setProducerQuery('')}
+                  style={{ background: 'none', border: 'none', color: 'var(--cyan)', cursor: 'pointer', fontFamily: 'inherit', fontSize: 13, fontWeight: 600, padding: 0 }}
+                >
+                  Azzera il filtro
+                </button>
+              </div>
+            )}
+            {visibleProducers.map(producer => {
               const isSelected = selectedProducer === producer.id
               return (
                 <div
                   key={producer.id}
-                  onClick={() => setSelectedProducer(producer.id)}
+                  onClick={producer.available ? () => setSelectedProducer(producer.id) : undefined}
                   style={{
                     padding: 18,
                     borderRadius: 'var(--radius-sm)',
                     background: isSelected ? 'rgba(63,115,8,0.07)' : 'var(--glass)',
                     border: `1px solid ${isSelected ? 'var(--cyan)' : 'var(--line)'}`,
-                    cursor: 'pointer',
+                    cursor: producer.available ? 'pointer' : 'default',
+                    opacity: producer.available ? 1 : 0.55,
                     transition: '0.18s',
                     display: 'flex',
                     alignItems: 'center',
@@ -245,6 +302,11 @@ export default function NuovaStampa() {
                     <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 5 }}>
                       <span style={{ fontSize: 15, fontWeight: 600, color: 'var(--ink)' }}>{producer.name}</span>
                       <span style={{ fontFamily: 'var(--mono)', color: 'var(--cyan)', fontSize: 12 }}>{producer.distance}</span>
+                      {!producer.available && (
+                        <span style={{ fontFamily: 'var(--mono)', fontSize: 10, letterSpacing: '0.06em', color: 'var(--muted)', border: '1px dashed var(--line-2)', borderRadius: 5, padding: '2px 7px' }}>
+                          AL COMPLETO ORA
+                        </span>
+                      )}
                     </div>
                     <div style={{ display: 'flex', gap: 5, flexWrap: 'wrap' }}>
                       {producer.technologies.map(tech => (
@@ -298,7 +360,11 @@ export default function NuovaStampa() {
             >
               ← Indietro
             </button>
-            <PrimaryButton onClick={() => setStep(3)}>
+            <PrimaryButton
+              onClick={() => setStep(3)}
+              disabled={!currentProducer}
+              title={currentProducer ? undefined : 'Scegli un produttore per continuare'}
+            >
               Continua →
             </PrimaryButton>
           </div>
@@ -319,8 +385,8 @@ export default function NuovaStampa() {
 
             <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
               {[
-                { label: 'FILE', value: fileName || 'modello.stl' },
-                { label: 'PRODUTTORE', value: currentProducer.name },
+                { label: 'FILE', value: fileName },
+                { label: 'PRODUTTORE', value: currentProducer?.name ?? '—' },
                 { label: 'MATERIALE', value: 'PLA bianco' },
                 { label: 'RISOLUZIONE', value: '0.2 mm' },
                 { label: 'INFILL', value: '20%' },
@@ -332,6 +398,9 @@ export default function NuovaStampa() {
                   <span style={{ fontSize: 13.5, fontWeight: 600, color: 'var(--ink)' }}>{row.value}</span>
                 </div>
               ))}
+              <p style={{ fontSize: 11.5, fontFamily: 'var(--mono)', color: 'var(--muted)', letterSpacing: '0.02em' }}>
+                Materiale e parametri sono consigliati da TESEO per questo modello — il produttore può proporti alternative in chat.
+              </p>
             </div>
 
             <div style={{ borderTop: '1px solid var(--line)', paddingTop: 16, display: 'flex', alignItems: 'baseline', gap: 12 }}>
@@ -348,7 +417,7 @@ export default function NuovaStampa() {
                 CONSEGNA STIMATA
               </span>
               <span style={{ fontSize: 13.5, fontFamily: 'var(--mono)', color: 'var(--ink)', fontWeight: 600 }}>
-                2-3 giorni lavorativi
+                {currentProducer?.avgTime ?? '2-3 giorni'}
               </span>
             </div>
           </GlassCard>
@@ -398,7 +467,14 @@ export default function NuovaStampa() {
             >
               ← Indietro
             </button>
-            <PrimaryButton onClick={() => navigate('/app/progetti')}>
+            <PrimaryButton
+              onClick={() => {
+                toast('Ordine confermato — in attesa del produttore')
+                navigate('/app/progetti', {
+                  state: { newOrder: { name: fileName, fablab: currentProducer?.name ?? '', notes } },
+                })
+              }}
+            >
               Conferma ordine
             </PrimaryButton>
           </div>
