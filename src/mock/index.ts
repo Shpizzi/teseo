@@ -155,15 +155,6 @@ export type Order = {
   progress?: number
 }
 
-export type Printer = {
-  id: string
-  name: string
-  status: 'active' | 'idle' | 'error'
-  material?: string
-  orderId?: string
-  progress?: number
-}
-
 export type FablabKpi = {
   value: string
   sublabel: string
@@ -184,13 +175,6 @@ export const fablabOrders: Order[] = [
 
 // Lookup ordNum → ordine (la coda referenzia gli ordini via ordNum)
 export const orderByOrdNum = (ordNum: string) => fablabOrders.find(o => o.ordNum === ordNum)
-
-export const fablabPrinters: Printer[] = [
-  { id: 'pr1', name: 'Bambu X1 · 01', status: 'active', material: 'Red ABS', orderId: '52943876', progress: 84 },
-  { id: 'pr2', name: 'Prusa MK4 · 02', status: 'active', material: 'PETG', orderId: '52943879', progress: 31 },
-  { id: 'pr3', name: 'Formlabs · 03', status: 'idle' },
-  { id: 'pr4', name: 'Ender CNC · 04', status: 'error' },
-]
 
 export const fablabKpis: FablabKpi[] = [
   { value: pad2(fablabOrders.filter(o => o.status === 'printing').length), sublabel: 'attive', label: 'Stampe in corso' },

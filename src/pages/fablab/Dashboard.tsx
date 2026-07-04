@@ -1,12 +1,13 @@
 import { useState } from 'react'
-import { Bell, Download, Clock, Activity, CheckCircle2, TrendingUp } from 'lucide-react'
+import { Download, Clock, Activity, CheckCircle2, TrendingUp } from 'lucide-react'
 import { useNavigate } from 'react-router-dom'
-import SearchBar from '../../components/SearchBar'
-import IconButton from '../../components/IconButton'
 import PrimaryButton from '../../components/PrimaryButton'
 import KpiCard from '../../components/KpiCard'
 import GlassCard from '../../components/GlassCard'
-import { fablabOrders, fablabPrinters, fablabKpis, type OrderStatus } from '../../mock'
+import { fablabKpis } from '../../mock'
+import { printersFull } from '../../mock/fablab-pages'
+import { useLiveOrders, setOrderStatus, type LiveStatus, type LiveOrder } from '../../mock/orderStore'
+import { toast } from '../../components/Toast'
 
 // ── DeadlineChip ──────────────────────────────────────────────
 type DeadlineType = 'urgent' | 'today' | 'week'
@@ -29,7 +30,16 @@ function DeadlineChip({ type, label }: { type: DeadlineType; label: string }) {
 }
 
 // ── OrderRow ──────────────────────────────────────────────────
-function OrderRow({ order, onNavigate }: { order: typeof fablabOrders[0]; onNavigate: (id: string) => void }) {
+type OrderRowProps = {
+  order: LiveOrder
+  onNavigate: (id: string) => void
+  rejecting: boolean
+  onRejectStart: () => void
+  onRejectCancel: () => void
+}
+
+function OrderRow({ order, onNavigate, rejecting, onRejectStart, onRejectCancel }: OrderRowProps) {
+  const navigate = useNavigate()
   return (
     <div
       onClick={() => onNavigate(order.id)}
@@ -103,10 +113,10 @@ function OrderRow({ order, onNavigate }: { order: typeof fablabOrders[0]; onNavi
 
       {/* Right block */}
       <div style={{ flex: '0 0 auto', display: 'flex', alignItems: 'center', gap: 8 }}>
-        {order.status === 'new' && (
+        {order.status === 'new' && !rejecting && (
           <>
             <button
-              onClick={e => e.stopPropagation()}
+              onClick={e => { e.stopPropagation(); onRejectStart() }}
               style={{
                 background: 'transparent',
                 border: '1px solid var(--line-2)',
@@ -122,7 +132,11 @@ function OrderRow({ order, onNavigate }: { order: typeof fablabOrders[0]; onNavi
               Rifiuta
             </button>
             <button
-              onClick={e => { e.stopPropagation(); onNavigate(order.id) }}
+              onClick={e => {
+                e.stopPropagation()
+                setOrderStatus(order.id, 'accepted')
+                toast('Ordine accettato — pronto per lo slicing')
+              }}
               style={{
                 background: 'var(--forest)',
                 border: 'none',
@@ -138,6 +152,47 @@ function OrderRow({ order, onNavigate }: { order: typeof fablabOrders[0]; onNavi
               Accetta
             </button>
           </>
+        )}
+        {order.status === 'new' && rejecting && (
+          <span onClick={e => e.stopPropagation()} style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+            <span style={{ fontSize: 11.5, color: 'var(--muted)', fontWeight: 600 }}>Rifiutare?</span>
+            <button
+              onClick={() => {
+                setOrderStatus(order.id, 'rejected')
+                onRejectCancel()
+                toast('Ordine rifiutato — il cliente riceve una notifica')
+              }}
+              style={{
+                background: 'transparent', border: '1px dashed #e40014', color: '#e40014',
+                fontFamily: 'inherit', fontWeight: 600, fontSize: 12,
+                padding: '5px 11px', borderRadius: 100, cursor: 'pointer',
+              }}
+            >
+              Sì
+            </button>
+            <button
+              onClick={onRejectCancel}
+              style={{
+                background: 'transparent', border: '1px solid var(--line)', color: 'var(--muted)',
+                fontFamily: 'inherit', fontWeight: 600, fontSize: 12,
+                padding: '5px 11px', borderRadius: 100, cursor: 'pointer',
+              }}
+            >
+              No
+            </button>
+          </span>
+        )}
+        {order.status === 'accepted' && (
+          <button
+            onClick={e => { e.stopPropagation(); navigate(`/fablab/slicing?ordine=${order.id}`) }}
+            style={{
+              background: 'transparent', border: '1px solid var(--cyan)', color: 'var(--cyan)',
+              fontFamily: 'inherit', fontWeight: 600, fontSize: 12,
+              padding: '6px 13px', borderRadius: 100, cursor: 'pointer',
+            }}
+          >
+            Avvia slicing →
+          </button>
         )}
         {order.status === 'printing' && (
           <div
@@ -163,6 +218,7 @@ function OrderRow({ order, onNavigate }: { order: typeof fablabOrders[0]; onNavi
           <>
             <span className="status-pill sp-ready">Pronto</span>
             <button
+              onClick={e => { e.stopPropagation(); toast(`${order.customer} avvisato: ordine pronto al ritiro`) }}
               style={{
                 background: 'transparent',
                 border: 'none',
@@ -175,7 +231,7 @@ function OrderRow({ order, onNavigate }: { order: typeof fablabOrders[0]; onNavi
                 cursor: 'pointer',
               }}
             >
-              Avvisa
+              Avvisa cliente
             </button>
           </>
         )}
@@ -183,6 +239,7 @@ function OrderRow({ order, onNavigate }: { order: typeof fablabOrders[0]; onNavi
           <>
             <span className="status-pill sp-err">Errore</span>
             <button
+              onClick={e => { e.stopPropagation(); onNavigate(order.id) }}
               style={{
                 background: 'transparent',
                 border: 'none',
@@ -195,7 +252,7 @@ function OrderRow({ order, onNavigate }: { order: typeof fablabOrders[0]; onNavi
                 cursor: 'pointer',
               }}
             >
-              Risolvi
+              Risolvi →
             </button>
           </>
         )}
@@ -207,10 +264,10 @@ function OrderRow({ order, onNavigate }: { order: typeof fablabOrders[0]; onNavi
 // ── Tab type ──────────────────────────────────────────────────
 type TabKey = 'new' | 'printing' | 'ready' | 'all'
 
-const tabs: { key: TabKey; label: string; status?: OrderStatus }[] = [
-  { key: 'new',      label: 'Nuovi',     status: 'new' },
-  { key: 'printing', label: 'In stampa', status: 'printing' },
-  { key: 'ready',    label: 'Pronti',    status: 'ready' },
+const tabs: { key: TabKey; label: string; statuses?: LiveStatus[] }[] = [
+  { key: 'new',      label: 'Nuovi',          statuses: ['new'] },
+  { key: 'printing', label: 'In lavorazione', statuses: ['accepted', 'printing'] },
+  { key: 'ready',    label: 'Pronti',         statuses: ['ready'] },
   { key: 'all',      label: 'Tutti' },
 ]
 
@@ -224,14 +281,21 @@ const kpiIcons = [
 // ── Dashboard ─────────────────────────────────────────────────
 export default function FablabDashboard() {
   const [activeTab, setActiveTab] = useState<TabKey>('new')
+  const [rejectingId, setRejectingId] = useState<string>()
   const navigate = useNavigate()
+  const orders = useLiveOrders()
 
-  const filteredOrders = activeTab === 'all'
-    ? fablabOrders
-    : fablabOrders.filter(o => o.status === activeTab)
+  const filteredOrders = orders.filter(o =>
+    activeTab === 'all' || tabs.find(t => t.key === activeTab)?.statuses?.includes(o.status))
 
-  const tabCount = (status?: OrderStatus) =>
-    status ? fablabOrders.filter(o => o.status === status).length : fablabOrders.length
+  const tabCount = (statuses?: LiveStatus[]) =>
+    statuses ? orders.filter(o => statuses.includes(o.status)).length : orders.length
+
+  const newCount = tabCount(['new'])
+  const errorCount = tabCount(['error'])
+  const activePrinters = printersFull.filter(p => p.status === 'active').length
+  const utilization = Math.round((activePrinters / printersFull.length) * 100)
+  const countByStatus = (s: string) => printersFull.filter(p => p.status === s).length
 
   return (
     <>
@@ -258,18 +322,30 @@ export default function FablabDashboard() {
               letterSpacing: '0.02em',
             }}
           >
-            2 NUOVI ORDINI DA VALUTARE · 1 ERRORE DA RISOLVERE
+            {[
+              newCount > 0 ? `${newCount} NUOV${newCount === 1 ? 'O ORDINE' : 'I ORDINI'} DA VALUTARE` : null,
+              errorCount > 0 ? `${errorCount} ERROR${errorCount === 1 ? 'E' : 'I'} DA RISOLVERE` : null,
+            ].filter(Boolean).join(' · ') || 'NESSUNA AZIONE URGENTE'}
           </p>
         </div>
         <div style={{ flex: 1 }} />
-        <SearchBar placeholder="Cerca un ordine o un cliente…" />
-        <IconButton title="Notifiche" badge={3}>
-          <Bell size={19} />
-        </IconButton>
-        <PrimaryButton>
-          <Download size={18} />
+        <button
+          onClick={() => toast('Report di produzione esportato (PDF)')}
+          style={{
+            display: 'flex', alignItems: 'center', gap: 8,
+            background: 'transparent', color: 'var(--muted)', border: '1px solid var(--line)',
+            fontFamily: 'inherit', fontWeight: 600, fontSize: 13, padding: '0 16px',
+            height: 40, borderRadius: 100, cursor: 'pointer', transition: '0.2s',
+          }}
+        >
+          <Download size={15} />
           Esporta report
-        </PrimaryButton>
+        </button>
+        {newCount > 0 && (
+          <PrimaryButton onClick={() => navigate('/fablab/ordini')}>
+            Valuta nuovi ordini ({newCount})
+          </PrimaryButton>
+        )}
       </div>
 
       {/* ── KPI strip ── */}
@@ -352,9 +428,12 @@ export default function FablabDashboard() {
             >
               Ordini
             </h3>
-            <span
+            <button
               onClick={() => navigate('/fablab/coda')}
               style={{
+                background: 'none',
+                border: 'none',
+                padding: 0,
                 color: 'var(--cyan)',
                 fontSize: 11,
                 fontWeight: 600,
@@ -364,7 +443,7 @@ export default function FablabDashboard() {
               }}
             >
               VISTA CODA ›
-            </span>
+            </button>
           </div>
 
           {/* Tabs */}
@@ -377,7 +456,7 @@ export default function FablabDashboard() {
             }}
           >
             {tabs.map(tab => {
-              const count = tabCount(tab.status)
+              const count = tabCount(tab.statuses)
               const isActive = activeTab === tab.key
               return (
                 <button
@@ -430,8 +509,20 @@ export default function FablabDashboard() {
               flex: 1,
             }}
           >
+            {filteredOrders.length === 0 && (
+              <div style={{ padding: 28, textAlign: 'center', color: 'var(--muted)', fontSize: 13 }}>
+                {activeTab === 'new' ? 'Nessun nuovo ordine da valutare — tutto smaltito.' : 'Nessun ordine in questo stato.'}
+              </div>
+            )}
             {filteredOrders.map(order => (
-              <OrderRow key={order.id} order={order} onNavigate={id => navigate('/fablab/ordini/' + id)} />
+              <OrderRow
+                key={order.id}
+                order={order}
+                onNavigate={id => navigate('/fablab/ordini/' + id)}
+                rejecting={rejectingId === order.id}
+                onRejectStart={() => setRejectingId(order.id)}
+                onRejectCancel={() => setRejectingId(undefined)}
+              />
             ))}
           </div>
         </GlassCard>
@@ -467,9 +558,12 @@ export default function FablabDashboard() {
             >
               Stampanti
             </h3>
-            <span
+            <button
               onClick={() => navigate('/fablab/stampanti')}
               style={{
+                background: 'none',
+                border: 'none',
+                padding: 0,
                 color: 'var(--cyan)',
                 fontSize: 11,
                 fontWeight: 600,
@@ -479,7 +573,7 @@ export default function FablabDashboard() {
               }}
             >
               GESTISCI ›
-            </span>
+            </button>
           </div>
 
           {/* Utilization bar */}
@@ -512,7 +606,7 @@ export default function FablabDashboard() {
                   color: 'var(--ink)',
                 }}
               >
-                8/12
+                {activePrinters}/{printersFull.length}
               </div>
             </div>
             <div>
@@ -523,7 +617,7 @@ export default function FablabDashboard() {
                   color: 'var(--ink)',
                 }}
               >
-                66% di utilizzo
+                {utilization}% di utilizzo
               </div>
               <div
                 style={{
@@ -533,7 +627,7 @@ export default function FablabDashboard() {
                   marginTop: 3,
                 }}
               >
-                8 attive · 1 idle · 1 errore · 2 manut.
+                {countByStatus('active')} attive · {countByStatus('idle')} libere · {countByStatus('error')} in errore · {countByStatus('maintenance')} in manutenzione
               </div>
             </div>
           </div>
@@ -548,7 +642,7 @@ export default function FablabDashboard() {
               flex: 1,
             }}
           >
-            {fablabPrinters.map(printer => (
+            {printersFull.map(printer => (
               <div
                 key={printer.id}
                 style={{
@@ -566,9 +660,9 @@ export default function FablabDashboard() {
                   className={
                     printer.status === 'active'
                       ? 'pdot-active'
-                      : printer.status === 'idle'
-                      ? 'pdot-idle'
-                      : 'pdot-err'
+                      : printer.status === 'error'
+                      ? 'pdot-err'
+                      : 'pdot-idle'
                   }
                   style={{
                     width: 10,
@@ -595,8 +689,10 @@ export default function FablabDashboard() {
                     {printer.status === 'active'
                       ? `${printer.orderId} · ${printer.material}`
                       : printer.status === 'idle'
-                      ? 'Inattiva · pronta'
-                      : 'Bobina esaurita'}
+                      ? 'Libera · pronta'
+                      : printer.status === 'maintenance'
+                      ? 'In manutenzione'
+                      : printer.errorMessage ?? 'In errore'}
                   </div>
                 </div>
 
@@ -606,19 +702,16 @@ export default function FablabDashboard() {
                     fontFamily: 'var(--mono)',
                     fontSize: 12,
                     fontWeight: 700,
-                    color:
-                      printer.status === 'active'
-                        ? 'var(--cyan)'
-                        : printer.status === 'idle'
-                        ? 'var(--muted)'
-                        : 'var(--cyan)',
+                    color: printer.status === 'active' ? 'var(--cyan)' : 'var(--muted)',
                   }}
                 >
                   {printer.status === 'active'
                     ? `${printer.progress}%`
                     : printer.status === 'idle'
-                    ? 'IDLE'
-                    : 'ERR'}
+                    ? 'LIBERA'
+                    : printer.status === 'maintenance'
+                    ? 'MANUT.'
+                    : 'ERRORE'}
                 </span>
               </div>
             ))}
