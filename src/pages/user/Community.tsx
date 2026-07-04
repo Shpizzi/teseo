@@ -9,11 +9,12 @@ const categories = ['Tutti', 'Casa', 'FabLab', 'Accessori', 'Meccanica', 'Gaming
 
 export default function Community() {
   const [activeCategory, setActiveCategory] = useState('Tutti')
+  const [query, setQuery] = useState('')
   const navigate = useNavigate()
 
-  const filtered = activeCategory === 'Tutti'
-    ? communityModels
-    : communityModels.filter(m => m.category === activeCategory)
+  const filtered = communityModels
+    .filter(m => activeCategory === 'Tutti' || m.category === activeCategory)
+    .filter(m => !query || [m.name, m.author, ...m.tags].join(' ').toLowerCase().includes(query.toLowerCase()))
 
   const chipStyle = (active: boolean) => ({
     padding: '6px 14px',
@@ -43,7 +44,7 @@ export default function Community() {
           </p>
         </div>
         <div style={{ flex: 1 }} />
-        <SearchBar placeholder="Cerca modelli community…" />
+        <SearchBar placeholder="Cerca modelli community…" value={query} onChange={setQuery} />
       </div>
 
       {/* Filter chips */}
@@ -67,6 +68,17 @@ export default function Community() {
           minHeight: 0,
         }}
       >
+        {filtered.length === 0 && (
+          <div style={{ gridColumn: '1 / -1', padding: 32, textAlign: 'center', color: 'var(--muted)', fontSize: 13 }}>
+            Nessun modello {query ? <>per «{query}»</> : <>nella categoria {activeCategory}</>} — per ora.{' '}
+            <button
+              onClick={() => { setActiveCategory('Tutti'); setQuery('') }}
+              style={{ background: 'none', border: 'none', color: 'var(--cyan)', cursor: 'pointer', fontFamily: 'inherit', fontSize: 13, fontWeight: 600, padding: 0 }}
+            >
+              Mostra tutti i modelli
+            </button>
+          </div>
+        )}
         {filtered.map(model => (
           <div
             key={model.id}
@@ -194,7 +206,7 @@ export default function Community() {
 
             {/* Print button */}
             <button
-              onClick={e => { e.stopPropagation(); navigate('/app/new') }}
+              onClick={e => { e.stopPropagation(); navigate('/app/new', { state: { modelName: model.name } }) }}
               style={{
                 padding: '8px 18px',
                 borderRadius: 100,
@@ -219,7 +231,7 @@ export default function Community() {
                 btn.style.color = 'var(--cyan)'
               }}
             >
-              Stampa questo
+              Stampa questo modello
             </button>
           </GlassCard>
           </div>

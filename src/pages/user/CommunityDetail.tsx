@@ -1,20 +1,33 @@
+import { useState } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
-import { Download, Star, Bookmark } from 'lucide-react'
+import { Download, Star, Bookmark, Check } from 'lucide-react'
 import GlassCard from '../../components/GlassCard'
 import PrimaryButton from '../../components/PrimaryButton'
 import PrintViewer3D from '../../components/PrintViewer3D'
 import { communityModels } from '../../mock/user-pages'
+import { toast } from '../../components/Toast'
 
 export default function CommunityDetail() {
   const { id } = useParams<{ id: string }>()
   const navigate = useNavigate()
+  const [saved, setSaved] = useState(false)
 
   const model = communityModels.find(m => m.id === id)
 
   if (!model) {
     return (
-      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', flex: 1, fontSize: 16, color: 'var(--muted)', fontFamily: 'var(--mono)' }}>
-        Modello non trovato
+      <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', flex: 1, gap: 16 }}>
+        <span style={{ fontSize: 16, color: 'var(--muted)', fontFamily: 'var(--mono)' }}>Modello non trovato</span>
+        <button
+          onClick={() => navigate('/app/community')}
+          style={{
+            background: 'transparent', color: 'var(--cyan)', border: '1px solid var(--line-2)',
+            fontFamily: 'inherit', fontWeight: 600, fontSize: 13.5, padding: '10px 22px',
+            borderRadius: 100, cursor: 'pointer',
+          }}
+        >
+          ← Torna alla community
+        </button>
       </div>
     )
   }
@@ -152,10 +165,14 @@ export default function CommunityDetail() {
           </div>
 
           <div style={{ marginTop: 'auto', display: 'flex', flexDirection: 'column', gap: 8 }}>
-            <PrimaryButton onClick={() => navigate('/app/new')}>
+            <PrimaryButton onClick={() => navigate('/app/new', { state: { modelName: model.name } })}>
               Stampa questo modello
             </PrimaryButton>
             <button
+              onClick={() => {
+                setSaved(s => !s)
+                toast(saved ? 'Modello rimosso dai salvati' : 'Modello salvato — lo trovi in Salvati')
+              }}
               style={{
                 display: 'flex',
                 alignItems: 'center',
@@ -181,8 +198,8 @@ export default function CommunityDetail() {
                 btn.style.background = 'transparent'
               }}
             >
-              <Bookmark size={15} />
-              Salva modello
+              {saved ? <Check size={15} /> : <Bookmark size={15} />}
+              {saved ? 'Salvato' : 'Salva modello'}
             </button>
           </div>
         </GlassCard>

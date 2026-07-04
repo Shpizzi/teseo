@@ -1,12 +1,17 @@
 import { useState } from 'react'
-import { Plus } from 'lucide-react'
+import { Printer } from 'lucide-react'
+import { useNavigate } from 'react-router-dom'
 import SearchBar from '../../components/SearchBar'
-import PrimaryButton from '../../components/PrimaryButton'
 import GlassCard from '../../components/GlassCard'
 import { savedModels } from '../../mock/user-pages'
 
 export default function Salvati() {
-  const [_query, setQuery] = useState('')
+  const [query, setQuery] = useState('')
+  const navigate = useNavigate()
+
+  const visible = query
+    ? savedModels.filter(m => [m.name, m.category, ...m.tags].join(' ').toLowerCase().includes(query.toLowerCase()))
+    : savedModels
 
   return (
     <>
@@ -17,15 +22,11 @@ export default function Salvati() {
             Modelli salvati
           </h1>
           <p style={{ color: 'var(--muted)', fontSize: 12, marginTop: 3, fontFamily: 'var(--mono)', letterSpacing: '0.02em' }}>
-            128 MODELLI
+            {savedModels.length} MODELLI
           </p>
         </div>
         <div style={{ flex: 1 }} />
-        <SearchBar placeholder="Cerca modelli…" />
-        <PrimaryButton onClick={() => setQuery('')}>
-          <Plus size={18} />
-          Aggiungi
-        </PrimaryButton>
+        <SearchBar placeholder="Cerca modelli…" value={query} onChange={setQuery} />
       </div>
 
       {/* Grid */}
@@ -40,7 +41,18 @@ export default function Salvati() {
           minHeight: 0,
         }}
       >
-        {savedModels.map(model => (
+        {visible.length === 0 && (
+          <div style={{ gridColumn: '1 / -1', padding: 32, textAlign: 'center', color: 'var(--muted)', fontSize: 13 }}>
+            Nessun modello corrisponde a «{query}».{' '}
+            <button
+              onClick={() => setQuery('')}
+              style={{ background: 'none', border: 'none', color: 'var(--cyan)', cursor: 'pointer', fontFamily: 'inherit', fontSize: 13, fontWeight: 600, padding: 0 }}
+            >
+              Azzera la ricerca
+            </button>
+          </div>
+        )}
+        {visible.map(model => (
           <GlassCard
             key={model.id}
             style={{
@@ -48,7 +60,6 @@ export default function Salvati() {
               display: 'flex',
               flexDirection: 'column',
               gap: 10,
-              cursor: 'pointer',
               transition: '0.2s',
             }}
           >
@@ -123,9 +134,25 @@ export default function Salvati() {
               ))}
             </div>
 
-            {/* Date */}
-            <div style={{ fontFamily: 'var(--mono)', color: 'var(--muted)', fontSize: 11 }}>
-              {model.savedDate}
+            {/* Date + CTA */}
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginTop: 'auto' }}>
+              <span style={{ fontFamily: 'var(--mono)', color: 'var(--muted)', fontSize: 11 }}>
+                {model.savedDate}
+              </span>
+              <button
+                onClick={() => navigate('/app/new', { state: { modelName: model.name } })}
+                style={{
+                  display: 'flex', alignItems: 'center', gap: 6,
+                  background: 'transparent', color: 'var(--cyan)', border: '1px solid var(--line-2)',
+                  fontFamily: 'inherit', fontWeight: 600, fontSize: 12, padding: '6px 13px',
+                  borderRadius: 100, cursor: 'pointer', transition: '0.18s',
+                }}
+                onMouseEnter={e => { (e.currentTarget as HTMLButtonElement).style.background = 'var(--glass-2)' }}
+                onMouseLeave={e => { (e.currentTarget as HTMLButtonElement).style.background = 'transparent' }}
+              >
+                <Printer size={13} />
+                Stampa questo modello
+              </button>
             </div>
           </GlassCard>
         ))}
