@@ -1,17 +1,20 @@
 import { useState, useRef, useMemo, useCallback } from 'react'
+import { useNavigate, useSearchParams } from 'react-router-dom'
 import {
   ChevronDown,
   Grid3X3,
   Box,
   AlignLeft,
-  X,
-  Plus,
+  Wrench,
+  PenLine,
   Play,
   Hand,
   FlaskConical,
   Download,
 } from 'lucide-react'
 import PrintViewer3D from '../../components/PrintViewer3D'
+import { useLiveOrders, setOrderStatus } from '../../mock/orderStore'
+import { toast } from '../../components/Toast'
 
 // ── Tick data generated once ──────────────────────────────────
 type Tick = { h: number; white: boolean }
@@ -21,8 +24,13 @@ export default function Slicing() {
   const [progress, setProgress] = useState(62)
   const [infill, setInfill] = useState(20)
   const [activePreset, setActivePreset] = useState('balanced')
+  // Un solo stato per i due toggle AI (pannello destro + dock): stesso concetto, stessa verità
   const [aiMode, setAiMode] = useState(true)
-  const [dockAi, setDockAi] = useState(true)
+  const navigate = useNavigate()
+
+  // Ordine in ingresso da OrdineDetail/Ordini (?ordine=id): il contesto segue Roberto
+  const orderId = useSearchParams()[0].get('ordine')
+  const order = useLiveOrders().find(o => o.id === orderId)
 
   const sliderRef = useRef<HTMLDivElement>(null)
   const isDragging = useRef(false)
@@ -60,8 +68,8 @@ export default function Slicing() {
   const presets = [
     { key: 'balanced', label: 'Bilanciato', Icon: Box },
     { key: 'visual',   label: 'Visuale',    Icon: AlignLeft },
-    { key: 'engineering', label: 'Tecnico', Icon: X },
-    { key: 'draft',    label: 'Bozza',      Icon: Plus },
+    { key: 'engineering', label: 'Tecnico', Icon: Wrench },
+    { key: 'draft',    label: 'Bozza',      Icon: PenLine },
   ]
 
   const floatPanelStyle: React.CSSProperties = {
@@ -130,7 +138,7 @@ export default function Slicing() {
           pointerEvents: 'none',
         }}
       >
-        FIG. 01 — DEMOGOR · SCALE 1:1
+        FIG. 01 — {(order?.name ?? 'DEMOGOR').toUpperCase()} · SCALE 1:1
       </div>
 
       {/* ── Float panel LEFT ── */}
@@ -144,27 +152,42 @@ export default function Slicing() {
             marginBottom: 12,
           }}
         >
-          {[
-            ['Modelli importati', '07', false],
-            ['Ottimizzati per slicing', '05', false],
-            ['Regolazioni in sospeso', '02', true],
-          ].map(([label, val, cyan]) => (
-            <div
-              key={label as string}
+          {order ? (
+            ([
+              ['Ordine', order.ordNum, true],
+              ['Cliente', order.customer, false],
+              ['Materiale', order.material, false],
+              ['Scadenza', order.deadlineLabel, true],
+            ] as [string, string, boolean][]).map(([label, val, cyan]) => (
+              <div
+                key={label}
+                style={{
+                  display: 'flex',
+                  justifyContent: 'space-between',
+                  fontFamily: 'var(--mono)',
+                  fontSize: 10.5,
+                  color: 'var(--muted)',
+                }}
+              >
+                <span>{label}</span>
+                <span style={{ color: cyan ? 'var(--cyan)' : 'var(--ink)', fontWeight: 600 }}>
+                  {val}
+                </span>
+              </div>
+            ))
+          ) : (
+            <button
+              onClick={() => navigate('/fablab/ordini')}
               style={{
-                display: 'flex',
-                justifyContent: 'space-between',
-                fontFamily: 'var(--mono)',
-                fontSize: 10.5,
-                color: 'var(--muted)',
+                background: 'none', border: 'none', padding: 0, textAlign: 'left',
+                fontFamily: 'var(--mono)', fontSize: 10.5, color: 'var(--muted)',
+                cursor: 'pointer', lineHeight: 1.5,
               }}
             >
-              <span>{label as string}</span>
-              <span style={{ color: cyan ? 'var(--cyan)' : 'var(--ink)', fontWeight: 600 }}>
-                {val as string}
-              </span>
-            </div>
-          ))}
+              Nessun ordine selezionato —{' '}
+              <span style={{ color: 'var(--cyan)' }}>scegli un ordine accettato ›</span>
+            </button>
+          )}
         </div>
 
         {/* Material pill */}
@@ -509,7 +532,7 @@ export default function Slicing() {
             letterSpacing: '0.05em',
           }}
         >
-          AVANZAMENTO STAMPA
+          ANTEPRIMA LAYER
         </span>
 
         {/* Track */}
@@ -565,8 +588,14 @@ export default function Slicing() {
           gap: 10,
         }}
       >
-        {/* Play */}
+        {/* Play — chiude lo slicing: l'ordine va in coda di stampa */}
         <button
+          title="Aggiungi alla coda di stampa"
+          onClick={() => {
+            if (order) setOrderStatus(order.id, 'printing')
+            toast(`${order?.name ?? 'Modello'} in coda su Bambu X1 · 01`)
+            navigate('/fablab/coda')
+          }}
           style={{
             width: 50,
             height: 50,
@@ -637,13 +666,13 @@ export default function Slicing() {
           {[{ val: true, label: 'AI slicing' }, { val: false, label: 'Manuale' }].map(({ val, label }) => (
             <button
               key={label}
-              onClick={() => setDockAi(val)}
+              onClick={() => setAiMode(val)}
               style={{
                 padding: '6px 14px',
                 borderRadius: 100,
                 border: 'none',
-                background: dockAi === val ? 'var(--cyan)' : 'transparent',
-                color: dockAi === val ? '#f4faed' : 'var(--muted)',
+                background: aiMode === val ? 'var(--cyan)' : 'transparent',
+                color: aiMode === val ? '#f4faed' : 'var(--muted)',
                 fontFamily: 'inherit',
                 fontWeight: 700,
                 fontSize: 11.5,
