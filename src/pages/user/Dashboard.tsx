@@ -14,8 +14,12 @@ const kpiIcons = [
   <Bookmark size={17} />,
 ]
 
+const kpiTargets = ['/app/progetti', '/app/progetti', '/app/progetti', '/app/salvati']
+
 export default function Dashboard() {
   const navigate = useNavigate()
+  const inStampa = userProjects.filter(p => p.status === 'printing').length
+  const readyProject = userProjects.find(p => p.status === 'ready')
   return (
     <>
       {/* ── Topbar ── */}
@@ -49,7 +53,7 @@ export default function Dashboard() {
               letterSpacing: '0.02em',
             }}
           >
-            2 STAMPE IN CORSO · 1 PRONTO AL RITIRO
+            {inStampa} {inStampa === 1 ? 'STAMPA' : 'STAMPE'} IN CORSO{readyProject ? ' · 1 PRONTO AL RITIRO' : ''}
           </p>
         </div>
         <div style={{ flex: 1 }} />
@@ -77,6 +81,7 @@ export default function Dashboard() {
             trend={kpi.trend}
             trendUp={kpi.trendUp}
             icon={kpiIcons[i]}
+            onClick={() => navigate(kpiTargets[i])}
           />
         ))}
       </div>
@@ -137,7 +142,7 @@ export default function Dashboard() {
                 letterSpacing: '0.04em',
               }}
             >
-              STORICO ›
+              TUTTI I PROGETTI ›
             </span>
           </div>
 
@@ -250,7 +255,8 @@ export default function Dashboard() {
             minHeight: 0,
           }}
         >
-          {/* Alert card: pickup ready */}
+          {/* Alert card: pickup ready — esiste solo se c'è davvero un progetto pronto */}
+          {readyProject && (
           <div
             style={{
               background: 'rgba(63,115,8,.10)',
@@ -308,19 +314,21 @@ export default function Dashboard() {
                 position: 'relative',
               }}
             >
-              <b style={{ color: 'var(--ink)', fontWeight: 600 }}>Ricambio cardine finestra</b>{' '}
+              <b style={{ color: 'var(--ink)', fontWeight: 600 }}>{readyProject.name}</b>{' '}
               completato da{' '}
-              <b style={{ color: 'var(--ink)', fontWeight: 600 }}>MakerSpace Navigli</b>.
+              <b style={{ color: 'var(--ink)', fontWeight: 600 }}>{readyProject.fablab}</b>.
               Ritiro disponibile fino a venerdì 18:00.
             </p>
 
             <button
               className="btn-spade"
               style={{ fontSize: 13, height: 38, padding: '0 18px' }}
+              onClick={() => navigate('/app/progetti/' + readyProject.id)}
             >
-              Prenota ritiro
+              Vedi dettagli ritiro
             </button>
           </div>
+          )}
 
           {/* Nearby producers card */}
           <GlassCard

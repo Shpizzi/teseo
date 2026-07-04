@@ -6,11 +6,13 @@ type KpiCardProps = {
   trend?: string
   trendUp?: boolean
   icon: ReactNode
+  onClick?: () => void
 }
 
-export default function KpiCard({ value, label, trend, trendUp, icon }: KpiCardProps) {
+export default function KpiCard({ value, label, trend, trendUp, icon, onClick }: KpiCardProps) {
   return (
     <div
+      onClick={onClick}
       style={{
         background: 'var(--glass)',
         border: '1px solid var(--line)',
@@ -19,7 +21,11 @@ export default function KpiCard({ value, label, trend, trendUp, icon }: KpiCardP
         backdropFilter: 'blur(12px)',
         WebkitBackdropFilter: 'blur(12px)',
         position: 'relative',
+        cursor: onClick ? 'pointer' : 'default',
+        transition: 'border-color 0.18s, background 0.18s',
       }}
+      onMouseEnter={onClick ? e => { (e.currentTarget as HTMLDivElement).style.borderColor = 'var(--line-2)' } : undefined}
+      onMouseLeave={onClick ? e => { (e.currentTarget as HTMLDivElement).style.borderColor = 'var(--line)' } : undefined}
     >
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 14 }}>
         <span
