@@ -174,3 +174,15 @@ npm run preview
 - All glass panels need `position: relative` to sit above z-index:0 grid layers
 - The sidebar is `flex: 0 0 212px` — never grows/shrinks
 - Content area is `flex: 1; min-width: 0` to prevent overflow blowout
+
+---
+
+## 9. Scan + CV (feature `src/scan/`)
+
+Live in-browser object recognition wired into `/app/new` ("Scansiona con fotocamera" → `ScanView`).
+
+- **Approach — Wizard of Oz.** Recognition is real (CLIP, zero-shot). Mesh generation is NOT: a recognized label maps to a pre-scanned `.glb` from `src/scan/library.ts` (files go in `public/meshes/`). Currently the result state shows the existing procedural `PrintViewer3D`; swap to `.glb` when files exist (see the `ponytail:` note in `ScanView.tsx`).
+- **Stack.** `@xenova/transformers` v2.17, pipeline `zero-shot-image-classification`, model `Xenova/clip-vit-base-patch32`. No API key. `vite.config.ts` excludes it from dep pre-bundling; `useRecognizer.ts` sets `env.allowLocalModels = false`.
+- **Flow.** `capture → scanning → result | nomatch → match`. Threshold `0.2` (calibration knob in `ScanView.tsx`). Distractor labels in `library.ts` make "nessun match" reliable.
+- **Fallbacks.** Camera denied → upload/dropzone. CLIP load error → silent demo mode. **Demo toggle** in the header forces `moka pot` (use in class if net/camera misbehave).
+- **Pre-warm / offline.** The model (~150MB) downloads from the HF hub on first `ScanView` mount ("inizializzazione CV…") and is then served from the browser cache — works offline after that first load. To pre-warm before an exam: open `/app/new` → scan once on the target device/browser while online, confirm it works, then it stays cached. **Camera needs HTTPS** on mobile: run `npm run dev -- --host` + `cloudflared tunnel --url http://localhost:5173` and open the `https://…trycloudflare.com` URL on the phone.

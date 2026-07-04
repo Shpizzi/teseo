@@ -1,9 +1,10 @@
-import { useState } from 'react'
+import { useState, useRef } from 'react'
 import { Upload, Camera, Check, Star } from 'lucide-react'
 import { useNavigate } from 'react-router-dom'
 import GlassCard from '../../components/GlassCard'
 import PrimaryButton from '../../components/PrimaryButton'
 import SearchBar from '../../components/SearchBar'
+import ScanView from '../../scan/ScanView'
 import { producers } from '../../mock/user-pages'
 
 type Step = 1 | 2 | 3
@@ -12,7 +13,13 @@ export default function NuovaStampa() {
   const [step, setStep] = useState<Step>(1)
   const [selectedProducer, setSelectedProducer] = useState(producers[0].id)
   const [notes, setNotes] = useState('')
+  const [fileName, setFileName] = useState('')
+  const [scanMode, setScanMode] = useState(false)
+  const fileInputRef = useRef<HTMLInputElement>(null)
   const navigate = useNavigate()
+
+  const openPicker = () => fileInputRef.current?.click()
+  const pickFile = (f?: File) => { if (f) setFileName(f.name) }
 
   const currentProducer = producers.find(p => p.id === selectedProducer) ?? producers[0]
 
@@ -60,6 +67,8 @@ export default function NuovaStampa() {
     </div>
   )
 
+  if (scanMode) return <ScanView onClose={() => setScanMode(false)} />
+
   return (
     <>
       {/* Topbar */}
@@ -94,6 +103,9 @@ export default function NuovaStampa() {
               cursor: 'pointer',
               transition: '0.2s',
             }}
+            onClick={openPicker}
+            onDragOver={e => e.preventDefault()}
+            onDrop={e => { e.preventDefault(); pickFile(e.dataTransfer.files?.[0]) }}
             onMouseEnter={e => {
               const el = e.currentTarget as HTMLDivElement
               el.style.borderColor = 'var(--cyan)'
@@ -105,6 +117,15 @@ export default function NuovaStampa() {
               el.style.background = 'var(--glass)'
             }}
           >
+            {/* Hidden native file input */}
+            <input
+              ref={fileInputRef}
+              type="file"
+              accept=".stl,.obj,.3mf,.step,.stp"
+              style={{ display: 'none' }}
+              onChange={e => pickFile(e.target.files?.[0] ?? undefined)}
+            />
+
             {/* Blueprint grid */}
             <div className="blueprint-grid" />
 
@@ -114,14 +135,16 @@ export default function NuovaStampa() {
               <h3 style={{ fontSize: 18, fontWeight: 600, color: 'var(--ink)', marginBottom: 8 }}>
                 Trascina il tuo file 3D qui
               </h3>
-              <p style={{ fontSize: 12, fontFamily: 'var(--mono)', color: 'var(--muted)' }}>
-                STL · OBJ · 3MF · STEP — max 50 MB
+              <p style={{ fontSize: 12, fontFamily: 'var(--mono)', color: fileName ? 'var(--cyan)' : 'var(--muted)' }}>
+                {fileName || 'STL · OBJ · 3MF · STEP — max 50 MB'}
               </p>
             </div>
 
-            <PrimaryButton>
-              Sfoglia file
-            </PrimaryButton>
+            <span onClick={e => e.stopPropagation()} style={{ position: 'relative', zIndex: 1 }}>
+              <PrimaryButton onClick={openPicker}>
+                Sfoglia file
+              </PrimaryButton>
+            </span>
           </div>
 
           {/* OR divider */}
@@ -152,6 +175,7 @@ export default function NuovaStampa() {
             }}
             onMouseEnter={e => { (e.currentTarget as HTMLButtonElement).style.background = 'var(--glass-2)' }}
             onMouseLeave={e => { (e.currentTarget as HTMLButtonElement).style.background = 'transparent' }}
+            onClick={() => setScanMode(true)}
           >
             <Camera size={18} />
             Scansiona con fotocamera
@@ -295,7 +319,7 @@ export default function NuovaStampa() {
 
             <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
               {[
-                { label: 'FILE', value: 'modello.stl' },
+                { label: 'FILE', value: fileName || 'modello.stl' },
                 { label: 'PRODUTTORE', value: currentProducer.name },
                 { label: 'MATERIALE', value: 'PLA bianco' },
                 { label: 'RISOLUZIONE', value: '0.2 mm' },
