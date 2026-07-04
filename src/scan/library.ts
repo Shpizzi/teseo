@@ -9,6 +9,12 @@ export type LibraryEntry = {
 }
 
 export const LIBRARY: Record<string, LibraryEntry> = {
+  'remote control': {
+    glb: '/meshes/remote.glb',
+    part: 'Coperchio vano batterie',
+    material: 'ABS',
+    note: 'Telecomando Fire TV: coperchio batterie smarrito, ricostruito da scan.',
+  },
   'moka pot': {
     glb: '/meshes/moka.glb',
     part: 'Manico / pomello (rottura comune)',

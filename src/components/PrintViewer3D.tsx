@@ -1,5 +1,6 @@
-import { useRef, useMemo } from 'react'
+import { useRef, useMemo, Suspense } from 'react'
 import { Canvas, useFrame } from '@react-three/fiber'
+import { useGLTF } from '@react-three/drei'
 import * as THREE from 'three'
 
 // The displaced icosahedron mesh — byte-identical to prototype
@@ -24,16 +25,36 @@ function buildDisplacedGeo(): THREE.BufferGeometry {
   return geo
 }
 
-type PrintMeshProps = {
+// Center a scanned geometry, stand its longest axis vertical, and scale it to
+// span ~2.4 units in Y so it fills the same frame + clip range as the procedural
+// mesh. Textures/materials are dropped — the blueprint look is wireframe only.
+function normalizeGeo(src: THREE.BufferGeometry): THREE.BufferGeometry {
+  const g = src.clone()
+  g.computeBoundingBox()
+  let size = g.boundingBox!.getSize(new THREE.Vector3())
+  if (size.x >= size.y && size.x >= size.z) g.rotateZ(Math.PI / 2)       // longest = X → up
+  else if (size.z >= size.x && size.z >= size.y) g.rotateX(-Math.PI / 2) // longest = Z → up
+  g.computeBoundingBox()
+  const center = g.boundingBox!.getCenter(new THREE.Vector3())
+  g.translate(-center.x, -center.y, -center.z)
+  g.computeBoundingBox()
+  size = g.boundingBox!.getSize(new THREE.Vector3())
+  const scale = 2.4 / Math.max(size.x, size.y, size.z)
+  g.scale(scale, scale, scale)
+  g.computeVertexNormals()
+  return g
+}
+
+type BodyProps = {
+  geo: THREE.BufferGeometry
   onProgressChange: (p: number) => void
 }
 
-function PrintMesh({ onProgressChange }: PrintMeshProps) {
+// Shared render: printed/to-print clipping split + auto-rotation + build plate.
+function PrintBody({ geo, onProgressChange }: BodyProps) {
   const groupRef = useRef<THREE.Group>(null)
   const progressRef = useRef(0.62)
   const dirRef = useRef(1)
-
-  const geo = useMemo(() => buildDisplacedGeo(), [])
 
   const clipSolid = useMemo(() => new THREE.Plane(new THREE.Vector3(0, -1, 0), 0), [])
   const clipWire  = useMemo(() => new THREE.Plane(new THREE.Vector3(0,  1, 0), 0), [])
@@ -74,11 +95,35 @@ function PrintMesh({ onProgressChange }: PrintMeshProps) {
   )
 }
 
-type PrintViewer3DProps = {
-  onProgressChange?: (p: number) => void
+function ProceduralMesh({ onProgressChange }: { onProgressChange: (p: number) => void }) {
+  const geo = useMemo(() => buildDisplacedGeo(), [])
+  return <PrintBody geo={geo} onProgressChange={onProgressChange} />
 }
 
-export default function PrintViewer3D({ onProgressChange }: PrintViewer3DProps) {
+function LoadedMesh({ url, onProgressChange }: { url: string; onProgressChange: (p: number) => void }) {
+  const { scene } = useGLTF(url)
+  const geo = useMemo(() => {
+    scene.updateMatrixWorld(true)
+    let picked: THREE.BufferGeometry | undefined
+    scene.traverse(o => {
+      const m = o as THREE.Mesh
+      if (m.isMesh && m.geometry && !picked) {
+        picked = m.geometry.clone()
+        picked.applyMatrix4(m.matrixWorld)
+      }
+    })
+    return normalizeGeo(picked ?? new THREE.IcosahedronGeometry(1, 2))
+  }, [scene])
+  return <PrintBody geo={geo} onProgressChange={onProgressChange} />
+}
+
+type PrintViewer3DProps = {
+  onProgressChange?: (p: number) => void
+  modelUrl?: string // load a scanned .glb; omit for the procedural mesh
+}
+
+export default function PrintViewer3D({ onProgressChange, modelUrl }: PrintViewer3DProps) {
+  const cb = onProgressChange ?? (() => {})
   return (
     <Canvas
       gl={{ localClippingEnabled: true, antialias: true, alpha: true }}
@@ -86,7 +131,9 @@ export default function PrintViewer3D({ onProgressChange }: PrintViewer3DProps) 
       style={{ position: 'absolute', inset: 0, width: '100%', height: '100%' }}
       onCreated={({ camera }) => { camera.lookAt(0, 0.1, 0) }}
     >
-      <PrintMesh onProgressChange={onProgressChange ?? (() => {})} />
+      <Suspense fallback={null}>
+        {modelUrl ? <LoadedMesh url={modelUrl} onProgressChange={cb} /> : <ProceduralMesh onProgressChange={cb} />}
+      </Suspense>
     </Canvas>
   )
 }

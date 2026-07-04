@@ -12,7 +12,7 @@ import { producers } from '../mock/user-pages'
 // set is noisy, so tune against real objects. Distractor labels in the library
 // keep out-of-set objects below this.
 const THRESHOLD = 0.2
-const DEMO_LABEL = 'moka pot'
+const DEMO_LABEL = 'remote control'
 
 type Phase = 'capture' | 'scanning' | 'result' | 'nomatch' | 'match'
 
@@ -100,7 +100,7 @@ export default function ScanView({ onClose }: { onClose?: () => void }) {
       top = r as { label: string; score: number }
     } catch {
       setClipError(true)
-      top = { label: DEMO_LABEL, score: 1 } // never a dead end
+      top = { label: DEMO_LABEL, score: 1 } // never a dead end (demo fallback)
     }
 
     const entry = LIBRARY[top.label]
@@ -225,12 +225,9 @@ export default function ScanView({ onClose }: { onClose?: () => void }) {
       {/* RESULT — recognized object + 3D viewer */}
       {phase === 'result' && match && (
         <div style={{ flex: 1, display: 'flex', flexWrap: 'wrap', gap: 16, minHeight: 0 }}>
-          {/* viewer */}
-          {/* ponytail: procedural mesh for now. When /meshes/*.glb exist, add a
-              modelUrl prop to PrintViewer3D (useGLTF branch) and pass
-              match.entry.glb here — swap is localized to these two spots. */}
+          {/* viewer — loads the recognized object's scanned .glb */}
           <div style={{ flex: '1 1 340px', position: 'relative', borderRadius: 18, overflow: 'hidden', border: '1px solid var(--line-2)', background: 'var(--bg-2)', minHeight: 300 }}>
-            <PrintViewer3D />
+            <PrintViewer3D modelUrl={match.entry.glb} />
           </div>
 
           {/* metadata */}
