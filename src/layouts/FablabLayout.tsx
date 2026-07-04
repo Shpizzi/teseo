@@ -1,3 +1,4 @@
+import { useState } from 'react'
 import { Outlet } from 'react-router-dom'
 import {
   LayoutDashboard,
@@ -6,8 +7,10 @@ import {
   Printer,
   Users,
   Box,
+  Menu,
 } from 'lucide-react'
 import Sidebar, { type NavItem } from '../components/Sidebar'
+import { useIsMobile } from '../hooks/useIsMobile'
 
 const fablabNavItems: NavItem[] = [
   { label: 'Dashboard',  icon: <LayoutDashboard size={20} />, href: '/fablab/dashboard' },
@@ -19,13 +22,16 @@ const fablabNavItems: NavItem[] = [
 ]
 
 export default function FablabLayout() {
+  const isMobile = useIsMobile()
+  const [open, setOpen] = useState(false)
+
   return (
     <div
       style={{
         height: '100vh',
         display: 'flex',
-        gap: 16,
-        padding: 22,
+        gap: isMobile ? 0 : 16,
+        padding: isMobile ? 14 : 22,
         position: 'relative',
         zIndex: 1,
         overflow: 'hidden',
@@ -35,6 +41,7 @@ export default function FablabLayout() {
         items={fablabNavItems}
         brand={{ subtitle: 'FabLab Lambrate' }}
         user={{ initials: 'L', name: 'Lambrate', role: 'account fablab' }}
+        {...(isMobile ? { open, onClose: () => setOpen(false) } : {})}
       />
       <div
         style={{
@@ -46,6 +53,20 @@ export default function FablabLayout() {
           overflow: 'hidden',
         }}
       >
+        {isMobile && (
+          <button
+            onClick={() => setOpen(true)}
+            aria-label="Apri menu"
+            style={{
+              display: 'flex', alignItems: 'center', gap: 9, alignSelf: 'flex-start',
+              background: 'var(--glass)', border: '1px solid var(--line)', borderRadius: 11,
+              color: 'var(--ink)', padding: '8px 14px', cursor: 'pointer', flex: '0 0 auto',
+              fontFamily: 'var(--mono)', fontSize: 12, letterSpacing: '0.08em',
+            }}
+          >
+            <Menu size={18} style={{ color: 'var(--cyan)' }} /> MENU
+          </button>
+        )}
         <Outlet />
       </div>
     </div>

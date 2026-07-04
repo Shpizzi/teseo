@@ -1,6 +1,6 @@
 import type { ReactNode } from 'react'
 import { Link, useLocation } from 'react-router-dom'
-import { Package } from 'lucide-react'
+import { Package, X } from 'lucide-react'
 
 export type NavItem = {
   label: string
@@ -19,29 +19,18 @@ type SidebarProps = {
     name: string
     role: string
   }
+  // When onClose is provided, the sidebar renders as a mobile off-canvas drawer
+  // controlled by `open`. Omit both for the static desktop column.
+  open?: boolean
+  onClose?: () => void
 }
 
-export default function Sidebar({ items, brand, user }: SidebarProps) {
+export default function Sidebar({ items, brand, user, open, onClose }: SidebarProps) {
   const location = useLocation()
+  const isDrawer = onClose !== undefined
 
-  return (
-    <aside
-      style={{
-        width: 212,
-        flex: '0 0 212px',
-        background: 'var(--glass)',
-        backdropFilter: 'blur(14px)',
-        WebkitBackdropFilter: 'blur(14px)',
-        border: '1px solid var(--line)',
-        borderRadius: 'var(--radius)',
-        display: 'flex',
-        flexDirection: 'column',
-        padding: '20px 14px',
-        gap: 3,
-        position: 'relative',
-        zIndex: 2,
-      }}
-    >
+  const inner = (
+    <>
       {/* Brand block */}
       <div
         style={{
@@ -68,7 +57,7 @@ export default function Sidebar({ items, brand, user }: SidebarProps) {
         >
           <Package size={19} />
         </span>
-        <span>
+        <span style={{ flex: 1, minWidth: 0 }}>
           <div
             style={{
               fontWeight: 800,
@@ -93,6 +82,19 @@ export default function Sidebar({ items, brand, user }: SidebarProps) {
             {brand.subtitle}
           </div>
         </span>
+        {isDrawer && (
+          <button
+            onClick={onClose}
+            aria-label="Chiudi menu"
+            style={{
+              width: 32, height: 32, flex: '0 0 auto', borderRadius: 9,
+              background: 'transparent', border: '1px solid var(--line)',
+              color: 'var(--muted)', display: 'grid', placeItems: 'center', cursor: 'pointer',
+            }}
+          >
+            <X size={16} />
+          </button>
+        )}
       </div>
 
       {/* Nav items */}
@@ -102,6 +104,7 @@ export default function Sidebar({ items, brand, user }: SidebarProps) {
           <Link
             key={item.href}
             to={item.href}
+            onClick={onClose}
             style={{
               display: 'flex',
               alignItems: 'center',
@@ -204,6 +207,64 @@ export default function Sidebar({ items, brand, user }: SidebarProps) {
           </div>
         </span>
       </div>
-    </aside>
+    </>
+  )
+
+  const asideBase: React.CSSProperties = {
+    background: 'var(--glass)',
+    backdropFilter: 'blur(14px)',
+    WebkitBackdropFilter: 'blur(14px)',
+    border: '1px solid var(--line)',
+    borderRadius: 'var(--radius)',
+    display: 'flex',
+    flexDirection: 'column',
+    padding: '20px 14px',
+    gap: 3,
+  }
+
+  // Desktop: static column, unchanged.
+  if (!isDrawer) {
+    return (
+      <aside style={{ ...asideBase, width: 212, flex: '0 0 212px', position: 'relative', zIndex: 2 }}>
+        {inner}
+      </aside>
+    )
+  }
+
+  // Mobile: off-canvas drawer + backdrop (always rendered so it can animate).
+  return (
+    <>
+      <div
+        onClick={onClose}
+        style={{
+          position: 'fixed',
+          inset: 0,
+          zIndex: 40,
+          background: 'rgba(4,14,28,0.55)',
+          backdropFilter: 'blur(2px)',
+          WebkitBackdropFilter: 'blur(2px)',
+          opacity: open ? 1 : 0,
+          pointerEvents: open ? 'auto' : 'none',
+          transition: 'opacity 0.22s ease',
+        }}
+      />
+      <aside
+        style={{
+          ...asideBase,
+          position: 'fixed',
+          top: 12,
+          bottom: 12,
+          left: 12,
+          width: 'min(272px, 82vw)',
+          zIndex: 41,
+          background: 'var(--bg-2)',
+          overflow: 'auto',
+          transform: open ? 'translateX(0)' : 'translateX(calc(-100% - 16px))',
+          transition: 'transform 0.26s cubic-bezier(.4,0,.2,1)',
+        }}
+      >
+        {inner}
+      </aside>
+    </>
   )
 }
