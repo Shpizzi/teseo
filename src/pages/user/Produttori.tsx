@@ -11,7 +11,7 @@ const distFilters = ['< 2 km', '< 5 km', 'Tutti']
 export default function Produttori() {
   const [activeTech, setActiveTech] = useState('Tutti')
   const [activeDist, setActiveDist] = useState('Tutti')
-  const [selected, setSelected] = useState(producers[0].id)
+  const [query, setQuery] = useState('')
   const navigate = useNavigate()
 
   const filtered = producers.filter(p => {
@@ -23,7 +23,8 @@ export default function Produttori() {
         : activeDist === '< 2 km'
         ? distNum < 2
         : distNum < 5
-    return techOk && distOk
+    const queryOk = !query || [p.name, p.city, ...p.materials, ...p.technologies].join(' ').toLowerCase().includes(query.toLowerCase())
+    return techOk && distOk && queryOk
   })
 
   const chipStyle = (active: boolean) => ({
@@ -49,11 +50,11 @@ export default function Produttori() {
             Produttori vicini
           </h1>
           <p style={{ color: 'var(--muted)', fontSize: 12, marginTop: 3, fontFamily: 'var(--mono)', letterSpacing: '0.02em' }}>
-            4 FABLAB NEL TUO RAGGIO
+            {producers.length} FABLAB NEL TUO RAGGIO
           </p>
         </div>
         <div style={{ flex: 1 }} />
-        <SearchBar placeholder="Cerca produttori…" />
+        <SearchBar placeholder="Cerca produttori…" value={query} onChange={setQuery} />
       </div>
 
       {/* Filter chips */}
@@ -75,15 +76,26 @@ export default function Produttori() {
       <div style={{ flex: 1, display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 16, minHeight: 0 }}>
         {/* Left: list */}
         <div style={{ display: 'flex', flexDirection: 'column', gap: 11, overflow: 'auto' }}>
+          {filtered.length === 0 && (
+            <div style={{ padding: 28, textAlign: 'center', color: 'var(--muted)', fontSize: 13 }}>
+              Nessun produttore con questi filtri.{' '}
+              <button
+                onClick={() => { setActiveTech('Tutti'); setActiveDist('Tutti'); setQuery('') }}
+                style={{ background: 'none', border: 'none', color: 'var(--cyan)', cursor: 'pointer', fontFamily: 'inherit', fontSize: 13, fontWeight: 600, padding: 0 }}
+              >
+                Azzera i filtri
+              </button>
+            </div>
+          )}
           {filtered.map(producer => (
             <div
               key={producer.id}
-              onClick={() => { setSelected(producer.id); navigate('/app/produttori/' + producer.id) }}
+              onClick={() => navigate('/app/produttori/' + producer.id)}
               style={{
                 padding: 18,
                 borderRadius: 'var(--radius-sm)',
-                background: selected === producer.id ? 'var(--glass-2)' : 'var(--glass)',
-                border: `1px solid ${selected === producer.id ? 'var(--line-2)' : 'var(--line)'}`,
+                background: 'var(--glass)',
+                border: '1px solid var(--line)',
                 cursor: 'pointer',
                 transition: '0.18s',
               }}
@@ -94,10 +106,8 @@ export default function Produttori() {
               }}
               onMouseLeave={e => {
                 const el = e.currentTarget as HTMLDivElement
-                if (selected !== producer.id) {
-                  el.style.borderColor = 'var(--line)'
-                  el.style.background = 'var(--glass)'
-                }
+                el.style.borderColor = 'var(--line)'
+                el.style.background = 'var(--glass)'
               }}
             >
               {/* Top row */}

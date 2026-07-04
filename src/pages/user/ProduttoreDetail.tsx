@@ -2,7 +2,7 @@ import { useParams, useNavigate } from 'react-router-dom'
 import { Star } from 'lucide-react'
 import GlassCard from '../../components/GlassCard'
 import PrimaryButton from '../../components/PrimaryButton'
-import { producers } from '../../mock/user-pages'
+import { producers, conversations } from '../../mock/user-pages'
 
 const fakePrinters = [
   { name: 'Bambu X1 · 01', status: 'active' as const },
@@ -19,11 +19,23 @@ export default function ProduttoreDetail() {
 
   if (!producer) {
     return (
-      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', flex: 1, fontSize: 16, color: 'var(--muted)', fontFamily: 'var(--mono)' }}>
-        Produttore non trovato
+      <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', flex: 1, gap: 16 }}>
+        <span style={{ fontSize: 16, color: 'var(--muted)', fontFamily: 'var(--mono)' }}>Produttore non trovato</span>
+        <button
+          onClick={() => navigate('/app/produttori')}
+          style={{
+            background: 'transparent', color: 'var(--cyan)', border: '1px solid var(--line-2)',
+            fontFamily: 'inherit', fontWeight: 600, fontSize: 13.5, padding: '10px 22px',
+            borderRadius: 100, cursor: 'pointer',
+          }}
+        >
+          ← Torna ai produttori
+        </button>
       </div>
     )
   }
+
+  const conversationId = conversations.find(c => c.fablab === producer.name)?.id
 
   const utilizationPct = Math.round((fakePrinters.filter(p => p.status === 'active').length / fakePrinters.length) * 100)
 
@@ -121,8 +133,8 @@ export default function ProduttoreDetail() {
         </div>
 
         <div style={{ marginLeft: 'auto' }}>
-          <PrimaryButton onClick={() => navigate('/app/new')}>
-            Invia richiesta di stampa
+          <PrimaryButton onClick={() => navigate('/app/new', { state: { producerId: producer.id } })}>
+            Stampa con questo FabLab
           </PrimaryButton>
         </div>
       </GlassCard>
@@ -262,7 +274,7 @@ export default function ProduttoreDetail() {
           </div>
 
           <div style={{ marginTop: 'auto', display: 'flex', flexDirection: 'column', gap: 10 }}>
-            <PrimaryButton onClick={() => navigate('/app/messages')}>
+            <PrimaryButton onClick={() => navigate('/app/messages', { state: { conversationId } })}>
               Avvia chat
             </PrimaryButton>
             <button

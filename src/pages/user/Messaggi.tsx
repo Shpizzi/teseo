@@ -1,14 +1,37 @@
 import { useState } from 'react'
 import { Send } from 'lucide-react'
+import { useLocation } from 'react-router-dom'
 import GlassCard from '../../components/GlassCard'
-import { conversations, chatMessages } from '../../mock/user-pages'
+import { conversations, chatMessages, type ChatMessage } from '../../mock/user-pages'
 
 export default function Messaggi() {
-  const [activeConv, setActiveConv] = useState(conversations[0].id)
+  // Deep-link dal dettaglio progetto/produttore: apre subito la conversazione giusta
+  const incoming = (useLocation().state as { conversationId?: string } | null)?.conversationId
+  const [activeConv, setActiveConv] = useState(
+    conversations.find(c => c.id === incoming)?.id ?? conversations[0].id
+  )
   const [inputText, setInputText] = useState('')
+  const [sent, setSent] = useState<ChatMessage[]>([])
+  const [readConvs, setReadConvs] = useState<Set<string>>(new Set([activeConv]))
+
+  const openConv = (id: string) => {
+    setActiveConv(id)
+    setReadConvs(prev => new Set(prev).add(id))
+  }
+
+  const send = () => {
+    const text = inputText.trim()
+    if (!text) return
+    setSent(prev => [...prev, {
+      id: `sent-${prev.length}`, conversationId: activeConv, sender: 'user', text,
+      time: 'adesso',
+    }])
+    setInputText('')
+  }
 
   const currentConv = conversations.find(c => c.id === activeConv)!
-  const messages = chatMessages.filter(m => m.conversationId === activeConv)
+  const messages = [...chatMessages, ...sent].filter(m => m.conversationId === activeConv)
+  const unreadTotal = conversations.reduce((n, c) => n + (readConvs.has(c.id) ? 0 : c.unread), 0)
 
   return (
     <>
@@ -19,7 +42,7 @@ export default function Messaggi() {
             Messaggi
           </h1>
           <p style={{ color: 'var(--muted)', fontSize: 12, marginTop: 3, fontFamily: 'var(--mono)', letterSpacing: '0.02em' }}>
-            3 CONVERSAZIONI · 1 NON LETTO
+            {conversations.length} CONVERSAZIONI{unreadTotal > 0 ? ` · ${unreadTotal} NON ${unreadTotal === 1 ? 'LETTO' : 'LETTI'}` : ''}
           </p>
         </div>
       </div>
@@ -36,7 +59,7 @@ export default function Messaggi() {
             return (
               <div
                 key={conv.id}
-                onClick={() => setActiveConv(conv.id)}
+                onClick={() => openConv(conv.id)}
                 style={{
                   padding: '12px 10px',
                   borderRadius: 13,
@@ -84,7 +107,7 @@ export default function Messaggi() {
                   <span style={{ flex: 1, fontSize: 13, color: 'var(--muted)', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
                     {conv.lastMessage}
                   </span>
-                  {conv.unread > 0 && (
+                  {conv.unread > 0 && !readConvs.has(conv.id) && (
                     <span
                       style={{
                         background: 'var(--cyan)',
@@ -134,7 +157,7 @@ export default function Messaggi() {
                   borderRadius: 100,
                 }}
               >
-                ATTIVO
+                Online
               </span>
             </div>
           </div>
@@ -201,6 +224,7 @@ export default function Messaggi() {
             <input
               value={inputText}
               onChange={e => setInputText(e.target.value)}
+              onKeyDown={e => { if (e.key === 'Enter') send() }}
               placeholder="Scrivi un messaggio…"
               style={{
                 flex: 1,
@@ -215,6 +239,7 @@ export default function Messaggi() {
               }}
             />
             <button
+              onClick={send}
               style={{
                 display: 'flex',
                 alignItems: 'center',

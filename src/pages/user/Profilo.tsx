@@ -1,8 +1,12 @@
 import { useState } from 'react'
 import GlassCard from '../../components/GlassCard'
 import PrimaryButton from '../../components/PrimaryButton'
+import { userProjects } from '../../mock'
+import { savedModels } from '../../mock/user-pages'
+import { toast } from '../../components/Toast'
 
 export default function Profilo() {
+  const [confirmDelete, setConfirmDelete] = useState(false)
   const [notifEmail, setNotifEmail] = useState(true)
   const [notifSms, setNotifSms] = useState(false)
   const [newsletter, setNewsletter] = useState(true)
@@ -92,7 +96,7 @@ export default function Profilo() {
             Account base
           </div>
           <div style={{ fontSize: 12, fontFamily: 'var(--mono)', color: 'var(--muted)' }}>
-            03 stampe attive · 128 modelli salvati · 8 community
+            {String(userProjects.filter(p => p.status !== 'draft').length).padStart(2, '0')} stampe attive · {String(savedModels.length).padStart(2, '0')} modelli salvati
           </div>
         </div>
       </GlassCard>
@@ -190,30 +194,64 @@ export default function Profilo() {
           ))}
 
           <div style={{ marginTop: 20 }}>
-            <PrimaryButton>
+            <PrimaryButton onClick={() => toast('Ti abbiamo inviato una email per reimpostare la password')}>
               Cambia password
             </PrimaryButton>
           </div>
 
           <div style={{ margin: '18px 0', borderTop: '1px solid var(--line)' }} />
 
-          <button
-            style={{
-              background: 'none',
-              border: 'none',
-              cursor: 'pointer',
-              fontSize: 13,
-              fontFamily: 'inherit',
-              color: 'var(--muted)',
-              textAlign: 'left',
-              padding: 0,
-              transition: '0.2s',
-            }}
-            onMouseEnter={e => { (e.currentTarget as HTMLButtonElement).style.color = 'var(--ink)' }}
-            onMouseLeave={e => { (e.currentTarget as HTMLButtonElement).style.color = 'var(--muted)' }}
-          >
-            Elimina account
-          </button>
+          {confirmDelete ? (
+            <div style={{ border: '1px dashed #e40014', borderRadius: 11, padding: 14, display: 'flex', flexDirection: 'column', gap: 10 }}>
+              <span style={{ fontSize: 13, color: 'var(--ink)', fontWeight: 600 }}>
+                Eliminare l'account? Progetti e modelli salvati andranno persi.
+              </span>
+              <div style={{ display: 'flex', gap: 8 }}>
+                <button
+                  onClick={() => {
+                    setConfirmDelete(false)
+                    toast("Ti abbiamo inviato una email per confermare l'eliminazione")
+                  }}
+                  style={{
+                    background: 'transparent', color: '#e40014', border: '1px dashed #e40014',
+                    fontFamily: 'inherit', fontWeight: 600, fontSize: 12.5, padding: '8px 16px',
+                    borderRadius: 100, cursor: 'pointer',
+                  }}
+                >
+                  Sì, elimina
+                </button>
+                <button
+                  onClick={() => setConfirmDelete(false)}
+                  style={{
+                    background: 'transparent', color: 'var(--muted)', border: '1px solid var(--line)',
+                    fontFamily: 'inherit', fontWeight: 600, fontSize: 12.5, padding: '8px 16px',
+                    borderRadius: 100, cursor: 'pointer',
+                  }}
+                >
+                  No, mantieni l'account
+                </button>
+              </div>
+            </div>
+          ) : (
+            <button
+              onClick={() => setConfirmDelete(true)}
+              style={{
+                background: 'none',
+                border: 'none',
+                cursor: 'pointer',
+                fontSize: 13,
+                fontFamily: 'inherit',
+                color: 'var(--muted)',
+                textAlign: 'left',
+                padding: 0,
+                transition: '0.2s',
+              }}
+              onMouseEnter={e => { (e.currentTarget as HTMLButtonElement).style.color = 'var(--ink)' }}
+              onMouseLeave={e => { (e.currentTarget as HTMLButtonElement).style.color = 'var(--muted)' }}
+            >
+              Elimina account
+            </button>
+          )}
         </GlassCard>
       </div>
     </>
