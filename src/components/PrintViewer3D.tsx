@@ -71,12 +71,13 @@ function normalizeGeo(src: THREE.BufferGeometry): THREE.BufferGeometry {
 type BodyProps = {
   geo: THREE.BufferGeometry
   onProgressChange: (p: number) => void
+  progress?: number // 0-100: blocca il clipping sull'avanzamento reale (niente animazione demo)
 }
 
 // Shared render: printed/to-print clipping split + auto-rotation + build plate.
-function PrintBody({ geo, onProgressChange }: BodyProps) {
+function PrintBody({ geo, onProgressChange, progress }: BodyProps) {
   const groupRef = useRef<THREE.Group>(null)
-  const progressRef = useRef(0.62)
+  const progressRef = useRef(progress !== undefined ? progress / 100 : 0.62)
   const dirRef = useRef(1)
 
   const clipSolid = useMemo(() => new THREE.Plane(new THREE.Vector3(0, -1, 0), 0), [])
@@ -85,9 +86,13 @@ function PrintBody({ geo, onProgressChange }: BodyProps) {
   useFrame(() => {
     if (!groupRef.current) return
     groupRef.current.rotation.y += 0.0045
-    progressRef.current += 0.0006 * dirRef.current
-    if (progressRef.current > 0.96) { progressRef.current = 0.96; dirRef.current = -1 }
-    if (progressRef.current < 0.35) { progressRef.current = 0.35; dirRef.current =  1 }
+    if (progress !== undefined) {
+      progressRef.current = progress / 100
+    } else {
+      progressRef.current += 0.0006 * dirRef.current
+      if (progressRef.current > 0.96) { progressRef.current = 0.96; dirRef.current = -1 }
+      if (progressRef.current < 0.35) { progressRef.current = 0.35; dirRef.current =  1 }
+    }
     const printH = -1.25 + progressRef.current * 2.55
     clipSolid.constant = printH
     clipWire.constant  = -printH
@@ -118,12 +123,12 @@ function PrintBody({ geo, onProgressChange }: BodyProps) {
   )
 }
 
-function ProceduralMesh({ onProgressChange }: { onProgressChange: (p: number) => void }) {
+function ProceduralMesh({ onProgressChange, progress }: { onProgressChange: (p: number) => void; progress?: number }) {
   const geo = useMemo(() => buildDisplacedGeo(), [])
-  return <PrintBody geo={geo} onProgressChange={onProgressChange} />
+  return <PrintBody geo={geo} onProgressChange={onProgressChange} progress={progress} />
 }
 
-function LoadedMesh({ url, onProgressChange }: { url: string; onProgressChange: (p: number) => void }) {
+function LoadedMesh({ url, onProgressChange, progress }: { url: string; onProgressChange: (p: number) => void; progress?: number }) {
   const { scene } = useGLTF(url)
   const geo = useMemo(() => {
     scene.updateMatrixWorld(true)
@@ -137,18 +142,19 @@ function LoadedMesh({ url, onProgressChange }: { url: string; onProgressChange: 
     })
     return normalizeGeo(picked ?? new THREE.IcosahedronGeometry(1, 2))
   }, [scene])
-  return <PrintBody geo={geo} onProgressChange={onProgressChange} />
+  return <PrintBody geo={geo} onProgressChange={onProgressChange} progress={progress} />
 }
 
 type PrintViewer3DProps = {
   onProgressChange?: (p: number) => void
   modelUrl?: string // load a scanned .glb; omit for the procedural mesh
+  progress?: number // 0-100: pin del clipping sull'avanzamento reale
 }
 
 // Fetch the scanned mesh ahead of the result state so the viewer isn't blank.
 useGLTF.preload('/meshes/remote.glb')
 
-export default function PrintViewer3D({ onProgressChange, modelUrl }: PrintViewer3DProps) {
+export default function PrintViewer3D({ onProgressChange, modelUrl, progress }: PrintViewer3DProps) {
   const cb = onProgressChange ?? (() => {})
   return (
     <Canvas
@@ -166,7 +172,7 @@ export default function PrintViewer3D({ onProgressChange, modelUrl }: PrintViewe
           </Html>
         }
       >
-        {modelUrl ? <LoadedMesh url={modelUrl} onProgressChange={cb} /> : <ProceduralMesh onProgressChange={cb} />}
+        {modelUrl ? <LoadedMesh url={modelUrl} onProgressChange={cb} progress={progress} /> : <ProceduralMesh onProgressChange={cb} progress={progress} />}
       </Suspense>
     </Canvas>
   )

@@ -4,29 +4,39 @@ import GlassCard from '../../components/GlassCard'
 import StatusPill from '../../components/StatusPill'
 import PrintViewer3D from '../../components/PrintViewer3D'
 import ProgressBar from '../../components/ProgressBar'
-import { userProjects } from '../../mock'
-
-const timelineSteps = [
-  { label: 'Richiesta inviata', date: '15 mag 2025', done: true, current: false },
-  { label: 'Accettato da FabLab Lambrate', date: '15 mag 2025', done: true, current: false },
-  { label: 'In stampa', date: '16 mag 2025', done: true, current: true },
-  { label: 'Pronto al ritiro', date: '—', done: false, current: false },
-]
+import { userProjects, projectTimeline } from '../../mock'
+import { toast } from '../../components/Toast'
 
 export default function ProgettoDetail() {
   const { id } = useParams<{ id: string }>()
   const navigate = useNavigate()
-  const [viewerProgress, setViewerProgress] = useState(0)
+  const [confirmCancel, setConfirmCancel] = useState(false)
 
   const project = userProjects.find(p => p.id === id)
 
   if (!project) {
     return (
-      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', flex: 1, fontSize: 16, color: 'var(--muted)', fontFamily: 'var(--mono)' }}>
-        Progetto non trovato
+      <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', flex: 1, gap: 16 }}>
+        <span style={{ fontSize: 16, color: 'var(--muted)', fontFamily: 'var(--mono)' }}>
+          Progetto non trovato
+        </span>
+        <button
+          onClick={() => navigate('/app/progetti')}
+          style={{
+            background: 'transparent', color: 'var(--cyan)', border: '1px solid var(--line-2)',
+            fontFamily: 'inherit', fontWeight: 600, fontSize: 13.5, padding: '10px 22px',
+            borderRadius: 100, cursor: 'pointer',
+          }}
+        >
+          ← Torna ai progetti
+        </button>
       </div>
     )
   }
+
+  const isDraft = project.status === 'draft'
+  const timelineSteps = projectTimeline(project)
+  const currentStep = timelineSteps.reduce((acc, s, i) => (s.done ? i : acc), -1)
 
   return (
     <>
@@ -91,7 +101,17 @@ export default function ProgettoDetail() {
             {/* FabLab */}
             <div>
               <div style={{ fontSize: 10, fontFamily: 'var(--mono)', color: 'var(--muted)', textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: 5 }}>FABLAB</div>
-              <div style={{ fontSize: 13.5, fontWeight: 600, color: 'var(--cyan)', cursor: 'pointer' }}>{project.fablab || '—'}</div>
+              {project.producerId ? (
+                <div
+                  onClick={() => navigate(`/app/produttori/${project.producerId}`)}
+                  title="Apri il profilo del produttore"
+                  style={{ fontSize: 13.5, fontWeight: 600, color: 'var(--cyan)', cursor: 'pointer' }}
+                >
+                  {project.fablab} →
+                </div>
+              ) : (
+                <div style={{ fontSize: 13.5, fontWeight: 600, color: 'var(--ink)' }}>{project.fablab || '—'}</div>
+              )}
             </div>
 
             {/* Progress */}
@@ -109,42 +129,95 @@ export default function ProgettoDetail() {
             {/* Order date */}
             <div>
               <div style={{ fontSize: 10, fontFamily: 'var(--mono)', color: 'var(--muted)', textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: 5 }}>DATA ORDINE</div>
-              <div style={{ fontSize: 13.5, fontFamily: 'var(--mono)', fontWeight: 600, color: 'var(--ink)' }}>15 mag 2025</div>
+              <div style={{ fontSize: 13.5, fontFamily: 'var(--mono)', fontWeight: 600, color: 'var(--ink)' }}>{project.orderDate ?? '—'}</div>
             </div>
 
             {/* Estimated cost */}
             <div>
               <div style={{ fontSize: 10, fontFamily: 'var(--mono)', color: 'var(--muted)', textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: 5 }}>COSTO STIMATO</div>
-              <div style={{ fontSize: 13.5, fontFamily: 'var(--mono)', fontWeight: 600, color: 'var(--ink)' }}>€ 12.80</div>
+              <div style={{ fontSize: 13.5, fontFamily: 'var(--mono)', fontWeight: 600, color: 'var(--ink)' }}>{project.cost ?? '—'}</div>
             </div>
           </div>
 
-          <div style={{ marginTop: 'auto' }}>
-            <button
-              onClick={() => navigate('/app/messages')}
-              style={{
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                gap: 8,
-                background: 'var(--forest)',
-                color: '#fff',
-                border: 'none',
-                fontFamily: 'inherit',
-                fontWeight: 700,
-                fontSize: 14,
-                padding: '0 20px',
-                height: 44,
-                borderRadius: 100,
-                cursor: 'pointer',
-                width: '100%',
-                transition: '0.2s',
-              }}
-              onMouseEnter={e => { (e.currentTarget as HTMLButtonElement).style.background = 'var(--cyan)' }}
-              onMouseLeave={e => { (e.currentTarget as HTMLButtonElement).style.background = 'var(--forest)' }}
-            >
-              Contatta produttore
-            </button>
+          <div style={{ marginTop: 'auto', display: 'flex', flexDirection: 'column', gap: 8 }}>
+            {isDraft ? (
+              <button
+                onClick={() => navigate('/app/new', { state: { modelName: project.name } })}
+                style={{
+                  display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8,
+                  background: 'var(--forest)', color: '#fff', border: 'none',
+                  fontFamily: 'inherit', fontWeight: 700, fontSize: 14,
+                  padding: '0 20px', height: 44, borderRadius: 100, cursor: 'pointer',
+                  width: '100%', transition: '0.2s',
+                }}
+                onMouseEnter={e => { (e.currentTarget as HTMLButtonElement).style.background = 'var(--cyan)' }}
+                onMouseLeave={e => { (e.currentTarget as HTMLButtonElement).style.background = 'var(--forest)' }}
+              >
+                Scegli produttore →
+              </button>
+            ) : (
+              <>
+                <button
+                  onClick={() => navigate('/app/messages', { state: { conversationId: project.conversationId } })}
+                  style={{
+                    display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8,
+                    background: 'var(--forest)', color: '#fff', border: 'none',
+                    fontFamily: 'inherit', fontWeight: 700, fontSize: 14,
+                    padding: '0 20px', height: 44, borderRadius: 100, cursor: 'pointer',
+                    width: '100%', transition: '0.2s',
+                  }}
+                  onMouseEnter={e => { (e.currentTarget as HTMLButtonElement).style.background = 'var(--cyan)' }}
+                  onMouseLeave={e => { (e.currentTarget as HTMLButtonElement).style.background = 'var(--forest)' }}
+                >
+                  Contatta produttore
+                </button>
+                {project.status === 'printing' && (
+                  confirmCancel ? (
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: 8, border: '1px dashed var(--line-2)', borderRadius: 11, padding: 12 }}>
+                      <span style={{ fontSize: 12.5, color: 'var(--ink)', fontWeight: 600, textAlign: 'center' }}>
+                        Annullare l'ordine? La stampa in corso verrà interrotta.
+                      </span>
+                      <div style={{ display: 'flex', gap: 8 }}>
+                        <button
+                          onClick={() => {
+                            toast('Ordine annullato')
+                            navigate('/app/progetti')
+                          }}
+                          style={{
+                            flex: 1, background: 'transparent', color: '#e40014', border: '1px dashed #e40014',
+                            fontFamily: 'inherit', fontWeight: 600, fontSize: 12.5, padding: '8px 0',
+                            borderRadius: 100, cursor: 'pointer',
+                          }}
+                        >
+                          Sì, annulla
+                        </button>
+                        <button
+                          onClick={() => setConfirmCancel(false)}
+                          style={{
+                            flex: 1, background: 'transparent', color: 'var(--muted)', border: '1px solid var(--line)',
+                            fontFamily: 'inherit', fontWeight: 600, fontSize: 12.5, padding: '8px 0',
+                            borderRadius: 100, cursor: 'pointer',
+                          }}
+                        >
+                          No, continua
+                        </button>
+                      </div>
+                    </div>
+                  ) : (
+                    <button
+                      onClick={() => setConfirmCancel(true)}
+                      style={{
+                        background: 'transparent', color: 'var(--muted)', border: '1px solid var(--line)',
+                        fontFamily: 'inherit', fontWeight: 600, fontSize: 13, padding: '10px 0',
+                        borderRadius: 100, cursor: 'pointer', width: '100%',
+                      }}
+                    >
+                      Annulla ordine
+                    </button>
+                  )
+                )}
+              </>
+            )}
           </div>
         </GlassCard>
 
@@ -185,51 +258,53 @@ export default function ProgettoDetail() {
             FIG. 01 — MODEL PREVIEW
           </div>
 
-          {/* 3D Viewer */}
+          {/* 3D Viewer — clipping pilotato dall'avanzamento reale del progetto */}
           <div style={{ flex: 1, position: 'relative', minHeight: 0 }}>
-            <PrintViewer3D onProgressChange={setViewerProgress} />
+            <PrintViewer3D progress={isDraft ? 100 : project.progress} />
           </div>
 
-          {/* Progress badge */}
-          <div
-            style={{
-              position: 'absolute',
-              bottom: 16,
-              left: '50%',
-              transform: 'translateX(-50%)',
-              zIndex: 10,
-              background: 'rgba(255,255,255,0.85)',
-              border: '1px solid var(--line-2)',
-              borderRadius: 100,
-              padding: '6px 16px',
-              display: 'flex',
-              alignItems: 'center',
-              gap: 10,
-              whiteSpace: 'nowrap',
-            }}
-          >
-            <span style={{ fontSize: 10, fontFamily: 'var(--mono)', color: 'var(--muted)', textTransform: 'uppercase', letterSpacing: '0.08em' }}>
-              AVANZAMENTO STAMPA
-            </span>
+          {/* Progress badge (solo se la stampa esiste davvero) */}
+          {!isDraft && (
             <div
               style={{
-                width: 80,
-                height: 5,
-                borderRadius: 0,
-                background: 'rgba(63,115,8,.14)',
-                overflow: 'hidden',
-                position: 'relative',
+                position: 'absolute',
+                bottom: 16,
+                left: '50%',
+                transform: 'translateX(-50%)',
+                zIndex: 10,
+                background: 'rgba(255,255,255,0.85)',
+                border: '1px solid var(--line-2)',
+                borderRadius: 100,
+                padding: '6px 16px',
+                display: 'flex',
+                alignItems: 'center',
+                gap: 10,
+                whiteSpace: 'nowrap',
               }}
             >
-              <span
-                className="progress-track-fill progress-track-fill-striped"
-                style={{ width: `${viewerProgress}%`, display: 'block', height: '100%' }}
-              />
+              <span style={{ fontSize: 10, fontFamily: 'var(--mono)', color: 'var(--muted)', textTransform: 'uppercase', letterSpacing: '0.08em' }}>
+                AVANZAMENTO STAMPA
+              </span>
+              <div
+                style={{
+                  width: 80,
+                  height: 5,
+                  borderRadius: 0,
+                  background: 'rgba(63,115,8,.14)',
+                  overflow: 'hidden',
+                  position: 'relative',
+                }}
+              >
+                <span
+                  className="progress-track-fill progress-track-fill-striped"
+                  style={{ width: `${project.progress}%`, display: 'block', height: '100%' }}
+                />
+              </div>
+              <span style={{ fontSize: 12, fontFamily: 'var(--mono)', color: 'var(--cyan)', fontWeight: 700 }}>
+                {project.progress}%
+              </span>
             </div>
-            <span style={{ fontSize: 12, fontFamily: 'var(--mono)', color: 'var(--cyan)', fontWeight: 700 }}>
-              {viewerProgress}%
-            </span>
-          </div>
+          )}
         </GlassCard>
 
         {/* Right: timeline */}
@@ -252,7 +327,7 @@ export default function ProgettoDetail() {
                       border: step.done ? 'none' : '1.5px solid var(--line-2)',
                       flex: '0 0 auto',
                       marginTop: 3,
-                      animation: step.current ? 'pulseRing 2s infinite' : 'none',
+                      animation: i === currentStep && project.status === 'printing' ? 'pulseRing 2s infinite' : 'none',
                     }}
                   />
                   {i < timelineSteps.length - 1 && (
@@ -271,8 +346,8 @@ export default function ProgettoDetail() {
                 <div style={{ paddingBottom: i < timelineSteps.length - 1 ? 24 : 0 }}>
                   <div
                     style={{
-                      fontSize: step.current ? 15 : 13.5,
-                      fontWeight: step.current ? 700 : 500,
+                      fontSize: i === currentStep ? 15 : 13.5,
+                      fontWeight: i === currentStep ? 700 : 500,
                       color: step.done ? 'var(--ink)' : 'var(--muted)',
                       marginBottom: 3,
                     }}
