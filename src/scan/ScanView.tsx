@@ -49,8 +49,7 @@ export default function ScanView({ onClose }: { onClose?: () => void }) {
       .then(stream => {
         if (cancelled) { stream.getTracks().forEach(t => t.stop()); return }
         streamRef.current = stream
-        if (videoRef.current) { videoRef.current.srcObject = stream }
-        setCameraOn(true)
+        setCameraOn(true) // mounts <video>; the stream is attached by the effect below
       })
       .catch(() => setCameraOn(false))
     return () => {
@@ -58,6 +57,16 @@ export default function ScanView({ onClose }: { onClose?: () => void }) {
       streamRef.current?.getTracks().forEach(t => t.stop())
     }
   }, [])
+
+  // Attach the stream only once the <video> element actually exists in the DOM.
+  // (videoRef is null inside the getUserMedia callback — the video mounts later.)
+  useEffect(() => {
+    const v = videoRef.current
+    if (cameraOn && v && streamRef.current) {
+      v.srcObject = streamRef.current
+      v.play().catch(() => {}) // iOS needs an explicit play(); muted+playsInline are set
+    }
+  }, [cameraOn, phase])
 
   function grabFrame(): string | undefined {
     const v = videoRef.current
@@ -125,9 +134,24 @@ export default function ScanView({ onClose }: { onClose?: () => void }) {
   }
 
   return (
-    <div style={{ flex: 1, display: 'flex', flexDirection: 'column', gap: 16, minHeight: 0, overflow: 'auto' }}>
+    <div
+      style={{
+        // full-screen overlay — lifts the scan out of the 212px sidebar layout so
+        // it fills the whole viewport (essential on mobile), above the sidebar (z:2).
+        position: 'fixed',
+        inset: 0,
+        zIndex: 50,
+        background: 'linear-gradient(160deg, #0a2342, #081d3a 60%, #0a2645)',
+        display: 'flex',
+        flexDirection: 'column',
+        gap: 14,
+        padding:
+          'max(16px, env(safe-area-inset-top)) max(16px, env(safe-area-inset-right)) max(16px, env(safe-area-inset-bottom)) max(16px, env(safe-area-inset-left))',
+        overflow: 'auto',
+      }}
+    >
       {/* header row */}
-      <div style={{ display: 'flex', alignItems: 'center', gap: 12, flex: '0 0 auto' }}>
+      <div style={{ display: 'flex', alignItems: 'center', gap: 12, rowGap: 8, flexWrap: 'wrap', flex: '0 0 auto' }}>
         <Radar size={18} style={{ color: 'var(--cyan)' }} />
         <span style={{ fontFamily: 'var(--mono)', fontSize: 12, letterSpacing: '0.06em', color: 'var(--ink)' }}>
           SCAN & RICONOSCIMENTO CV
@@ -200,17 +224,17 @@ export default function ScanView({ onClose }: { onClose?: () => void }) {
 
       {/* RESULT — recognized object + 3D viewer */}
       {phase === 'result' && match && (
-        <div style={{ flex: 1, display: 'flex', gap: 16, minHeight: 0 }}>
+        <div style={{ flex: 1, display: 'flex', flexWrap: 'wrap', gap: 16, minHeight: 0 }}>
           {/* viewer */}
           {/* ponytail: procedural mesh for now. When /meshes/*.glb exist, add a
               modelUrl prop to PrintViewer3D (useGLTF branch) and pass
               match.entry.glb here — swap is localized to these two spots. */}
-          <div style={{ flex: '1 1 55%', position: 'relative', borderRadius: 18, overflow: 'hidden', border: '1px solid var(--line-2)', background: 'var(--bg-2)', minHeight: 320 }}>
+          <div style={{ flex: '1 1 340px', position: 'relative', borderRadius: 18, overflow: 'hidden', border: '1px solid var(--line-2)', background: 'var(--bg-2)', minHeight: 300 }}>
             <PrintViewer3D />
           </div>
 
           {/* metadata */}
-          <div style={{ flex: '1 1 45%', display: 'flex', flexDirection: 'column', gap: 14, minWidth: 0 }}>
+          <div style={{ flex: '1 1 300px', display: 'flex', flexDirection: 'column', gap: 14, minWidth: 0 }}>
             <GlassCard hero style={{ padding: 22, display: 'flex', flexDirection: 'column', gap: 14 }}>
               <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
                 <Check size={16} style={{ color: 'var(--cyan)' }} />
