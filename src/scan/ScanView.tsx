@@ -14,7 +14,7 @@ import { producers } from '../mock/user-pages'
 const THRESHOLD = 0.2
 const DEMO_LABEL = 'remote control'
 
-type Phase = 'capture' | 'scanning' | 'result' | 'nomatch' | 'match'
+type Phase = 'capture' | 'scanning' | 'confirm-object' | 'confirm-part' | 'result' | 'ai-generate' | 'match'
 
 const outlineBtn: React.CSSProperties = {
   display: 'flex', alignItems: 'center', gap: 8, background: 'transparent',
@@ -106,9 +106,9 @@ export default function ScanView({ onClose }: { onClose?: () => void }) {
     const entry = LIBRARY[top.label]
     if (entry && top.score >= THRESHOLD) {
       setMatch({ ...top, entry })
-      setPhase('result')
+      setPhase('confirm-object') // → confirm-part → result
     } else {
-      setPhase('nomatch')
+      setPhase('ai-generate')
     }
   }
 
@@ -222,66 +222,128 @@ export default function ScanView({ onClose }: { onClose?: () => void }) {
         </div>
       )}
 
-      {/* RESULT — recognized object + 3D viewer */}
-      {phase === 'result' && match && (
+      {/* CONFIRM (obj → part) → RESULT — shared viewer, phase-specific right panel */}
+      {(phase === 'confirm-object' || phase === 'confirm-part' || phase === 'result') && match && (
         <div style={{ flex: 1, display: 'flex', flexWrap: 'wrap', gap: 16, minHeight: 0 }}>
-          {/* viewer — loads the recognized object's scanned .glb */}
+          {/* viewer — stays mounted across the confirmation steps */}
           <div style={{ flex: '1 1 340px', position: 'relative', borderRadius: 18, overflow: 'hidden', border: '1px solid var(--line-2)', background: 'var(--bg-2)', minHeight: 300 }}>
             <PrintViewer3D modelUrl={match.entry.glb} />
           </div>
 
-          {/* metadata */}
           <div style={{ flex: '1 1 300px', display: 'flex', flexDirection: 'column', gap: 14, minWidth: 0 }}>
-            <GlassCard hero style={{ padding: 22, display: 'flex', flexDirection: 'column', gap: 14 }}>
-              <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-                <Check size={16} style={{ color: 'var(--cyan)' }} />
-                <span style={{ fontFamily: 'var(--mono)', fontSize: 11, letterSpacing: '0.06em', color: 'var(--muted)' }}>
-                  OGGETTO RICONOSCIUTO · {Math.round(match.score * 100)}%
-                </span>
-              </div>
-              <h2 style={{ fontSize: 22, fontWeight: 600, color: 'var(--ink)', textTransform: 'capitalize' }}>{match.label}</h2>
-              {[
-                { k: 'PEZZO', v: match.entry.part },
-                { k: 'MATERIALE', v: match.entry.material },
-              ].map(r => (
-                <div key={r.k} style={{ display: 'flex', gap: 14 }}>
-                  <span style={{ fontFamily: 'var(--mono)', fontSize: 10, color: 'var(--muted)', letterSpacing: '0.06em', width: 84, flex: '0 0 auto', paddingTop: 2 }}>{r.k}</span>
-                  <span style={{ fontSize: 13.5, fontWeight: 600, color: 'var(--ink)' }}>{r.v}</span>
+            {/* STEP 1 — confirm the recognized object */}
+            {phase === 'confirm-object' && (
+              <>
+                <GlassCard hero style={{ padding: 22, display: 'flex', flexDirection: 'column', gap: 12 }}>
+                  <span style={{ fontFamily: 'var(--mono)', fontSize: 11, letterSpacing: '0.06em', color: 'var(--muted)' }}>
+                    OGGETTO RILEVATO · {Math.round(match.score * 100)}%
+                  </span>
+                  <h2 style={{ fontSize: 21, fontWeight: 600, color: 'var(--ink)', lineHeight: 1.2 }}>{match.entry.name}</h2>
+                  <p style={{ fontSize: 13, color: 'var(--muted)', lineHeight: 1.55 }}>
+                    Riconosciuto come <span style={{ color: 'var(--cyan)', textTransform: 'capitalize' }}>{match.label}</span>. Con questa forma corrisponde a un prodotto presente in archivio.
+                  </p>
+                  <p style={{ fontSize: 14, fontWeight: 600, color: 'var(--ink)', marginTop: 2 }}>È corretto?</p>
+                </GlassCard>
+                <div style={{ display: 'flex', gap: 10, flexWrap: 'wrap' }}>
+                  <PrimaryButton onClick={() => setPhase('confirm-part')}><Check size={16} /> Sì, è questo</PrimaryButton>
+                  <button style={outlineBtn} onClick={() => setPhase('ai-generate')}>No, è un altro</button>
                 </div>
-              ))}
-              <p style={{ fontSize: 12.5, color: 'var(--muted)', lineHeight: 1.55, borderTop: '1px solid var(--line)', paddingTop: 12 }}>
-                {match.entry.note}
-              </p>
-            </GlassCard>
+                <button style={{ ...outlineBtn, color: 'var(--muted)', borderColor: 'var(--line)' }} onClick={reset}>
+                  <RotateCcw size={15} /> Nuova scansione
+                </button>
+              </>
+            )}
 
-            <div style={{ display: 'flex', gap: 10 }}>
-              <PrimaryButton onClick={() => setPhase('match')}>
-                <Radar size={16} /> Cerca nella rete
-              </PrimaryButton>
-              <button style={outlineBtn}><Sparkles size={16} /> Genera con AI</button>
-            </div>
-            <button style={{ ...outlineBtn, color: 'var(--muted)', borderColor: 'var(--line)' }} onClick={reset}>
-              <RotateCcw size={15} /> Nuova scansione
-            </button>
+            {/* STEP 2 — confirm the available part */}
+            {phase === 'confirm-part' && (
+              <>
+                <GlassCard hero style={{ padding: 22, display: 'flex', flexDirection: 'column', gap: 12 }}>
+                  <span style={{ fontFamily: 'var(--mono)', fontSize: 11, letterSpacing: '0.06em', color: 'var(--muted)' }}>
+                    RICAMBI IN ARCHIVIO · 1
+                  </span>
+                  <p style={{ fontSize: 13, color: 'var(--muted)', lineHeight: 1.55 }}>
+                    Per <span style={{ color: 'var(--ink)', fontWeight: 600 }}>{match.entry.name}</span> a database abbiamo un solo ricambio:
+                  </p>
+                  <div style={{ padding: 14, borderRadius: 'var(--radius-sm)', border: '1px solid var(--line)', background: 'var(--glass)', display: 'flex', flexDirection: 'column', gap: 8 }}>
+                    <span style={{ fontSize: 15, fontWeight: 600, color: 'var(--cyan)' }}>{match.entry.part}</span>
+                    <span style={{ fontFamily: 'var(--mono)', fontSize: 11, color: 'var(--muted)' }}>MATERIALE · {match.entry.material}</span>
+                  </div>
+                  <p style={{ fontSize: 14, fontWeight: 600, color: 'var(--ink)', marginTop: 2 }}>È il pezzo che ti serve?</p>
+                </GlassCard>
+                <div style={{ display: 'flex', gap: 10, flexWrap: 'wrap' }}>
+                  <PrimaryButton onClick={() => setPhase('result')}><Check size={16} /> Sì, è questo</PrimaryButton>
+                  <button style={outlineBtn} onClick={() => setPhase('ai-generate')}><Sparkles size={16} /> No, altro pezzo</button>
+                </div>
+                <button style={{ ...outlineBtn, color: 'var(--muted)', borderColor: 'var(--line)' }} onClick={() => setPhase('confirm-object')}>
+                  ← Indietro
+                </button>
+              </>
+            )}
+
+            {/* STEP 3 — result */}
+            {phase === 'result' && (
+              <>
+                <GlassCard hero style={{ padding: 22, display: 'flex', flexDirection: 'column', gap: 14 }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                    <Check size={16} style={{ color: 'var(--cyan)' }} />
+                    <span style={{ fontFamily: 'var(--mono)', fontSize: 11, letterSpacing: '0.06em', color: 'var(--muted)' }}>
+                      RICAMBIO PRONTO
+                    </span>
+                  </div>
+                  <h2 style={{ fontSize: 22, fontWeight: 600, color: 'var(--ink)' }}>{match.entry.part}</h2>
+                  {[
+                    { k: 'OGGETTO', v: match.entry.name },
+                    { k: 'MATERIALE', v: match.entry.material },
+                  ].map(r => (
+                    <div key={r.k} style={{ display: 'flex', gap: 14 }}>
+                      <span style={{ fontFamily: 'var(--mono)', fontSize: 10, color: 'var(--muted)', letterSpacing: '0.06em', width: 84, flex: '0 0 auto', paddingTop: 2 }}>{r.k}</span>
+                      <span style={{ fontSize: 13.5, fontWeight: 600, color: 'var(--ink)' }}>{r.v}</span>
+                    </div>
+                  ))}
+                  <p style={{ fontSize: 12.5, color: 'var(--muted)', lineHeight: 1.55, borderTop: '1px solid var(--line)', paddingTop: 12 }}>
+                    {match.entry.note}
+                  </p>
+                </GlassCard>
+                <div style={{ display: 'flex', gap: 10, flexWrap: 'wrap' }}>
+                  <PrimaryButton onClick={() => setPhase('match')}><Radar size={16} /> Cerca nella rete</PrimaryButton>
+                  <button style={outlineBtn}><Sparkles size={16} /> Genera con AI</button>
+                </div>
+                <button style={{ ...outlineBtn, color: 'var(--muted)', borderColor: 'var(--line)' }} onClick={reset}>
+                  <RotateCcw size={15} /> Nuova scansione
+                </button>
+              </>
+            )}
           </div>
         </div>
       )}
 
-      {/* NOMATCH — in-palette dashed-cyan alert */}
-      {phase === 'nomatch' && (
+      {/* AI-GENERATE — part not in archive → AI reconstruction + extra scans (mock) */}
+      {phase === 'ai-generate' && (
         <div style={{ flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: 18 }}>
-          <div style={{ maxWidth: 460, textAlign: 'center', padding: 28, borderRadius: 18, border: '1.5px dashed var(--line-2)', background: 'var(--glass)' }}>
-            <Sparkles size={34} style={{ color: 'var(--cyan)', marginBottom: 12 }} />
-            <h3 style={{ fontSize: 18, fontWeight: 600, color: 'var(--ink)', marginBottom: 8 }}>Nessun ricambio in libreria</h3>
+          <div style={{ maxWidth: 520, textAlign: 'center', padding: 28, borderRadius: 18, border: '1.5px dashed var(--line-2)', background: 'var(--glass)', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 12 }}>
+            <Sparkles size={34} style={{ color: 'var(--cyan)' }} />
+            <h3 style={{ fontSize: 18, fontWeight: 600, color: 'var(--ink)' }}>Generazione AI del pezzo</h3>
             <p style={{ fontSize: 13, color: 'var(--muted)', lineHeight: 1.55 }}>
-              L'oggetto non corrisponde a un modello certificato. Possiamo generarlo con AI e attivare una
-              <span style={{ color: 'var(--cyan)' }}> bounty all'esperto</span> della rete per ricostruirlo.
+              Il pezzo che ti serve non è ancora in archivio. TESEO può ricostruirlo con AI: servono alcune
+              <span style={{ color: 'var(--cyan)' }}> scansioni aggiuntive del componente</span> da più angolazioni.
             </p>
+            <div style={{ display: 'flex', gap: 8, alignItems: 'center', fontFamily: 'var(--mono)', fontSize: 11, color: 'var(--muted)' }}>
+              {[1, 2, 3].map(n => (
+                <span key={n} style={{ width: 30, height: 30, borderRadius: 8, border: '1px dashed var(--line-2)', display: 'grid', placeItems: 'center' }}>{n}</span>
+              ))}
+              <span>scansione 0 / 3</span>
+            </div>
+            <p style={{ fontSize: 12, color: 'var(--muted)', fontStyle: 'italic', lineHeight: 1.5 }}>
+              Al termine il modello viene validato e messo in coda; puoi attivare una <span style={{ color: 'var(--cyan)' }}>bounty all'esperto</span> della rete.
+            </p>
+            <button style={{ ...outlineBtn, opacity: 0.55, cursor: 'not-allowed' }} disabled>
+              <Camera size={16} /> Avvia scansione componente
+            </button>
+            <span style={{ fontFamily: 'var(--mono)', fontSize: 10, color: 'var(--muted-2)' }}>modulo non attivo in questa demo</span>
           </div>
-          <div style={{ display: 'flex', gap: 10 }}>
-            <PrimaryButton onClick={reset}><RotateCcw size={16} /> Riprova</PrimaryButton>
-            <button style={outlineBtn}><Sparkles size={16} /> Genera + bounty</button>
-          </div>
+          <button style={{ ...outlineBtn, color: 'var(--muted)', borderColor: 'var(--line)' }} onClick={reset}>
+            <RotateCcw size={15} /> Nuova scansione
+          </button>
         </div>
       )}
 
@@ -289,7 +351,7 @@ export default function ScanView({ onClose }: { onClose?: () => void }) {
       {phase === 'match' && match && (
         <div style={{ flex: 1, display: 'flex', flexDirection: 'column', gap: 12, minHeight: 0 }}>
           <span style={{ fontFamily: 'var(--mono)', fontSize: 11, letterSpacing: '0.06em', color: 'var(--muted)' }}>
-            NODI COMPATIBILI · {match.entry.material} · {match.label}
+            NODI COMPATIBILI · {match.entry.part} · {match.entry.material}
           </span>
           <div style={{ flex: 1, display: 'flex', flexDirection: 'column', gap: 11, overflow: 'auto' }}>
             {producers.map((p, i) => {

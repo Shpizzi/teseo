@@ -2,6 +2,7 @@
 // The CLIP recognition is real; the mesh is pre-authored (image-to-3D is
 // server-side and too fragile for a live demo). Label → mesh is a direct lookup.
 export type LibraryEntry = {
+  name: string // human product name shown in the confirmation step
   glb: string // pre-scanned mesh under /public/meshes (added separately)
   part: string // which broken/replaceable part
   material: string
@@ -10,30 +11,35 @@ export type LibraryEntry = {
 
 export const LIBRARY: Record<string, LibraryEntry> = {
   'remote control': {
+    name: 'Telecomando Amazon Fire TV Stick',
     glb: '/meshes/remote.glb',
     part: 'Coperchio vano batterie',
     material: 'ABS',
     note: 'Telecomando Fire TV: coperchio batterie smarrito, ricostruito da scan.',
   },
   'moka pot': {
+    name: 'Moka / caffettiera',
     glb: '/meshes/moka.glb',
     part: 'Manico / pomello (rottura comune)',
     material: 'PETG',
     note: 'Modello fuori produzione. Ricambio ricostruibile da scan + libreria community.',
   },
   'coffee mug': {
+    name: 'Tazza',
     glb: '/meshes/mug.glb',
     part: 'Manico',
     material: 'PLA',
     note: 'Manico staccato: ristampabile con aggancio a incastro.',
   },
   'over-ear headphones': {
+    name: 'Cuffie over-ear',
     glb: '/meshes/cuffie.glb',
     part: 'Cerniera archetto',
     material: 'PETG',
     note: 'Cerniera fragile: rinforzo strutturale nel ricambio community.',
   },
   'eyeglasses': {
+    name: 'Occhiali',
     glb: '/meshes/occhiali.glb',
     part: 'Astina / cerniera',
     material: 'Nylon PA12',
