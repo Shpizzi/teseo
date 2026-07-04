@@ -11,7 +11,7 @@ export type HistoryProject = {
 }
 
 export const historyProjects: HistoryProject[] = [
-  { id: 'h1', name: 'Ricambio cardine finestra', fablab: 'MakerSpace Navigli', material: 'PLA', completedDate: '12 mag 2025', status: 'completed', cost: '€ 14.50' },
+  { id: 'h1', name: 'Maniglia armadio cucina', fablab: 'MakerSpace Navigli', material: 'PLA', completedDate: '12 mag 2025', status: 'completed', cost: '€ 14.50' },
   { id: 'h2', name: 'Supporto smartphone bici', fablab: 'FabLab Bovisa', material: 'PETG', completedDate: '03 apr 2025', status: 'completed', cost: '€ 8.00' },
   { id: 'h3', name: 'Coperchio router v1', fablab: 'FabLab Lambrate', material: 'ABS', completedDate: '18 mar 2025', status: 'cancelled', cost: '—' },
 ]

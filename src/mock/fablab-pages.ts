@@ -14,6 +14,7 @@ export type OrderDetail = Omit<Order, 'customer'> & {
   timeline: { label: string; date: string; done: boolean }[]
 }
 
+// Timeline con vocabolario unico: Ordine ricevuto → Accettato → In stampa → Pronto → Ritirato
 export const orderDetails: OrderDetail[] = [
   {
     id: 'o1', ordNum: '52943884', name: 'Ingranaggio di ricambio',
@@ -24,9 +25,25 @@ export const orderDetails: OrderDetail[] = [
     notes: 'Urgente per fermo macchina in produzione. Tolleranza ±0.1mm richiesta.',
     timeline: [
       { label: 'Ordine ricevuto', date: '28 mag 12:14', done: true },
-      { label: 'In valutazione', date: '28 mag 12:14', done: true },
+      { label: 'Accettato', date: '—', done: false },
       { label: 'In stampa', date: '—', done: false },
       { label: 'Pronto', date: '—', done: false },
+      { label: 'Ritirato', date: '—', done: false },
+    ]
+  },
+  {
+    id: 'o2', ordNum: '52943880', name: 'Custodia sensore IoT (×4)',
+    customer: { name: 'Marco T.', email: 'marco.t@outlook.it', phone: '+39 348 5567 210', initials: 'MT' },
+    material: 'PETG', status: 'new', deadline: 'week', deadlineLabel: 'entro 3 giorni',
+    fileSize: '5.1 MB', dimensions: '80 × 55 × 30 mm', infill: 35, layerHeight: '0.2 mm',
+    supports: false, estimatedTime: '3h 15m', estimatedCost: '€ 16.00',
+    notes: 'Quattro copie identiche. Colore indifferente, purché opaco.',
+    timeline: [
+      { label: 'Ordine ricevuto', date: '28 mag 09:30', done: true },
+      { label: 'Accettato', date: '—', done: false },
+      { label: 'In stampa', date: '—', done: false },
+      { label: 'Pronto', date: '—', done: false },
+      { label: 'Ritirato', date: '—', done: false },
     ]
   },
   {
@@ -41,6 +58,52 @@ export const orderDetails: OrderDetail[] = [
       { label: 'Accettato', date: '15 mag 09:45', done: true },
       { label: 'In stampa', date: '15 mag 22:00', done: true },
       { label: 'Pronto', date: '—', done: false },
+      { label: 'Ritirato', date: '—', done: false },
+    ]
+  },
+  {
+    id: 'o4', ordNum: '52943879', name: 'Coperchio stagno IP67',
+    customer: { name: 'Idroservice', email: 'ordini@idroservice.it', phone: '+39 02 4471 8890', initials: 'ID' },
+    material: 'PETG', status: 'printing', deadline: 'week', deadlineLabel: 'domani',
+    fileSize: '7.9 MB', dimensions: '140 × 140 × 25 mm', infill: 45, layerHeight: '0.16 mm',
+    supports: true, estimatedTime: '9h 05m', estimatedCost: '€ 21.00',
+    notes: 'Guarnizione non inclusa: serve solo il coperchio.',
+    timeline: [
+      { label: 'Ordine ricevuto', date: '26 mag 15:20', done: true },
+      { label: 'Accettato', date: '26 mag 16:00', done: true },
+      { label: 'In stampa', date: '27 mag 08:15', done: true },
+      { label: 'Pronto', date: '—', done: false },
+      { label: 'Ritirato', date: '—', done: false },
+    ]
+  },
+  {
+    id: 'o5', ordNum: '52943871', name: 'Set targhette segnaletiche',
+    customer: { name: 'Comune di Milano', email: 'acquisti@comune.milano.it', phone: '+39 02 0202', initials: 'CM' },
+    material: 'PLA', status: 'ready', deadline: 'week', deadlineLabel: 'ritiro oggi',
+    fileSize: '3.2 MB', dimensions: '200 × 60 × 4 mm', infill: 100, layerHeight: '0.2 mm',
+    supports: false, estimatedTime: '45m', estimatedCost: '€ 12.00',
+    notes: '',
+    timeline: [
+      { label: 'Ordine ricevuto', date: '24 mag 10:00', done: true },
+      { label: 'Accettato', date: '24 mag 11:30', done: true },
+      { label: 'In stampa', date: '25 mag 09:00', done: true },
+      { label: 'Pronto', date: '27 mag 17:40', done: true },
+      { label: 'Ritirato', date: '—', done: false },
+    ]
+  },
+  {
+    id: 'o6', ordNum: '52943865', name: 'Prototipo impugnatura',
+    customer: { name: 'Lab Polimi', email: 'lab.proto@polimi.it', phone: '+39 02 2399 1234', initials: 'LP' },
+    material: 'Resina', status: 'error', deadline: 'week', deadlineLabel: 'entro 3 giorni',
+    fileSize: '11.4 MB', dimensions: '110 × 40 × 35 mm', infill: 100, layerHeight: '0.05 mm',
+    supports: true, estimatedTime: '6h 30m', estimatedCost: '€ 28.00',
+    notes: 'Resina esaurita a metà stampa: serve ricarica e riavvio del job.',
+    timeline: [
+      { label: 'Ordine ricevuto', date: '22 mag 14:10', done: true },
+      { label: 'Accettato', date: '22 mag 15:00', done: true },
+      { label: 'In stampa', date: '23 mag 07:30', done: true },
+      { label: 'Pronto', date: '—', done: false },
+      { label: 'Ritirato', date: '—', done: false },
     ]
   },
 ]
