@@ -1,7 +1,5 @@
-import { Plus, Sun, Clock, CheckCircle2, Bookmark, ScanLine, Bell, Star } from 'lucide-react'
+import { Plus, Sun, Clock, CheckCircle2, Bookmark, Star } from 'lucide-react'
 import { useNavigate } from 'react-router-dom'
-import SearchBar from '../../components/SearchBar'
-import IconButton from '../../components/IconButton'
 import PrimaryButton from '../../components/PrimaryButton'
 import KpiCard from '../../components/KpiCard'
 import GlassCard from '../../components/GlassCard'
@@ -51,17 +49,10 @@ export default function Dashboard() {
               letterSpacing: '0.02em',
             }}
           >
-            3 PROGETTI IN LAVORAZIONE · 1 PRONTO AL RITIRO
+            2 STAMPE IN CORSO · 1 PRONTO AL RITIRO
           </p>
         </div>
         <div style={{ flex: 1 }} />
-        <SearchBar placeholder="Cerca un modello o un produttore…" />
-        <IconButton title="Scansiona">
-          <ScanLine size={19} />
-        </IconButton>
-        <IconButton title="Notifiche" badge={2}>
-          <Bell size={19} />
-        </IconButton>
         <PrimaryButton onClick={() => navigate('/app/new')}>
           <Plus size={18} />
           Nuova stampa
@@ -70,7 +61,7 @@ export default function Dashboard() {
 
       {/* ── KPI strip ── */}
       <div
-        className="anim-fadeUp-d1"
+        className="anim-fadeUp"
         style={{
           display: 'grid',
           gridTemplateColumns: 'repeat(4,1fr)',
@@ -92,7 +83,7 @@ export default function Dashboard() {
 
       {/* ── Main grid ── */}
       <div
-        className="anim-fadeUp-d2"
+        className="anim-fadeUp"
         style={{
           flex: 1,
           display: 'grid',
@@ -270,18 +261,6 @@ export default function Dashboard() {
               position: 'relative',
             }}
           >
-            {/* Dashed inset */}
-            <div
-              style={{
-                position: 'absolute',
-                inset: 7,
-                border: '1px dashed var(--line)',
-                borderRadius: 13,
-                pointerEvents: 'none',
-                opacity: 0.45,
-              }}
-            />
-
             {/* Top row */}
             <div
               style={{
@@ -318,18 +297,6 @@ export default function Dashboard() {
               >
                 Pronto al ritiro
               </h4>
-              <span
-                style={{
-                  color: 'var(--cyan)',
-                  fontSize: 10.5,
-                  fontWeight: 700,
-                  marginLeft: 'auto',
-                  fontFamily: 'var(--mono)',
-                  letterSpacing: '0.1em',
-                }}
-              >
-                ORA
-              </span>
             </div>
 
             <p

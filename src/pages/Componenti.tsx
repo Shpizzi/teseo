@@ -1,4 +1,4 @@
-import { Home, FolderKanban, Users, Bell, Printer, Package, TrendingUp } from 'lucide-react'
+import { Home, FolderKanban, Users, Bell, Printer, Package, TrendingUp, Check, Send, UploadCloud } from 'lucide-react'
 import GlassCard from '../components/GlassCard'
 import IconButton from '../components/IconButton'
 import KpiCard from '../components/KpiCard'
@@ -175,6 +175,164 @@ export default function Componenti() {
             <div className="mpin you" style={{ left: '62%', top: '70%' }}>
               <span className="pd" />
               <span className="t">Tu</span>
+            </div>
+          </div>
+        </Section>
+
+        {/* ============================================================== */}
+        {/* CANDIDATI — pattern ripetuti inline nelle pagine, non ancora   */}
+        {/* estratti come componenti. Esempi statici fedeli agli originali.*/}
+        {/* ============================================================== */}
+        <div style={{ borderTop: '1px dashed var(--line-2)', margin: '8px 0 40px', paddingTop: 32 }}>
+          <h2 style={{ fontSize: 22, fontWeight: 700, marginBottom: 4 }}>Candidati — non ancora componenti</h2>
+          <p style={{ color: 'var(--muted)', fontSize: 13, marginBottom: 36 }}>
+            Pattern ripetuti inline in 2+ pagine, pronti per l'estrazione. Accanto a ciascuno i file dove compaiono.
+          </p>
+        </div>
+
+        <Section label="C1 · PageHeader — titolo + sottotitolo mono + azioni · ~15 pagine">
+          <GlassCard style={{ padding: 20 }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 14 }}>
+              <div>
+                <h1 style={{ fontWeight: 600, fontSize: 25, letterSpacing: '-0.01em', color: 'var(--ink)' }}>Ordini</h1>
+                <p style={{ color: 'var(--muted)', fontSize: 12, marginTop: 3, fontFamily: 'var(--mono)', letterSpacing: '0.02em' }}>6 TOTALI · 2 NUOVI</p>
+              </div>
+              <div style={{ flex: 1 }} />
+              <SearchBar placeholder="Cerca…" className="hidden md:flex" />
+              <PrimaryButton>Nuova stampa</PrimaryButton>
+            </div>
+          </GlassCard>
+        </Section>
+
+        <Section label="C2 · SectionLabel — field label + card title · 10+ pagine">
+          <GlassCard style={{ padding: 20, display: 'grid', gap: 14 }}>
+            <div>
+              <div style={{ fontSize: 10, fontFamily: 'var(--mono)', color: 'var(--muted)', textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: 5 }}>Stato — variante A (field label)</div>
+              <div style={{ fontSize: 14, fontWeight: 600 }}>In stampa</div>
+            </div>
+            <h3 style={{ fontSize: 12, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.08em', color: 'var(--ink)' }}>Dettagli progetto — variante B (card title)</h3>
+          </GlassCard>
+        </Section>
+
+        <Section label="C3 · Avatar iniziali · 7 pagine">
+          <Row>
+            {[[36, 'FB'], [42, 'LC'], [48, 'MR']].map(([size, initials]) => (
+              <div key={initials as string} style={{ width: size as number, height: size as number, borderRadius: '50%', background: 'var(--glass-2)', border: '1px solid var(--line-2)', display: 'grid', placeItems: 'center', fontSize: (size as number) / 3, fontWeight: 700, fontFamily: 'var(--mono)', color: 'var(--cyan)' }}>
+                {initials}
+              </div>
+            ))}
+            <span style={{ fontSize: 12, color: 'var(--muted)' }}>36 / 42 / 48px</span>
+          </Row>
+        </Section>
+
+        <Section label="C4 · DeadlineChip — duplicato in 3 file fablab">
+          <Row>
+            {[['dl-urgent', 'OGGI 18:00'], ['dl-today', 'DOMANI'], ['dl-week', 'VEN 12/07']].map(([cls, label]) => (
+              <span key={cls} className={cls} style={{ fontFamily: 'var(--mono)', fontSize: 10, padding: '3px 8px', borderRadius: 5, display: 'inline-block', whiteSpace: 'nowrap' }}>{label}</span>
+            ))}
+          </Row>
+        </Section>
+
+        <Section label="C5 · FilterChip toggle · 4 pagine">
+          <Row>
+            {[['Tutti', true], ['FDM', false], ['Resina', false], ['Multicolor', false]].map(([label, active]) => (
+              <button key={label as string} style={{ padding: '6px 14px', borderRadius: 100, fontSize: 11, fontFamily: 'var(--mono)', fontWeight: 600, cursor: 'pointer', border: `1px solid ${active ? 'var(--cyan)' : 'var(--line)'}`, background: active ? 'var(--cyan)' : 'var(--glass)', color: active ? '#f4faed' : 'var(--muted)', transition: '0.18s', whiteSpace: 'nowrap' }}>
+                {label}
+              </button>
+            ))}
+          </Row>
+        </Section>
+
+        <Section label="C6 · Tabs con badge conteggio · Ordini + Dashboard fablab">
+          <Row>
+            {[['Tutti', 0, true], ['Nuovi', 2, false], ['In stampa', 3, false], ['Completati', 8, false]].map(([label, count, active]) => (
+              <button key={label as string} style={{ display: 'flex', alignItems: 'center', gap: 6, padding: '6px 13px', borderRadius: 100, border: active ? '1px solid var(--cyan)' : '1px solid var(--line)', background: active ? 'rgba(63,115,8,.10)' : 'transparent', color: active ? 'var(--cyan)' : 'var(--muted)', fontFamily: 'inherit', fontWeight: 600, fontSize: 12.5, cursor: 'pointer', transition: '0.18s' }}>
+                {label}
+                {(count as number) > 0 && (
+                  <span style={{ background: active ? 'var(--cyan)' : 'var(--glass-2)', color: active ? '#f4faed' : 'var(--muted)', fontFamily: 'var(--mono)', fontSize: 10, fontWeight: 700, padding: '1px 6px', borderRadius: 100 }}>{count}</span>
+                )}
+              </button>
+            ))}
+            <span style={{ background: 'var(--cyan)', color: '#f4faed', fontSize: 10, fontWeight: 700, fontFamily: 'var(--mono)', padding: '1px 7px', borderRadius: 100 }}>3</span>
+            <span style={{ fontSize: 12, color: 'var(--muted)' }}>← CountBadge (unread)</span>
+          </Row>
+        </Section>
+
+        <Section label="C7 · CtaButton forest + BackButton · 7 pagine">
+          <Row>
+            <button style={{ display: 'flex', alignItems: 'center', gap: 8, background: 'var(--forest)', color: '#fff', border: 'none', fontFamily: 'inherit', fontWeight: 700, fontSize: 14, padding: '0 20px', height: 44, borderRadius: 100, cursor: 'pointer', transition: '0.2s' }}
+              onMouseEnter={e => { e.currentTarget.style.background = 'var(--cyan)' }}
+              onMouseLeave={e => { e.currentTarget.style.background = 'var(--forest)' }}>
+              <Send size={16} /> Invia
+            </button>
+            <button style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--muted)', fontFamily: 'var(--mono)', fontSize: 12, padding: 0, display: 'flex', alignItems: 'center', gap: 6 }}>
+              ← Progetti
+            </button>
+          </Row>
+        </Section>
+
+        <Section label="C8 · TagChip statico · Produttori + CommunityDetail">
+          <Row>
+            {['FDM', 'SLA', 'PETG', 'multicolor'].map(tech => (
+              <span key={tech} style={{ fontSize: 10, fontFamily: 'var(--mono)', border: '1px solid var(--line)', borderRadius: 5, padding: '3px 8px', color: 'var(--muted)' }}>{tech}</span>
+            ))}
+          </Row>
+        </Section>
+
+        <Section label="C9 · Timeline verticale · ProgettoDetail + ComeFunziona">
+          <GlassCard style={{ padding: 20, maxWidth: 420 }}>
+            {[
+              { label: 'Ordine confermato', date: '28 GIU · 14:02', done: true, current: false },
+              { label: 'In stampa', date: '30 GIU · 09:15', done: true, current: true },
+              { label: 'Ritiro', date: 'STIMATO 05 LUG', done: false, current: false },
+            ].map((step, i, steps) => (
+              <div key={step.label} style={{ display: 'flex', gap: 14 }}>
+                <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', flex: '0 0 auto' }}>
+                  <div style={{ width: 10, height: 10, borderRadius: '50%', background: step.done ? 'var(--cyan)' : 'transparent', border: step.done ? 'none' : '1.5px solid var(--line-2)', marginTop: 3 }} />
+                  {i < steps.length - 1 && <div style={{ width: 1, flex: 1, minHeight: 32, background: 'var(--line)' }} />}
+                </div>
+                <div style={{ paddingBottom: i < steps.length - 1 ? 24 : 0 }}>
+                  <div style={{ fontSize: step.current ? 15 : 13.5, fontWeight: step.current ? 700 : 500, color: step.done ? 'var(--ink)' : 'var(--muted)', marginBottom: 3 }}>{step.label}</div>
+                  <div style={{ fontSize: 11, fontFamily: 'var(--mono)', color: 'var(--muted)' }}>{step.date}</div>
+                </div>
+              </div>
+            ))}
+          </GlassCard>
+        </Section>
+
+        <Section label="C10 · StepIndicator wizard · NuovaStampa">
+          <Row>
+            {[['Modello', 'done'], ['Produttore', 'current'], ['Conferma', 'todo']].map(([label, state], i) => (
+              <div key={label} style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+                {i > 0 && <div style={{ width: 36, height: 1, background: state === 'todo' ? 'var(--line)' : 'var(--cyan)' }} />}
+                <span style={{ width: 32, height: 32, borderRadius: '50%', display: 'grid', placeItems: 'center', fontFamily: 'var(--mono)', fontSize: 12, fontWeight: 700, background: state === 'done' ? 'var(--cyan)' : state === 'current' ? 'rgba(63,115,8,.12)' : 'transparent', border: state === 'todo' ? '1px solid var(--line-2)' : '1px solid var(--cyan)', color: state === 'done' ? '#f4faed' : state === 'current' ? 'var(--cyan)' : 'var(--muted)' }}>
+                  {state === 'done' ? <Check size={15} /> : i + 1}
+                </span>
+                <span style={{ fontSize: 12.5, fontWeight: 600, color: state === 'todo' ? 'var(--muted)' : 'var(--ink)' }}>{label}</span>
+              </div>
+            ))}
+          </Row>
+        </Section>
+
+        <Section label="C11 · ChatBubble · Messaggi">
+          <GlassCard style={{ padding: 20, display: 'grid', gap: 10, maxWidth: 520 }}>
+            <div style={{ justifySelf: 'start', maxWidth: '75%', background: 'var(--glass-2)', border: '1px solid var(--line)', borderRadius: '12px 12px 12px 4px', padding: '10px 14px' }}>
+              <div style={{ fontSize: 13.5 }}>Ciao! Il pezzo è in coda, partiamo domattina.</div>
+              <div style={{ fontSize: 10, fontFamily: 'var(--mono)', color: 'var(--muted)', marginTop: 4 }}>09:41</div>
+            </div>
+            <div style={{ justifySelf: 'end', maxWidth: '75%', background: 'var(--forest)', color: '#fff', borderRadius: '12px 12px 4px 12px', padding: '10px 14px' }}>
+              <div style={{ fontSize: 13.5 }}>Perfetto, grazie mille!</div>
+              <div style={{ fontSize: 10, fontFamily: 'var(--mono)', color: 'rgba(255,255,255,.55)', marginTop: 4 }}>09:44</div>
+            </div>
+          </GlassCard>
+        </Section>
+
+        <Section label="C12 · Dropzone upload · NuovaStampa">
+          <div style={{ border: '2px dashed var(--line-2)', borderRadius: 'var(--radius)', height: 180, display: 'grid', placeItems: 'center', color: 'var(--muted)', background: 'var(--glass)' }}>
+            <div style={{ textAlign: 'center' }}>
+              <UploadCloud size={28} style={{ color: 'var(--cyan)', margin: '0 auto 8px' }} />
+              <div style={{ fontWeight: 600, fontSize: 14, color: 'var(--ink)' }}>Trascina qui il tuo file STL</div>
+              <div style={{ fontFamily: 'var(--mono)', fontSize: 11, marginTop: 4 }}>.STL · .OBJ · .3MF — MAX 100MB</div>
             </div>
           </div>
         </Section>

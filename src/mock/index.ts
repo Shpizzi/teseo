@@ -61,10 +61,10 @@ export const userProjects: Project[] = [
 ]
 
 export const userKpis: KpiData[] = [
-  { value: '03', label: 'Progetti attivi', trend: '+2', trendUp: true },
+  { value: '03', label: 'Progetti attivi' },
   { value: '01', label: 'In attesa di produttore' },
-  { value: '01', label: 'Pronti al ritiro', trend: 'NEW', trendUp: true },
-  { value: '128', label: 'Modelli salvati' },
+  { value: '01', label: 'Pronti al ritiro' },
+  { value: '06', label: 'Modelli salvati' },
 ]
 
 export const nearbyProducers: NearbyProducer[] = [
@@ -82,6 +82,14 @@ export const nearbyProducers: NearbyProducer[] = [
     distance: '4.1 km',
     technologies: 'FDM, Laser',
     rating: 4.9,
+    available: true,
+  },
+  {
+    id: 'fab3',
+    name: 'MakerSpace Navigli',
+    distance: '2.7 km',
+    technologies: 'FDM, SLA, SLS',
+    rating: 4.6,
     available: true,
   },
 ]
