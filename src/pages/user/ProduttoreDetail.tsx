@@ -1,14 +1,73 @@
+import { useEffect, useState } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
-import { Star, ArrowLeft, MapPin, Clock } from 'lucide-react'
+import { Star, ArrowLeft, MapPin, Clock, Images, X, ChevronLeft, ChevronRight } from 'lucide-react'
 import GlassCard from '../../components/GlassCard'
 import PrimaryButton from '../../components/PrimaryButton'
-import { producers, conversations } from '../../mock/user-pages'
+import { allProducers, conversations } from '../../mock/user-pages'
+
+type LightboxState = { photos: { src: string; by: string }[]; index: number }
+
+function Lightbox({ state, onChange, onClose }: { state: LightboxState; onChange: (i: number) => void; onClose: () => void }) {
+  const { photos, index } = state
+  const prev = () => onChange((index - 1 + photos.length) % photos.length)
+  const next = () => onChange((index + 1) % photos.length)
+
+  useEffect(() => {
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') onClose()
+      if (e.key === 'ArrowLeft') prev()
+      if (e.key === 'ArrowRight') next()
+    }
+    window.addEventListener('keydown', onKey)
+    return () => window.removeEventListener('keydown', onKey)
+  })
+
+  const navBtn: React.CSSProperties = {
+    background: 'rgba(255,255,255,.1)', border: '1px solid rgba(255,255,255,.25)', borderRadius: '50%',
+    width: 42, height: 42, display: 'grid', placeItems: 'center', cursor: 'pointer', color: '#fff', flex: '0 0 auto',
+  }
+
+  return (
+    <div
+      onClick={onClose}
+      style={{
+        position: 'fixed', inset: 0, zIndex: 100, background: 'rgba(9,15,5,.88)',
+        display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 18, padding: 32,
+      }}
+    >
+      <button aria-label="Chiudi" onClick={onClose} style={{ ...navBtn, position: 'absolute', top: 20, right: 20 }}>
+        <X size={18} />
+      </button>
+      {photos.length > 1 && (
+        <button aria-label="Precedente" onClick={e => { e.stopPropagation(); prev() }} style={navBtn}>
+          <ChevronLeft size={20} />
+        </button>
+      )}
+      <figure onClick={e => e.stopPropagation()} style={{ margin: 0, maxWidth: 'min(920px, 80vw)', textAlign: 'center' }}>
+        <img
+          src={photos[index].src}
+          alt={photos[index].by}
+          style={{ maxWidth: '100%', maxHeight: '78vh', borderRadius: 12, display: 'block' }}
+        />
+        <figcaption style={{ fontFamily: 'var(--mono)', fontSize: 11, color: 'rgba(255,255,255,.7)', marginTop: 10, letterSpacing: '0.04em' }}>
+          {photos[index].by} · {index + 1}/{photos.length}
+        </figcaption>
+      </figure>
+      {photos.length > 1 && (
+        <button aria-label="Successiva" onClick={e => { e.stopPropagation(); next() }} style={navBtn}>
+          <ChevronRight size={20} />
+        </button>
+      )}
+    </div>
+  )
+}
 
 export default function ProduttoreDetail() {
   const { id } = useParams<{ id: string }>()
   const navigate = useNavigate()
+  const [lightbox, setLightbox] = useState<LightboxState | null>(null)
 
-  const producer = producers.find(p => p.id === id)
+  const producer = allProducers.find(p => p.id === id)
 
   if (!producer) {
     return (
@@ -54,11 +113,27 @@ export default function ProduttoreDetail() {
 
       {/* Header card: foto + info, stile scheda Google Maps */}
       <GlassCard hero style={{ padding: 0, display: 'flex', overflow: 'hidden', flex: '0 0 auto' }}>
-        <img
-          src={producer.photo}
-          alt={producer.name}
-          style={{ width: 260, height: 148, objectFit: 'cover', flex: '0 0 auto', borderRight: '1px solid var(--line)' }}
-        />
+        <div
+          onClick={() => setLightbox({ photos: producer.gallery, index: 0 })}
+          style={{ position: 'relative', width: 260, height: 148, flex: '0 0 auto', borderRight: '1px solid var(--line)', cursor: 'pointer' }}
+        >
+          <img
+            src={producer.photo}
+            alt={producer.name}
+            style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }}
+          />
+          <span
+            style={{
+              position: 'absolute', bottom: 10, left: 10,
+              display: 'inline-flex', alignItems: 'center', gap: 6,
+              background: 'rgba(9,15,5,.72)', color: '#fff', borderRadius: 100,
+              padding: '6px 12px', fontFamily: 'var(--mono)', fontSize: 10.5, fontWeight: 600, letterSpacing: '0.04em',
+            }}
+          >
+            <Images size={12} />
+            APRI GALLERY ({producer.gallery.length})
+          </span>
+        </div>
         <div style={{ flex: 1, padding: '20px 24px', display: 'flex', flexDirection: 'column', gap: 8, minWidth: 0 }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
             <div
@@ -113,8 +188,8 @@ export default function ProduttoreDetail() {
         </div>
       </GlassCard>
 
-      {/* 3-col grid: info generali · galleria · recensioni */}
-      <div style={{ flex: 1, display: 'grid', gridTemplateColumns: '1.2fr 1fr 1fr', gap: 16, minHeight: 0 }}>
+      {/* 2-col grid: info generali · recensioni (la galleria si apre dalla foto in alto) */}
+      <div style={{ flex: 1, display: 'grid', gridTemplateColumns: '1.2fr 1fr', gap: 16, minHeight: 0 }}>
 
         {/* Col 1: blocco info generale */}
         <GlassCard style={{ padding: 22, display: 'flex', flexDirection: 'column', gap: 16, overflow: 'auto' }}>
@@ -178,35 +253,7 @@ export default function ProduttoreDetail() {
           </div>
         </GlassCard>
 
-        {/* Col 2: galleria — foto del lab + foto mandate dagli utenti */}
-        <GlassCard style={{ padding: 22, display: 'flex', flexDirection: 'column', gap: 14, overflow: 'auto' }}>
-          <h3 style={{ fontSize: 12, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.08em', color: 'var(--ink)' }}>
-            Galleria
-          </h3>
-          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10 }}>
-            {producer.gallery.map((g, i) => (
-              <figure key={i} style={{ margin: 0, ...(i === 0 ? { gridColumn: '1 / -1' } : {}) }}>
-                <img
-                  src={g.src}
-                  alt={g.by}
-                  style={{
-                    width: '100%',
-                    aspectRatio: i === 0 ? '16 / 8' : '4 / 3',
-                    objectFit: 'cover',
-                    borderRadius: 10,
-                    border: '1px solid var(--line)',
-                    display: 'block',
-                  }}
-                />
-                <figcaption style={{ fontFamily: 'var(--mono)', fontSize: 9.5, color: 'var(--muted-2)', marginTop: 4, letterSpacing: '0.03em' }}>
-                  {g.by}
-                </figcaption>
-              </figure>
-            ))}
-          </div>
-        </GlassCard>
-
-        {/* Col 3: recensioni */}
+        {/* Col 2: recensioni */}
         <GlassCard style={{ padding: 22, display: 'flex', flexDirection: 'column', gap: 14, overflow: 'auto' }}>
           <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
             <h3 style={{ fontSize: 12, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.08em', color: 'var(--ink)' }}>
@@ -252,10 +299,39 @@ export default function ProduttoreDetail() {
                 ))}
               </div>
               <p style={{ fontSize: 12.5, color: 'var(--muted)', lineHeight: 1.55 }}>{r.text}</p>
+              {r.photos && (
+                <div style={{ display: 'flex', gap: 8, marginTop: 10 }}>
+                  {r.photos.map((src, pi) => (
+                    <img
+                      key={src}
+                      src={src}
+                      alt={`foto di ${r.author}`}
+                      onClick={() =>
+                        setLightbox({
+                          photos: r.photos!.map(s => ({ src: s, by: `foto di ${r.author}` })),
+                          index: pi,
+                        })
+                      }
+                      style={{
+                        width: 72, height: 56, objectFit: 'cover', borderRadius: 8,
+                        border: '1px solid var(--line)', cursor: 'zoom-in', display: 'block',
+                      }}
+                    />
+                  ))}
+                </div>
+              )}
             </div>
           ))}
         </GlassCard>
       </div>
+
+      {lightbox && (
+        <Lightbox
+          state={lightbox}
+          onChange={i => setLightbox({ ...lightbox, index: i })}
+          onClose={() => setLightbox(null)}
+        />
+      )}
     </>
   )
 }

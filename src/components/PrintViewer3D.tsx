@@ -1,6 +1,7 @@
 import { useRef, useMemo, Suspense } from 'react'
-import { Canvas, useFrame } from '@react-three/fiber'
+import { Canvas, useFrame, useLoader } from '@react-three/fiber'
 import { useGLTF, Html } from '@react-three/drei'
+import { STLLoader, OBJLoader } from 'three-stdlib'
 import * as THREE from 'three'
 
 // The displaced icosahedron mesh — byte-identical to prototype
@@ -140,20 +141,38 @@ function ProceduralMesh({ onProgressChange, progress, tone }: { onProgressChange
   return <PrintBody geo={geo} onProgressChange={onProgressChange} progress={progress} tone={tone} />
 }
 
+function pickFirstGeo(root: THREE.Object3D): THREE.BufferGeometry | undefined {
+  root.updateMatrixWorld(true)
+  let picked: THREE.BufferGeometry | undefined
+  root.traverse(o => {
+    const m = o as THREE.Mesh
+    if (m.isMesh && m.geometry && !picked) {
+      picked = m.geometry.clone()
+      picked.applyMatrix4(m.matrixWorld)
+    }
+  })
+  return picked
+}
+
 function LoadedMesh({ url, onProgressChange, progress, tone }: { url: string; onProgressChange: (p: number) => void; progress?: number; tone: Tone }) {
   const { scene } = useGLTF(url)
+  const geo = useMemo(
+    () => normalizeGeo(pickFirstGeo(scene) ?? new THREE.IcosahedronGeometry(1, 2)),
+    [scene],
+  )
+  return <PrintBody geo={geo} onProgressChange={onProgressChange} progress={progress} tone={tone} />
+}
+
+// Mesh grezze .stl / .obj (prototipi ricambi): stessa pipeline del .glb, senza conversione
+function LoadedRawMesh({ url, onProgressChange, progress, tone }: { url: string; onProgressChange: (p: number) => void; progress?: number; tone: Tone }) {
+  const isStl = /\.stl$/i.test(url)
+  const raw = useLoader(isStl ? STLLoader : OBJLoader, url) as THREE.BufferGeometry | THREE.Group
   const geo = useMemo(() => {
-    scene.updateMatrixWorld(true)
-    let picked: THREE.BufferGeometry | undefined
-    scene.traverse(o => {
-      const m = o as THREE.Mesh
-      if (m.isMesh && m.geometry && !picked) {
-        picked = m.geometry.clone()
-        picked.applyMatrix4(m.matrixWorld)
-      }
-    })
+    const picked = (raw as THREE.BufferGeometry).isBufferGeometry
+      ? (raw as THREE.BufferGeometry).clone()
+      : pickFirstGeo(raw as THREE.Group)
     return normalizeGeo(picked ?? new THREE.IcosahedronGeometry(1, 2))
-  }, [scene])
+  }, [raw])
   return <PrintBody geo={geo} onProgressChange={onProgressChange} progress={progress} tone={tone} />
 }
 
@@ -185,7 +204,11 @@ export default function PrintViewer3D({ onProgressChange, modelUrl, progress, to
           </Html>
         }
       >
-        {modelUrl ? <LoadedMesh url={modelUrl} onProgressChange={cb} progress={progress} tone={tone} /> : <ProceduralMesh onProgressChange={cb} progress={progress} tone={tone} />}
+        {modelUrl
+          ? /\.(stl|obj)$/i.test(modelUrl)
+            ? <LoadedRawMesh url={modelUrl} onProgressChange={cb} progress={progress} tone={tone} />
+            : <LoadedMesh url={modelUrl} onProgressChange={cb} progress={progress} tone={tone} />
+          : <ProceduralMesh onProgressChange={cb} progress={progress} tone={tone} />}
       </Suspense>
     </Canvas>
   )

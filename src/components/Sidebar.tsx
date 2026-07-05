@@ -15,12 +15,6 @@ type SidebarProps = {
   brand: {
     subtitle: string
   }
-  user: {
-    initials: string
-    name: string
-    role: string
-    href?: string
-  }
   // Variante scura (forest): usata dal ramo FabLab per distinguerlo
   // a colpo d'occhio dallo spazio utente.
   dark?: boolean
@@ -30,7 +24,7 @@ type SidebarProps = {
   onClose?: () => void
 }
 
-export default function Sidebar({ items, brand, user, dark, open, onClose }: SidebarProps) {
+export default function Sidebar({ items, brand, dark, open, onClose }: SidebarProps) {
   const location = useLocation()
   const isDrawer = onClose !== undefined
 
@@ -188,62 +182,6 @@ export default function Sidebar({ items, brand, user, dark, open, onClose }: Sid
         )
       })}
 
-      {/* Spacer */}
-      <div style={{ flex: 1 }} />
-
-      {/* User block */}
-      <Link
-        to={user.href ?? '#'}
-        onClick={onClose}
-        title="Profilo"
-        style={{
-          display: 'flex',
-          alignItems: 'center',
-          gap: 11,
-          padding: 9,
-          borderRadius: 12,
-          border: `1px solid ${c.line}`,
-          cursor: user.href ? 'pointer' : 'default',
-          textDecoration: 'none',
-          pointerEvents: user.href ? 'auto' : 'none',
-        }}
-      >
-        <span
-          style={{
-            width: 36,
-            height: 36,
-            borderRadius: '50%',
-            background: c.accentBg,
-            border: `1px solid ${c.line}`,
-            color: c.accent,
-            display: 'grid',
-            placeItems: 'center',
-            fontWeight: 700,
-            fontSize: 14,
-            flex: '0 0 auto',
-            fontFamily: 'var(--mono)',
-          }}
-        >
-          {user.initials}
-        </span>
-        <span>
-          <div style={{ fontSize: 13.5, fontWeight: 600, lineHeight: 1.2, color: c.ink }}>
-            {user.name}
-          </div>
-          <div
-            style={{
-              display: 'block',
-              color: c.muted,
-              fontSize: 10.5,
-              fontWeight: 500,
-              fontFamily: 'var(--mono)',
-              marginTop: 1,
-            }}
-          >
-            {user.role}
-          </div>
-        </span>
-      </Link>
     </>
   )
 

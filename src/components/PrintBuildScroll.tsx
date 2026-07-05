@@ -167,28 +167,13 @@ export default function PrintBuildScroll() {
               color: '#f4faed',
             }}
           >
-            Strato dopo strato.
+            Strato dopo strato
           </h2>
           <p style={{ fontSize: 15.5, color: 'rgba(244,250,237,.7)', lineHeight: 1.65, marginTop: 24, maxWidth: 400 }}>
-            Non ristampiamo l&apos;oggetto: stampiamo solo il pezzo che serve.
+            Non buttiamo l'oggetto intero, stampiamo solo il pezzo che serve.
             Il manico della moka si è rotto? La rete produce quello, in materiale
-            riciclato — e la tua moka torna sul fuoco.
+            riciclato e la tua moka torna sul fuoco.
           </p>
-          <span
-            style={{
-              display: 'inline-block',
-              marginTop: 26,
-              fontFamily: 'var(--mono)',
-              fontSize: 11,
-              letterSpacing: '0.1em',
-              color: 'var(--lemongrass)',
-              border: '1px solid rgba(178,235,118,.35)',
-              borderRadius: 6,
-              padding: '7px 12px',
-            }}
-          >
-            IN STAMPA: MANICO · PETG RICICLATO
-          </span>
         </div>
 
         {/* Canvas 3D */}

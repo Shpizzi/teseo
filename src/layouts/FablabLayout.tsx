@@ -56,7 +56,6 @@ export default function FablabLayout() {
           dark
           items={fablabNavItems}
           brand={{ subtitle: 'spazio produttore' }}
-          user={{ initials: 'T', name: 'Tillverka', role: 'account fablab' }}
           {...(isMobile ? { open, onClose: () => setOpen(false) } : {})}
         />
         <div

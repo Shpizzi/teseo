@@ -207,7 +207,7 @@ function ProblemClaim() {
         }}
       >
         L&apos;<span style={{ fontFamily: 'var(--mono)', color: 'var(--cyan)' }}>82%</span> di chi cerca un
-        ricambio non lo trova.
+        ricambio non lo trova
       </h2>
       <p style={{ fontSize: 17, color: 'var(--muted)', marginTop: 14, maxWidth: 560, margin: '14px auto 0', lineHeight: 1.6 }}>
         E l&apos;oggetto finisce in discarica per un pezzo da pochi grammi.
@@ -486,9 +486,6 @@ function AssistantCell({ started }: { started: boolean }) {
         </span>
         <div>
           <div style={{ color: '#fff', fontSize: 13, fontWeight: 600 }}>Teseo AI</div>
-          <div style={{ ...AIP_MONO, color: 'var(--lemongrass)', fontSize: 9.5, letterSpacing: '0.08em', textTransform: 'uppercase' }}>
-            Orchestratore · online
-          </div>
         </div>
       </div>
 
@@ -586,7 +583,7 @@ function ImpactBentoSection() {
           Stesso oggetto, due finali diversi
         </h2>
         <p style={{ fontSize: 16, color: 'var(--muted)', marginTop: 8, maxWidth: 560, margin: '8px auto 0' }}>
-          Una sedia con un componente rotto da 30 grammi. I numeri di cosa succede oggi — e di cosa succede con Teseo.
+          Esplora come Teseo cambia il destino di un oggetto rotto, riducendo sprechi e costi.
         </p>
       </div>
 
@@ -643,7 +640,6 @@ function ImpactBentoSection() {
             <span style={{ ...mono, fontSize: 34, fontWeight: 700, color: 'var(--ink)' }}>{s.v}</span>
             <div>
               <p style={{ fontSize: 13.5, color: 'var(--muted)', lineHeight: 1.5 }}>{s.l}</p>
-              <span style={{ ...mono, fontSize: 9.5, letterSpacing: '0.06em', textTransform: 'uppercase', color: 'var(--muted-2)' }}>Survey · 100 risposte · 2026</span>
             </div>
           </div>
         ))}

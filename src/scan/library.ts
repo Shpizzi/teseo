@@ -45,6 +45,28 @@ export const LIBRARY: Record<string, LibraryEntry> = {
     material: 'Nylon PA12',
     note: 'Astina rotta: ricambio su misura da scan del frontale.',
   },
+  // Prototipi reali (mesh .obj/.stl in public/meshes, il viewer li carica direttamente)
+  'water valve': {
+    name: 'Valvola a muro',
+    glb: '/meshes/valvola.obj',
+    part: 'Manopola / volantino',
+    material: 'PETG',
+    note: 'Volantino spanato: ricambio con innesto quadro rinforzato.',
+  },
+  'umbrella': {
+    name: 'Ombrello',
+    glb: '/meshes/ombrello.stl',
+    part: 'Snodo stecca',
+    material: 'Nylon PA12',
+    note: 'Snodo della stecca rotto: clip di riparazione dalla libreria community.',
+  },
+  'refrigerator': {
+    name: 'Frigorifero',
+    glb: '/meshes/frigo.stl',
+    part: 'Ricambio interno (balconcino / supporto)',
+    material: 'ABS',
+    note: 'Ricambio fuori produzione: ricostruito da scan, adatto a contatto alimentare con PETG.',
+  },
 }
 
 export const LABELS = Object.keys(LIBRARY)

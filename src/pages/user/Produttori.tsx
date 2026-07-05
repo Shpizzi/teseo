@@ -4,8 +4,7 @@ import { useNavigate } from 'react-router-dom'
 import SearchBar from '../../components/SearchBar'
 import GlassCard from '../../components/GlassCard'
 import FablabMap from '../../components/FablabMap'
-import { producers } from '../../mock/user-pages'
-import { milanoFablabs } from '../../mock/fablab-milano'
+import { allProducers } from '../../mock/user-pages'
 
 const techFilters = ['Tutti', 'FDM', 'Resina', 'SLA', 'Laser']
 const distFilters = ['< 2 km', '< 5 km', 'Tutti']
@@ -16,7 +15,7 @@ export default function Produttori() {
   const [query, setQuery] = useState('')
   const navigate = useNavigate()
 
-  const filtered = producers.filter(p => {
+  const filtered = allProducers.filter(p => {
     const techOk = activeTech === 'Tutti' || p.technologies.includes(activeTech)
     const distNum = parseFloat(p.distance)
     const distOk =
@@ -52,7 +51,7 @@ export default function Produttori() {
             Produttori vicini
           </h1>
           <p style={{ color: 'var(--muted)', fontSize: 12, marginTop: 3, fontFamily: 'var(--mono)', letterSpacing: '0.02em' }}>
-            {producers.length} FABLAB NEL TUO RAGGIO
+            {allProducers.length} FABLAB NEL TUO RAGGIO
           </p>
         </div>
         <div style={{ flex: 1 }} />
@@ -192,14 +191,11 @@ export default function Produttori() {
 
         {/* Right: mappa reale (MapLibre + OpenFreeMap) */}
         <GlassCard style={{ position: 'relative', overflow: 'hidden' }}>
-          {/* Mappa reale: i 4 profili in evidenza (cliccabili) + il resto della rete dal KMZ */}
+          {/* Mappa reale: tutta la rete, ogni pin apre il profilo */}
           <FablabMap
             pins={[
               { name: 'Tu', lng: 9.19, lat: 45.4685, you: true },
-              ...producers.map(p => ({ id: p.id, name: p.name, lng: p.lng, lat: p.lat })),
-              ...milanoFablabs
-                .filter(f => !producers.some(p => p.name === f.name))
-                .map(f => ({ name: f.name, lng: f.lng, lat: f.lat, compact: true })),
+              ...allProducers.map(p => ({ id: p.id, name: p.name, lng: p.lng, lat: p.lat })),
             ]}
             zoom={11.2}
             onPinClick={pid => navigate('/app/produttori/' + pid)}

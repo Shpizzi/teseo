@@ -65,7 +65,6 @@ export default function UserLayout() {
         <Sidebar
           items={userNavItems}
           brand={{ subtitle: 'spazio personale' }}
-          user={{ initials: 'F', name: 'Francesca R.', role: 'account base', href: '/app/profile' }}
           {...(isMobile ? { open, onClose: () => setOpen(false) } : {})}
         />
         <div

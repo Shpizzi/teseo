@@ -346,7 +346,6 @@ export default function Componenti() {
                 { label: 'Community', icon: <Users size={18} />, href: '#community', badge: 2 },
               ]}
               brand={{ subtitle: 'design system' }}
-              user={{ initials: 'LC', name: 'Luca Calvinoni', role: 'maker' }}
             />
           </div>
         </Section>

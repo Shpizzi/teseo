@@ -1,3 +1,5 @@
+import { milanoFablabs } from './fablab-milano'
+
 // ===== HISTORY PROJECTS =====
 
 export type HistoryProject = {
@@ -36,7 +38,7 @@ export type ProducerFull = {
   photo: string
   gallery: { src: string; by: string }[] // foto del lab + foto mandate dagli utenti
   materialRatings: { material: string; rating: number }[]
-  reviewsList: { author: string; date: string; rating: number; text: string }[]
+  reviewsList: { author: string; date: string; rating: number; text: string; photos?: string[] }[]
   address: string
   hours: string
 }
@@ -58,7 +60,7 @@ export const producers: ProducerFull[] = [
       { material: 'Nylon', rating: 4.5 },
     ],
     reviewsList: [
-      { author: 'Marco T.', date: 'giu 2026', rating: 5, text: 'Manico della moka stampato in un giorno, incastro perfetto al primo colpo.' },
+      { author: 'Marco T.', date: 'giu 2026', rating: 5, text: 'Manico della moka stampato in un giorno, incastro perfetto al primo colpo.', photos: ['/landing/fablab-d.jpg', '/landing/fablab-c.jpg'] },
       { author: 'Giulia P.', date: 'mag 2026', rating: 5, text: 'Super disponibili: mi hanno aiutato a scegliere il materiale giusto.' },
       { author: 'Roberto L.', date: 'apr 2026', rating: 4, text: 'Ottima qualità, tempi un filo più lunghi del previsto.' },
     ],
@@ -79,7 +81,7 @@ export const producers: ProducerFull[] = [
     ],
     reviewsList: [
       { author: 'Francesca R.', date: 'giu 2026', rating: 5, text: 'La statuetta è venuta identica al modello. Comunicazione perfetta in chat.' },
-      { author: 'Andrea S.', date: 'giu 2026', rating: 5, text: 'Cardine della finestra: 6 euro e mezza giornata. Incredibile.' },
+      { author: 'Andrea S.', date: 'giu 2026', rating: 5, text: 'Cardine della finestra: 6 euro e mezza giornata. Incredibile.', photos: ['/landing/fablab-e.jpg'] },
       { author: 'Paola N.', date: 'mag 2026', rating: 5, text: 'Velocissimi, il pezzo era pronto prima dell’ETA.' },
     ],
     address: 'Via Galileo Ferraris 1, Milano', hours: 'Lun–Sab 9:00–20:00',
@@ -99,7 +101,7 @@ export const producers: ProducerFull[] = [
       { material: 'Nylon', rating: 4.3 },
     ],
     reviewsList: [
-      { author: 'Elena V.', date: 'mag 2026', rating: 5, text: 'Ricambio in resina per un giocattolo: dettaglio pazzesco.' },
+      { author: 'Elena V.', date: 'mag 2026', rating: 5, text: 'Ricambio in resina per un giocattolo: dettaglio pazzesco.', photos: ['/landing/fablab-a.jpg'] },
       { author: 'Davide M.', date: 'apr 2026', rating: 4, text: 'Buon lavoro, il ritiro serale è comodissimo.' },
       { author: 'Simone C.', date: 'mar 2026', rating: 4, text: 'Consulenza sul materiale molto utile, prezzi onesti.' },
     ],
@@ -124,6 +126,83 @@ export const producers: ProducerFull[] = [
     address: 'Via Privata Simone Schiaffino 22-30, Milano', hours: 'Lun–Ven 18:00–23:00',
   },
 ]
+
+// ===== NETWORK PRODUCERS (derivati dal KMZ, dati mock deterministici) =====
+
+const YOU = { lng: 9.19, lat: 45.4685 } // posizione "Tu" sulla mappa
+const kmFromYou = (lng: number, lat: number) => {
+  const dx = (lng - YOU.lng) * 78.4 // km per grado di longitudine a ~45.5°N
+  const dy = (lat - YOU.lat) * 111.2
+  return Math.sqrt(dx * dx + dy * dy)
+}
+
+const hashOf = (s: string) => [...s].reduce((h, c) => h + c.charCodeAt(0), 0)
+
+const TECH_POOL = [['FDM'], ['FDM', 'Resina'], ['FDM', 'SLA'], ['FDM', 'Laser'], ['Resina', 'SLA']]
+const MATERIALS_BY_TECH: Record<string, string[]> = {
+  FDM: ['PLA', 'PETG', 'ABS'],
+  Resina: ['Resina'],
+  SLA: ['Resina'],
+  Laser: [],
+}
+const TIME_POOL = ['1-2 giorni', '2-3 giorni', '2-4 giorni', '3-5 giorni']
+const HOURS_POOL = ['Lun–Ven 9:00–18:00', 'Lun–Sab 10:00–19:00', 'Lun–Ven 9:30–18:30 · Sab 10:00–13:00', 'Mar–Sab 10:00–19:00']
+const PHOTO_POOL = ['/landing/fablab-a.jpg', '/landing/fablab-b.jpg', '/landing/fablab-c.jpg', '/landing/fablab-d.jpg', '/landing/fablab-e.jpg']
+const REVIEW_POOL = [
+  { author: 'Andrea S.', text: 'Stampa precisa e consegna nei tempi, tornerò.' },
+  { author: 'Chiara R.', text: 'Molto disponibili nel consigliare il materiale giusto.' },
+  { author: 'Paolo G.', text: 'Ricambio perfetto al primo tentativo, ottimo rapporto qualità/prezzo.' },
+  { author: 'Sara N.', text: 'Comunicazione chiara sullo stato della stampa.' },
+  { author: 'Matteo F.', text: 'Buona qualità, ritiro comodo vicino a casa.' },
+]
+const REVIEW_DATES = ['giu 2026', 'mag 2026', 'apr 2026', 'mar 2026']
+
+// ponytail: profili generati deterministicamente dal nome — sostituire con dati reali quando i fablab si registrano
+export const networkProducers: ProducerFull[] = milanoFablabs
+  .filter(f => !producers.some(p => f.name.toLowerCase().includes(p.name.toLowerCase())))
+  .map((f, i) => {
+    const h = hashOf(f.name)
+    const technologies = TECH_POOL[h % TECH_POOL.length]
+    const materials = [...new Set(technologies.flatMap(t => MATERIALS_BY_TECH[t]))]
+    const rating = Math.round((4.2 + (h % 8) / 10) * 10) / 10
+    const km = kmFromYou(f.lng, f.lat)
+    return {
+      id: `net${i + 1}`,
+      name: f.name,
+      distance: `${km.toFixed(1)} km`,
+      technologies,
+      rating,
+      reviews: 12 + (h % 130),
+      available: h % 3 !== 0,
+      city: f.address.split(', ').pop() ?? 'Milano',
+      completedJobs: 40 + ((h * 7) % 800),
+      avgTime: TIME_POOL[h % TIME_POOL.length],
+      materials,
+      description: `Fablab della rete TESEO in zona ${f.zone}. Stampa on-demand con ritiro in sede.`,
+      lng: f.lng,
+      lat: f.lat,
+      photo: PHOTO_POOL[i % PHOTO_POOL.length],
+      gallery: [
+        { src: PHOTO_POOL[i % PHOTO_POOL.length], by: f.name },
+        { src: PHOTO_POOL[(i + 2) % PHOTO_POOL.length], by: f.name },
+      ],
+      materialRatings: materials.map((m, j) => ({ material: m, rating: Math.round((rating - j * 0.1) * 10) / 10 })),
+      reviewsList: [0, 1].map(j => {
+        const r = REVIEW_POOL[(h + j * 2) % REVIEW_POOL.length]
+        return {
+          ...r,
+          date: REVIEW_DATES[(h + j) % REVIEW_DATES.length],
+          rating: 4 + ((h + j) % 2),
+          photos: j === 0 && h % 2 === 0 ? [PHOTO_POOL[(i + 3) % PHOTO_POOL.length]] : undefined,
+        }
+      }),
+      address: f.address,
+      hours: HOURS_POOL[h % HOURS_POOL.length],
+    }
+  })
+  .sort((a, b) => parseFloat(a.distance) - parseFloat(b.distance))
+
+export const allProducers: ProducerFull[] = [...producers, ...networkProducers]
 
 // ===== SAVED MODELS =====
 
