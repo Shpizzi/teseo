@@ -71,8 +71,8 @@ Palette ispirata a spade.com (luglio 2026): sage chiaro + verde moss/forest.
 NB: la variabile si chiama ancora `--cyan` per compatibilità storica, ma il valore è il verde moss.
 
 ```css
---bg:      #f4faed          /* sage-1: primary background */
---bg-2:    #f0fae6          /* sage-2: secondary background */
+--bg:      #fafcf5          /* off-white verde: primary background */
+--bg-2:    #f4f8ec          /* off-white verde 2: secondary background */
 --ink:     #090f05          /* near-black green: primary text */
 --cyan:    #3f7308          /* moss: brand accent (nome legacy!) */
 --forest:  #18280e          /* dark surfaces, primary buttons */
@@ -80,10 +80,10 @@ NB: la variabile si chiama ancora `--cyan` per compatibilità storica, ma il val
 --white:   #fff
 --muted:   rgba(9,15,5,.60)   /* secondary text */
 --muted-2: rgba(9,15,5,.40)   /* tertiary text */
---line:    #d8e5ca          /* sage-3: borders (weak) */
---line-2:  #b3c5a0          /* sage-4: borders (strong, interactive) */
+--line:    #e2e9d8          /* sage-3: borders (weak) */
+--line-2:  #c2cfb2          /* sage-4: borders (strong, interactive) */
 --glass:   #ffffff          /* card backgrounds */
---glass-2: #eaf6dc          /* card hover/active */
+--glass-2: #f1f6e8          /* card hover/active */
 --mono:    'IBM Plex Mono', monospace
 --radius:  12px
 --radius-sm: 8px
@@ -158,7 +158,7 @@ sticky pin) + clipping plane di `PrintViewer3D` (`buildDisplacedGeo` esportata).
   2. Add a `<Route path="<slug>" element={<PageName />} />` inside the matching layout in `src/App.tsx`
   3. Add a nav item to the relevant layout's sidebar items array
 - **CSS:** Blueprint background + grid stays in `src/index.css` global scope. Component-level glass/pill/reg-mark styles are in `@layer components` in `src/index.css`. Tailwind utilities for layout/spacing only.
-- **Palette spade**: sage (#f4faed), bianco, moss (#3f7308), forest (#18280e), lemongrass (#b2eb76). No blu, no colori caldi (il rosso #e40014 solo per errori).
+- **Palette spade**: off-white verde (#fafcf5), bianco, moss (#3f7308), forest (#18280e), lemongrass (#b2eb76). No blu, no colori caldi (il rosso #e40014 solo per errori).
 - **Fonts:** Urbanist for all body text. IBM Plex Mono for numbers, ETAs, order codes, labels with letter-spacing.
 - **Italian everywhere** — all UI copy, labels, status text, buttons, tooltips.
 

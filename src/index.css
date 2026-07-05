@@ -6,8 +6,8 @@
 
 /* ===== CSS VARIABLES — palette spade.com (sage / moss / forest / lemongrass) ===== */
 :root {
-  --bg: #f4faed;          /* sage-1: fondo pagina */
-  --bg-2: #f0fae6;        /* sage-2: pannelli secondari */
+  --bg: #fafcf5;          /* off-white verde: fondo pagina */
+  --bg-2: #f4f8ec;        /* off-white verde 2: pannelli secondari */
   --ink: #090f05;         /* quasi-nero verde: testo primario */
   --cyan: #3f7308;        /* ponytail: vecchio nome var, ora è il moss di spade — rinominarla toccherebbe ogni pagina */
   --forest: #18280e;      /* superfici scure / bottoni primari */
@@ -15,10 +15,10 @@
   --white: #fff;
   --muted: rgba(9, 15, 5, 0.60);
   --muted-2: rgba(9, 15, 5, 0.40);
-  --line: #d8e5ca;        /* sage-3: bordi deboli */
-  --line-2: #b3c5a0;      /* sage-4: bordi forti/interattivi */
-  --glass: #ffffff;       /* card su fondo sage */
-  --glass-2: #eaf6dc;     /* card hover/attive */
+  --line: #e2e9d8;        /* sage-3: bordi deboli */
+  --line-2: #c2cfb2;      /* sage-4: bordi forti/interattivi */
+  --glass: #ffffff;       /* card su fondo off-white */
+  --glass-2: #f1f6e8;     /* card hover/attive */
   --mono: 'IBM Plex Mono', monospace;
   --radius: 12px;
   --radius-sm: 8px;
@@ -53,26 +53,12 @@ body::before {
   pointer-events: none;
   z-index: 0;
   background:
-    radial-gradient(900px 600px at 85% 6%, rgba(178, 235, 118, 0.14), transparent 55%),
-    radial-gradient(700px 700px at 4% 96%, rgba(63, 115, 8, 0.05), transparent 50%);
+    radial-gradient(900px 600px at 85% 6%, rgba(178, 235, 118, 0.08), transparent 55%),
+    radial-gradient(700px 700px at 4% 96%, rgba(63, 115, 8, 0.03), transparent 50%);
 }
 
-/* Blueprint grid — ora in inchiostro spade */
-body::after {
-  content: "";
-  position: fixed;
-  inset: 0;
-  pointer-events: none;
-  z-index: 0;
-  background-image:
-    linear-gradient(rgba(9, 15, 5, 0.025) 1px, transparent 1px),
-    linear-gradient(90deg, rgba(9, 15, 5, 0.025) 1px, transparent 1px),
-    linear-gradient(rgba(9, 15, 5, 0.05) 1px, transparent 1px),
-    linear-gradient(90deg, rgba(9, 15, 5, 0.05) 1px, transparent 1px);
-  background-size: 26px 26px, 26px 26px, 130px 130px, 130px 130px;
-  -webkit-mask-image: radial-gradient(ellipse 80% 70% at 50% 42%, #000, transparent 85%);
-  mask-image: radial-gradient(ellipse 80% 70% at 50% 42%, #000, transparent 85%);
-}
+/* La griglia blueprint non è più globale: vive solo dentro le sezioni
+   che la usano (.land-grid, superfici scure, viewport) */
 
 /* ===== SCROLLBAR ===== */
 ::-webkit-scrollbar {
@@ -92,6 +78,27 @@ body::after {
 
 /* ===== COMPONENTS ===== */
 @layer components {
+
+  /* Blocchi pieni stile spade: sezioni arrotondate su fondo bianco */
+  .land-block {
+    position: relative;
+    margin: 12px;
+    border-radius: 24px;
+    overflow: hidden;
+  }
+  .land-block--sage   { background: var(--bg); }
+  .land-block--forest { background: var(--forest); }
+
+  /* Griglia grande e tenue, contenuta nella sezione che la richiede */
+  .land-grid {
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    background-image:
+      linear-gradient(rgba(9, 15, 5, 0.045) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(9, 15, 5, 0.045) 1px, transparent 1px);
+    background-size: 92px 92px;
+  }
 
   /* Blueprint grid as standalone element */
   .blueprint-grid {
@@ -131,15 +138,6 @@ body::after {
     position: relative;
   }
 
-  .hero-card::before {
-    content: "";
-    position: absolute;
-    inset: 8px;
-    border: 1px dashed var(--line-2);
-    border-radius: 9px;
-    pointer-events: none;
-    opacity: 0.5;
-  }
 
   /* Registration corner marks — i tick angolari di spade */
   .reg-marks {
@@ -445,6 +443,15 @@ body::after {
 @media (max-width: 900px) {
   .hero-float { display: none; }
 }
+
+/* Input newsletter footer: l'autofill del browser lo dipingerebbe di bianco */
+.footer-mail:-webkit-autofill,
+.footer-mail:-webkit-autofill:hover,
+.footer-mail:-webkit-autofill:focus {
+  -webkit-box-shadow: 0 0 0 1000px #122006 inset;
+  -webkit-text-fill-color: #fff;
+  caret-color: #fff;
+}
 .anim-fadeUp    { animation: fadeUp .7s cubic-bezier(.2,.7,.3,1) both; }
 .anim-fadeUp-d1 { animation: fadeUp .7s .1s cubic-bezier(.2,.7,.3,1) both; }
 .anim-fadeUp-d2 { animation: fadeUp .7s .2s cubic-bezier(.2,.7,.3,1) both; }
@@ -482,7 +489,7 @@ body::after {
   border-color: var(--lemongrass); border-style: solid; opacity: 0.85;
 }
 
-/* Landing scrollable wrapper */
+/* Landing scrollable wrapper — fondo bianco, i colori vivono nei blocchi */
 .landing-scroll {
   position: fixed;
   inset: 0;
@@ -490,6 +497,7 @@ body::after {
   overflow-x: hidden;
   z-index: 1;
   scroll-behavior: smooth;
+  background: var(--white);
 }
 
 /* Gradient dividers */

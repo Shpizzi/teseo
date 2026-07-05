@@ -1,4 +1,4 @@
-import { ReactNode, CSSProperties, useRef } from 'react'
+import { ReactNode, CSSProperties, useEffect, useRef } from 'react'
 import { Canvas, useFrame } from '@react-three/fiber'
 import * as THREE from 'three'
 
@@ -16,7 +16,7 @@ function Spin({ speed, axis = 'y', children }: { speed: number; axis?: 'y' | 'z'
 
 /* ── Oggetti procedurali low-poly: il wireframe deve leggersi da blueprint ── */
 
-function Tazza() {
+export function Tazza() {
   return (
     <group>
       <mesh>
@@ -35,7 +35,7 @@ function Tazza() {
   )
 }
 
-function Moka() {
+export function Moka() {
   return (
     <group position={[0, -0.08, 0]}>
       <mesh position={[0, -0.35, 0]}>
@@ -62,7 +62,7 @@ function Moka() {
   )
 }
 
-function Cuffie() {
+export function Cuffie() {
   return (
     <group position={[0, -0.05, 0]}>
       <mesh>
@@ -79,7 +79,7 @@ function Cuffie() {
   )
 }
 
-function Occhiali() {
+export function Occhiali() {
   return (
     <group scale={1.15}>
       {[-0.4, 0.4].map((x) => (
@@ -102,7 +102,7 @@ function Occhiali() {
   )
 }
 
-function Telecomando() {
+export function Telecomando() {
   return (
     <group rotation={[0.5, 0, 0.15]}>
       <mesh>
@@ -119,7 +119,7 @@ function Telecomando() {
   )
 }
 
-function Ingranaggio() {
+export function Ingranaggio() {
   return (
     <group>
       <mesh rotation={[Math.PI / 2, 0, 0]}>
@@ -143,7 +143,7 @@ function Ingranaggio() {
   )
 }
 
-function Sedia() {
+export function Sedia() {
   return (
     <group position={[0, 0.1, 0]} scale={0.85}>
       <mesh>
@@ -167,7 +167,19 @@ function Sedia() {
 
 /* ── Item fluttuante: mini-canvas, come le card dello screenshot ── */
 
-function FloatItem({
+/* Ricolora tutti i wireframe (per usare le mesh su fondo scuro, es. footer) */
+function Recolor({ color, children }: { color: string; children: ReactNode }) {
+  const ref = useRef<THREE.Group>(null)
+  useEffect(() => {
+    ref.current?.traverse((o) => {
+      const mesh = o as THREE.Mesh
+      if (mesh.isMesh) (mesh.material as THREE.MeshBasicMaterial).color.set(color)
+    })
+  }, [color])
+  return <group ref={ref}>{children}</group>
+}
+
+export function FloatItem({
   size = 150,
   speed = 0.35,
   axis,
@@ -175,6 +187,7 @@ function FloatItem({
   tiltZ = 0,
   duration = '8s',
   delay = '0s',
+  color,
   style,
   children,
 }: {
@@ -185,6 +198,7 @@ function FloatItem({
   tiltZ?: number
   duration?: string
   delay?: string
+  color?: string
   style: CSSProperties
   children: ReactNode
 }) {
@@ -203,7 +217,9 @@ function FloatItem({
     >
       <Canvas gl={{ antialias: true, alpha: true }} camera={{ fov: 35, position: [0, 0, 3.4] }}>
         <group rotation={[tilt, 0, tiltZ]}>
-          <Spin speed={speed} axis={axis}>{children}</Spin>
+          <Spin speed={speed} axis={axis}>
+            {color ? <Recolor color={color}>{children}</Recolor> : children}
+          </Spin>
         </group>
       </Canvas>
     </div>

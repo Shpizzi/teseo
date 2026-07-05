@@ -176,6 +176,26 @@ export const fablabOrders: Order[] = [
 // Lookup ordNum → ordine (la coda referenzia gli ordini via ordNum)
 export const orderByOrdNum = (ordNum: string) => fablabOrders.find(o => o.ordNum === ordNum)
 
+// ===== IMPATTO =====
+// Stime per pezzo vs acquisto del ricambio nuovo (ricerca: −95% CO₂, −70 €)
+
+export type ImpactRow = { name: string; date: string; co2Kg: number; euro: number }
+
+export const userImpactRows: ImpactRow[] = [
+  { name: 'Ricambio cardine finestra', date: '22 mag 2025', co2Kg: 19.5, euro: 73 },
+  { name: 'Maniglia armadio cucina', date: '12 mag 2025', co2Kg: 6.2, euro: 22 },
+  { name: 'Supporto smartphone bici', date: '03 apr 2025', co2Kg: 4.8, euro: 17 },
+]
+
+export type ImpactMonth = { month: string; pieces: number; co2Kg: number }
+
+export const fablabImpactMonths: ImpactMonth[] = [
+  { month: 'FEB', pieces: 198, co2Kg: 1450 },
+  { month: 'MAR', pieces: 240, co2Kg: 1780 },
+  { month: 'APR', pieces: 305, co2Kg: 2260 },
+  { month: 'MAG', pieces: 345, co2Kg: 2610 },
+]
+
 export const fablabKpis: FablabKpi[] = [
   { value: pad2(fablabOrders.filter(o => o.status === 'printing').length), sublabel: 'attive', label: 'Stampe in corso' },
   { value: pad2(printQueue.filter(q => q.status === 'queued').length), sublabel: 'in coda', label: 'In attesa di stampa' },

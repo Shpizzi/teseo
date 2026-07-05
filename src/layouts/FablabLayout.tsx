@@ -6,6 +6,7 @@ import {
   Activity,
   Printer,
   Box,
+  Leaf,
   Menu,
 } from 'lucide-react'
 import Sidebar, { type NavItem } from '../components/Sidebar'
@@ -21,6 +22,7 @@ export const fablabNavItems: NavItem[] = [
   { label: 'Slicing',    icon: <Box size={20} />,             href: '/fablab/slicing' },
   { label: 'Coda',       icon: <Activity size={20} />,        href: '/fablab/coda' },
   { label: 'Stampanti',  icon: <Printer size={20} />,         href: '/fablab/stampanti' },
+  { label: 'Impatto',    icon: <Leaf size={20} />,            href: '/fablab/impatto' },
 ]
 
 export default function FablabLayout() {

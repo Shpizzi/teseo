@@ -1,5 +1,5 @@
 import { useState, useRef } from 'react'
-import { Upload, Camera, Check, Star } from 'lucide-react'
+import { Upload, Camera, Check, Star, Sparkles } from 'lucide-react'
 import { useNavigate, useLocation } from 'react-router-dom'
 import GlassCard from '../../components/GlassCard'
 import PrimaryButton from '../../components/PrimaryButton'
@@ -7,6 +7,8 @@ import SearchBar from '../../components/SearchBar'
 import ScanView from '../../scan/ScanView'
 import { producers } from '../../mock/user-pages'
 import { toast } from '../../components/Toast'
+import { searchModels } from '../../components/TeseoAssistant'
+import type { ModelHit } from '../../components/TeseoAssistant'
 
 type Step = 1 | 2 | 3
 
@@ -23,7 +25,22 @@ export default function NuovaStampa() {
   const [fileName, setFileName] = useState(incoming.modelName ?? '')
   const [producerQuery, setProducerQuery] = useState('')
   const [scanMode, setScanMode] = useState(false)
+  const [aiQuery, setAiQuery] = useState('')
+  const [aiSearching, setAiSearching] = useState(false)
+  const [aiHits, setAiHits] = useState<ModelHit[] | null>(null)
   const fileInputRef = useRef<HTMLInputElement>(null)
+
+  const runAiSearch = () => {
+    const q = aiQuery.trim()
+    if (!q || aiSearching) return
+    setAiHits(null)
+    setAiSearching(true)
+    // ponytail: delay finto per il "sapore AI" — la ricerca è sincrona sui mock
+    setTimeout(() => {
+      setAiHits(searchModels(q))
+      setAiSearching(false)
+    }, 900 + Math.random() * 500)
+  }
 
   const openPicker = () => fileInputRef.current?.click()
   const pickFile = (f?: File) => { if (f) setFileName(f.name) }
@@ -125,7 +142,7 @@ export default function NuovaStampa() {
 
       {/* Step 1: upload */}
       {step === 1 && (
-        <div style={{ flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: 24, minHeight: 0 }}>
+        <div style={{ flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'safe center', gap: 24, minHeight: 0, overflow: 'auto' }}>
           {/* Drag-drop area */}
           <div
             style={{
@@ -196,6 +213,85 @@ export default function NuovaStampa() {
             </span>
             <div style={{ flex: 1, height: 1, background: 'var(--line)' }} />
           </div>
+
+          {/* Ricerca AI nell'archivio: descrivi il pezzo in linguaggio naturale */}
+          <form
+            onSubmit={e => { e.preventDefault(); runAiSearch() }}
+            style={{ width: '100%', maxWidth: 600, display: 'flex', flexDirection: 'column', gap: 10, flex: '0 0 auto' }}
+          >
+            <div style={{ display: 'flex', gap: 8 }}>
+              <div style={{ flex: 1, position: 'relative' }}>
+                <Sparkles size={15} style={{ position: 'absolute', left: 14, top: '50%', transform: 'translateY(-50%)', color: 'var(--cyan)' }} />
+                <input
+                  value={aiQuery}
+                  onChange={e => setAiQuery(e.target.value)}
+                  placeholder="Descrivi il pezzo: «gancio appendiabiti», «supporto monitor»…"
+                  style={{
+                    width: '100%', height: 44, padding: '0 14px 0 38px', fontSize: 13.5,
+                    background: 'var(--glass)', border: '1px solid var(--line-2)', borderRadius: 100,
+                    color: 'var(--ink)', fontFamily: 'inherit', outline: 'none',
+                  }}
+                />
+              </div>
+              <button
+                type="submit"
+                className="btn-spade"
+                disabled={!aiQuery.trim() || aiSearching}
+                style={{ height: 44, padding: '0 20px', fontSize: 13.5, flex: '0 0 auto' }}
+              >
+                Cerca con AI
+              </button>
+            </div>
+
+            {aiSearching && (
+              <div style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '4px 6px' }}>
+                <span style={{ display: 'flex', gap: 4 }}>
+                  {[0, 1, 2].map(i => (
+                    <span key={i} style={{ width: 5, height: 5, borderRadius: '50%', background: 'var(--cyan)', animation: 'blink 1s infinite', animationDelay: `${i * 0.18}s` }} />
+                  ))}
+                </span>
+                <span style={{ fontFamily: 'var(--mono)', fontSize: 11, letterSpacing: '0.08em', color: 'var(--muted)', textTransform: 'uppercase' }}>
+                  Teseo cerca nell'archivio…
+                </span>
+              </div>
+            )}
+
+            {aiHits && aiHits.length === 0 && (
+              <p style={{ fontSize: 12.5, color: 'var(--muted)', padding: '2px 6px' }}>
+                Nessun modello compatibile con «{aiQuery}» — prova la scansione con fotocamera o carica un file.
+              </p>
+            )}
+
+            {aiHits && aiHits.length > 0 && (
+              <div style={{ display: 'flex', flexDirection: 'column', gap: 7 }}>
+                {aiHits.slice(0, 3).map(hit => (
+                  <div
+                    key={hit.to + hit.name}
+                    onClick={() => {
+                      setFileName(hit.name)
+                      setStep(2)
+                    }}
+                    style={{
+                      display: 'flex', alignItems: 'center', gap: 12, padding: '11px 14px',
+                      background: 'var(--glass)', border: '1px solid var(--line)', borderRadius: 'var(--radius-sm)',
+                      cursor: 'pointer', transition: '0.15s',
+                    }}
+                    onMouseEnter={e => { e.currentTarget.style.borderColor = 'var(--cyan)'; e.currentTarget.style.background = 'var(--glass-2)' }}
+                    onMouseLeave={e => { e.currentTarget.style.borderColor = 'var(--line)'; e.currentTarget.style.background = 'var(--glass)' }}
+                  >
+                    <Sparkles size={14} style={{ color: 'var(--cyan)', flex: '0 0 auto' }} />
+                    <div style={{ flex: 1, minWidth: 0 }}>
+                      <div style={{ fontSize: 13.5, fontWeight: 600, color: 'var(--ink)' }}>{hit.name}</div>
+                      <div style={{ fontFamily: 'var(--mono)', fontSize: 10.5, color: 'var(--muted)', marginTop: 1 }}>{hit.meta}</div>
+                    </div>
+                    <span style={{ fontFamily: 'var(--mono)', fontSize: 11, fontWeight: 600, color: 'var(--cyan)', letterSpacing: '0.03em', flex: '0 0 auto' }}>
+                      USA QUESTO ›
+                    </span>
+                  </div>
+                ))}
+              </div>
+            )}
+          </form>
 
           {/* Camera button */}
           <button

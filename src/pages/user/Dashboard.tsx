@@ -1,18 +1,28 @@
-import { Plus, Sun, Clock, CheckCircle2, Bookmark, Star } from 'lucide-react'
+import { Plus, Layers, Clock, CheckCircle2, Bookmark, Star, Box, HelpCircle } from 'lucide-react'
 import { useNavigate } from 'react-router-dom'
 import PrimaryButton from '../../components/PrimaryButton'
 import KpiCard from '../../components/KpiCard'
 import GlassCard from '../../components/GlassCard'
 import StatusPill from '../../components/StatusPill'
 import ProgressBar from '../../components/ProgressBar'
+import TeseoAssistant from '../../components/TeseoAssistant'
 import { userProjects, userKpis, nearbyProducers } from '../../mock'
+import type { ReactNode } from 'react'
+import type { ProjectStatus } from '../../mock'
 
 const kpiIcons = [
-  <Sun size={17} />,
+  <Layers size={17} />,
   <Clock size={17} />,
   <CheckCircle2 size={17} />,
   <Bookmark size={17} />,
 ]
+
+const statusIcon: Record<ProjectStatus, ReactNode> = {
+  printing: <Box size={26} />,
+  ready: <CheckCircle2 size={26} />,
+  draft: <Clock size={26} />,
+  error: <HelpCircle size={26} />,
+}
 
 const kpiTargets = ['/app/progetti', '/app/progetti', '/app/progetti', '/app/salvati']
 
@@ -122,7 +132,7 @@ export default function Dashboard() {
             <h3
               style={{
                 fontWeight: 600,
-                fontSize: 12,
+                fontSize: 13,
                 letterSpacing: '0.08em',
                 textTransform: 'uppercase',
                 color: 'var(--muted)',
@@ -135,7 +145,7 @@ export default function Dashboard() {
               onClick={() => navigate('/app/progetti')}
               style={{
                 color: 'var(--cyan)',
-                fontSize: 11,
+                fontSize: 12,
                 fontWeight: 600,
                 cursor: 'pointer',
                 fontFamily: 'var(--mono)',
@@ -146,101 +156,107 @@ export default function Dashboard() {
             </span>
           </div>
 
-          {/* Project list */}
+          {/* Project list — lista pulita a righe, divisori invece di box */}
           <div
             style={{
               display: 'flex',
               flexDirection: 'column',
-              gap: 11,
               overflow: 'auto',
               position: 'relative',
             }}
           >
-            {userProjects.map(project => (
+            {userProjects.map((project, i) => (
               <div
                 key={project.id}
                 onClick={() => navigate('/app/progetti/' + project.id)}
                 style={{
-                  display: 'flex',
-                  alignItems: 'center',
-                  gap: 14,
-                  padding: 14,
-                  borderRadius: 'var(--radius-sm)',
-                  background: 'var(--glass)',
-                  border: '1px solid var(--line)',
+                  padding: '20px 6px',
+                  borderTop: i === 0 ? 'none' : '1px solid var(--line)',
                   cursor: 'pointer',
-                  transition: '0.2s',
+                  transition: 'background 0.15s',
                 }}
-                onMouseEnter={e => {
-                  const el = e.currentTarget as HTMLDivElement
-                  el.style.borderColor = 'var(--line-2)'
-                  el.style.background = 'var(--glass-2)'
-                }}
-                onMouseLeave={e => {
-                  const el = e.currentTarget as HTMLDivElement
-                  el.style.borderColor = 'var(--line)'
-                  el.style.background = 'var(--glass)'
-                }}
+                onMouseEnter={e => { e.currentTarget.style.background = 'var(--glass-2)' }}
+                onMouseLeave={e => { e.currentTarget.style.background = 'transparent' }}
               >
-                {/* Thumbnail */}
-                <div className="thumb-mini" />
-
-                {/* Meta */}
-                <div style={{ flex: 1, minWidth: 0 }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: 16 }}>
+                  {/* Icona di stato */}
                   <div
                     style={{
-                      fontWeight: 600,
-                      fontSize: 14.5,
-                      whiteSpace: 'nowrap',
-                      overflow: 'hidden',
-                      textOverflow: 'ellipsis',
-                      color: 'var(--ink)',
-                    }}
-                  >
-                    {project.name}
-                  </div>
-                  <div
-                    style={{
+                      width: 64,
+                      height: 64,
+                      borderRadius: 16,
+                      flex: '0 0 auto',
+                      background: 'var(--glass-2)',
+                      border: '1px solid var(--line)',
+                      display: 'grid',
+                      placeItems: 'center',
                       color: 'var(--muted)',
-                      fontSize: 11.5,
-                      marginTop: 2,
-                      fontFamily: 'var(--mono)',
                     }}
                   >
-                    {project.status === 'draft'
-                      ? `Bozza · nessun produttore`
-                      : `${project.fablab} · ${project.material}`}
+                    {statusIcon[project.status]}
                   </div>
-                  <ProgressBar
-                    value={project.progress}
-                    label={project.status !== 'draft' ? `${project.progress}%` : '—'}
-                  />
-                </div>
 
-                {/* Right: status + eta */}
-                <div
-                  style={{
-                    display: 'flex',
-                    flexDirection: 'column',
-                    alignItems: 'flex-end',
-                    gap: 7,
-                    flex: '0 0 auto',
-                  }}
-                >
-                  <StatusPill status={project.status} />
-                  {project.eta && (
-                    <span
+                  {/* Meta */}
+                  <div style={{ flex: 1, minWidth: 0 }}>
+                    <div
                       style={{
-                        fontSize: 11,
+                        fontWeight: 600,
+                        fontSize: 20,
+                        whiteSpace: 'nowrap',
+                        overflow: 'hidden',
+                        textOverflow: 'ellipsis',
+                        color: 'var(--ink)',
+                      }}
+                    >
+                      {project.name}
+                    </div>
+                    <div
+                      style={{
                         color: 'var(--muted)',
-                        fontWeight: 500,
+                        fontSize: 14,
+                        marginTop: 4,
                         fontFamily: 'var(--mono)',
                       }}
                     >
-                      {project.eta}
-                    </span>
-                  )}
+                      {project.status === 'draft'
+                        ? 'Bozza · nessun produttore'
+                        : `${project.fablab} · ${project.material}`}
+                    </div>
+                  </div>
+
+                  {/* Right: status + eta */}
+                  <div
+                    style={{
+                      display: 'flex',
+                      flexDirection: 'column',
+                      alignItems: 'flex-end',
+                      gap: 8,
+                      flex: '0 0 auto',
+                    }}
+                  >
+                    <StatusPill status={project.status} />
+                    {project.eta && (
+                      <span
+                        style={{
+                          fontSize: 12,
+                          color: project.status === 'draft' ? 'var(--cyan)' : 'var(--muted)',
+                          fontWeight: project.status === 'draft' ? 600 : 500,
+                          fontFamily: 'var(--mono)',
+                        }}
+                      >
+                        {project.eta}
+                        {project.status === 'draft' ? ' ›' : ''}
+                      </span>
+                    )}
+                  </div>
                 </div>
+
+                {/* Progress bar a tutta larghezza, allineata al titolo */}
+                {project.status === 'printing' && (
+                  <div style={{ paddingLeft: 80, marginTop: 14 }}>
+                    <ProgressBar value={project.progress} />
+                  </div>
+                )}
               </div>
             ))}
           </div>
@@ -259,7 +275,7 @@ export default function Dashboard() {
           {readyProject && (
           <div
             style={{
-              background: 'rgba(63,115,8,.10)',
+              background: 'var(--glass)',
               border: '1px solid var(--line-2)',
               borderRadius: 'var(--radius)',
               padding: 20,
@@ -282,8 +298,8 @@ export default function Dashboard() {
                   width: 32,
                   height: 32,
                   borderRadius: 9,
-                  background: 'rgba(63,115,8,.18)',
-                  border: '1px solid var(--line-2)',
+                  background: 'var(--bg-2)',
+                  border: '1px solid var(--line)',
                   display: 'grid',
                   placeItems: 'center',
                   color: 'var(--cyan)',
@@ -377,88 +393,15 @@ export default function Dashboard() {
               </span>
             </div>
 
-            {/* Map preview */}
-            <div
-              style={{
-                position: 'relative',
-                borderRadius: 'var(--radius-sm)',
-                overflow: 'hidden',
-                flex: 1,
-                minHeight: 140,
-                border: '1px solid var(--line-2)',
-                background: '#18280e',
-                marginBottom: 14,
-              }}
-            >
-              {/* Map grid */}
-              <div
-                style={{
-                  position: 'absolute',
-                  inset: 0,
-                  backgroundImage:
-                    'linear-gradient(rgba(178,235,118,.10) 1px,transparent 1px),linear-gradient(90deg,rgba(178,235,118,.10) 1px,transparent 1px)',
-                  backgroundSize: '28px 28px',
-                }}
-              />
-
-              {/* Roads */}
-              <div
-                style={{
-                  position: 'absolute',
-                  top: '42%',
-                  left: 0,
-                  right: 0,
-                  height: 6,
-                  background: 'rgba(178,235,118,.10)',
-                }}
-              />
-              <div
-                style={{
-                  position: 'absolute',
-                  left: '38%',
-                  top: 0,
-                  bottom: 0,
-                  width: 6,
-                  background: 'rgba(178,235,118,.10)',
-                }}
-              />
-
-              {/* Map pins */}
-              {/* TU (you) */}
-              <div className="mpin you" style={{ left: '46%', top: '54%' }}>
-                <span className="t">TU</span>
-                <span className="pd" />
-              </div>
-
-              {/* LAMBRATE */}
-              <div className="mpin" style={{ left: '26%', top: '34%', cursor: 'pointer' }} onClick={() => navigate('/app/produttori/fab1')}>
-                <span className="t">LAMBRATE</span>
-                <span className="pd" />
-              </div>
-
-              {/* NAVIGLI */}
-              <div className="mpin" style={{ left: '68%', top: '48%', cursor: 'pointer' }} onClick={() => navigate('/app/produttori/fab3')}>
-                <span className="t">NAVIGLI</span>
-                <span className="pd" />
-              </div>
-
-              {/* BOVISA */}
-              <div className="mpin" style={{ left: '58%', top: '74%', cursor: 'pointer' }} onClick={() => navigate('/app/produttori/fab2')}>
-                <span className="t">BOVISA</span>
-                <span className="pd" />
-              </div>
-            </div>
-
             {/* Producer list */}
             <div
               style={{
                 display: 'flex',
                 flexDirection: 'column',
-                gap: 9,
                 overflow: 'auto',
               }}
             >
-              {nearbyProducers.map(producer => (
+              {nearbyProducers.map((producer, i) => (
                 <div
                   key={producer.id}
                   onClick={() => navigate('/app/produttori/' + producer.id)}
@@ -467,7 +410,12 @@ export default function Dashboard() {
                     alignItems: 'center',
                     gap: 11,
                     cursor: 'pointer',
+                    padding: '14px 2px',
+                    borderTop: i === 0 ? 'none' : '1px solid var(--line)',
+                    transition: 'background 0.15s',
                   }}
+                  onMouseEnter={e => { e.currentTarget.style.background = 'var(--glass-2)' }}
+                  onMouseLeave={e => { e.currentTarget.style.background = 'transparent' }}
                 >
                   {/* Availability dot */}
                   <span
@@ -479,7 +427,7 @@ export default function Dashboard() {
                       background: producer.available ? 'var(--cyan)' : 'transparent',
                       boxShadow: producer.available
                         ? 'none'
-                        : 'inset 0 0 0 1.5px var(--cyan)',
+                        : 'inset 0 0 0 1.5px var(--line-2)',
                     }}
                   />
 
@@ -510,7 +458,7 @@ export default function Dashboard() {
                       display: 'flex',
                       alignItems: 'center',
                       gap: 4,
-                      color: 'var(--cyan)',
+                      color: 'var(--ink)',
                       fontFamily: 'var(--mono)',
                     }}
                   >
@@ -523,6 +471,8 @@ export default function Dashboard() {
           </GlassCard>
         </div>
       </div>
+
+      <TeseoAssistant />
     </>
   )
 }

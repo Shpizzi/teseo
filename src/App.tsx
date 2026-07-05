@@ -18,6 +18,8 @@ import Produttori from './pages/user/Produttori'
 import ProduttoreDetail from './pages/user/ProduttoreDetail'
 import Messaggi from './pages/user/Messaggi'
 import Profilo from './pages/user/Profilo'
+import UserImpatto from './pages/user/Impatto'
+import FablabImpatto from './pages/fablab/Impatto'
 import FablabDashboard from './pages/fablab/Dashboard'
 import FablabSlicing from './pages/fablab/Slicing'
 import FablabOrdini from './pages/fablab/Ordini'
@@ -45,6 +47,7 @@ export default function App() {
         <Route path="produttori" element={<Produttori />} />
         <Route path="produttori/:id" element={<ProduttoreDetail />} />
         <Route path="messages" element={<Messaggi />} />
+        <Route path="impatto" element={<UserImpatto />} />
         <Route path="profile" element={<Profilo />} />
       </Route>
       <Route path="/fablab" element={<FablabLayout />}>
@@ -54,6 +57,7 @@ export default function App() {
         <Route path="ordini/:id" element={<FablabOrdineDetail />} />
         <Route path="coda" element={<FablabCoda />} />
         <Route path="stampanti" element={<FablabStampanti />} />
+        <Route path="impatto" element={<FablabImpatto />} />
       </Route>
       <Route path="/fablab/slicing" element={<FablabSlicingLayout />}>
         <Route index element={<FablabSlicing />} />

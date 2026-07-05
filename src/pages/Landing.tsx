@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from 'react'
-import { Package, ScanLine, Cpu, Users, MapPin, Recycle, CheckCircle2, Activity, TrendingDown, XCircle } from 'lucide-react'
+import { Package, ScanLine, Cpu, Users, MapPin, Recycle, CheckCircle2, Activity, TrendingDown, XCircle, Sparkles } from 'lucide-react'
 import { useNavigate, Link } from 'react-router-dom'
 import gsap from 'gsap'
 import { ScrollTrigger } from 'gsap/ScrollTrigger'
@@ -74,7 +74,7 @@ function HeroSection() {
         display: 'flex',
         alignItems: 'center',
         justifyContent: 'center',
-        minHeight: '100svh',
+        minHeight: 'calc(100svh - 90px)',
       }}
     >
       {/* Mesh di oggetti riconoscibili che fluttuano attorno al titolo */}
@@ -151,9 +151,7 @@ function ProblemBar() {
     <div
       style={{
         padding: '40px 6% 12px',
-        background: 'rgba(63,115,8,.04)',
         borderTop: '1px solid var(--line)',
-        borderBottom: '1px solid var(--line)',
       }}
     >
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)' }}>
@@ -202,6 +200,58 @@ function ProblemBar() {
         INDAGINE TESEO 2026 &middot; 100 RISPOSTE &middot; MILANO, HINTERLAND E LOMBARDIA
       </p>
     </div>
+  )
+}
+
+/* ────────────────── TRUSTED BY ────────────────── */
+function TrustedBySection() {
+  // ponytail: nessun asset logo — wordmark testuali con stili diversi per simulare i marchi; sostituire con SVG quando esistono
+  const logos: { name: string; style: React.CSSProperties }[] = [
+    { name: 'NABA', style: { fontWeight: 800, letterSpacing: '0.22em' } },
+    { name: 'Polifactory', style: { fontWeight: 600, fontStyle: 'italic' } },
+    { name: 'WeMake', style: { fontWeight: 700, letterSpacing: '-0.02em' } },
+    { name: 'OpenDot', style: { fontFamily: 'var(--mono)', fontWeight: 600 } },
+    { name: 'FabLab Milano', style: { fontWeight: 500, letterSpacing: '0.10em', textTransform: 'uppercase', fontSize: 15 } },
+    { name: 'IDEAS BIT FACTORY', style: { fontFamily: 'var(--mono)', fontWeight: 500, fontSize: 14, letterSpacing: '0.06em' } },
+    { name: 'Vectorealism', style: { fontWeight: 300, fontSize: 21 } },
+    { name: 'Stecca 3.0', style: { fontWeight: 800, fontStyle: 'italic' } },
+    { name: 'MUSE FabLab', style: { fontWeight: 600, letterSpacing: '0.14em', textTransform: 'uppercase', fontSize: 14 } },
+    { name: 'Talent Garden', style: { fontWeight: 700 } },
+  ]
+
+  return (
+    <section style={{ padding: '72px 6%' }}>
+      <p
+        style={{
+          textAlign: 'center',
+          fontFamily: 'var(--mono)',
+          fontSize: 12,
+          letterSpacing: '0.08em',
+          color: 'var(--muted)',
+          marginBottom: 44,
+        }}
+      >
+        La rete di FabLab, scuole e maker space che stampa con Teseo
+      </p>
+      <div
+        style={{
+          display: 'flex',
+          flexWrap: 'wrap',
+          justifyContent: 'center',
+          alignItems: 'center',
+          columnGap: 72,
+          rowGap: 40,
+          maxWidth: 1100,
+          margin: '0 auto',
+        }}
+      >
+        {logos.map((l) => (
+          <span key={l.name} style={{ fontSize: 19, color: 'var(--ink)', opacity: 0.82, whiteSpace: 'nowrap', ...l.style }}>
+            {l.name}
+          </span>
+        ))}
+      </div>
+    </section>
   )
 }
 
@@ -270,7 +320,6 @@ function TwoPathsSection() {
           {flow(withoutSteps, false)}
           <div style={{ marginTop: 22, paddingTop: 18, borderTop: '1px solid var(--line)' }}>
             <span style={{ fontFamily: 'var(--mono)', fontSize: 22, fontWeight: 700, color: 'var(--ink)' }}>~20 kg CO₂</span>
-            <span style={{ fontSize: 13, color: 'var(--muted)', marginLeft: 10 }}>e ~80€ per ricomprarla</span>
           </div>
         </div>
 
@@ -291,7 +340,6 @@ function TwoPathsSection() {
           {flow(withSteps, true)}
           <div style={{ marginTop: 22, paddingTop: 18, borderTop: '1px solid var(--line)' }}>
             <span style={{ fontFamily: 'var(--mono)', fontSize: 22, fontWeight: 700, color: 'var(--cyan)' }}>~0,5 kg CO₂</span>
-            <span style={{ fontSize: 13, color: 'var(--muted)', marginLeft: 10 }}>e ~10€ per il ricambio</span>
           </div>
         </div>
       </div>
@@ -318,7 +366,7 @@ function HowItWorksSection() {
       desc: 'Inquadra l’oggetto rotto con la fotocamera. L’AI lo riconosce: non serve saper modellare.',
       stats: [
         { v: '30s', l: 'Per la scansione' },
-        { v: '98%', l: 'Riconoscimento' },
+        { v: '98%', l: 'Precisione' },
         { v: '0', l: 'Competenze richieste' },
       ],
       intel: ['Computer vision zero-shot sull’oggetto', 'Funziona anche coi ricambi fuori produzione'],
@@ -390,7 +438,7 @@ function HowItWorksSection() {
 
   return (
     /* 300vh di scroll verticale: la viewport resta pinnata (sticky) e il track scorre in orizzontale */
-    <section ref={sectionRef} id="come-funziona" style={{ height: '300vh', position: 'relative', background: 'rgba(63,115,8,.02)' }}>
+    <section ref={sectionRef} id="come-funziona" style={{ height: '300vh', position: 'relative' }}>
       <div
         style={{
           position: 'sticky',
@@ -403,6 +451,8 @@ function HowItWorksSection() {
           gap: 40,
         }}
       >
+        {/* Griglia contenuta nella sezione (fondo sito bianco) */}
+        <div className="land-grid" />
         {/* Header */}
         <div style={{ padding: '0 6%' }}>
           <SectionTag>COME FUNZIONA</SectionTag>
@@ -648,163 +698,365 @@ function FeaturesSection() {
   )
 }
 
+/* ────────────────── ASSISTENTE AI (anteprima orchestratore) ────────────────── */
+// Conversazione scriptata: anteprima del TeseoAssistant vero che vive in /app/dashboard.
+const AIP_MONO: React.CSSProperties = { fontFamily: 'var(--mono)' }
+
+function AssistantPreviewSection() {
+  const navigate = useNavigate()
+  const sectionRef = useRef<HTMLElement>(null)
+
+  useEffect(() => {
+    const section = sectionRef.current
+    if (!section) return
+    const scroller = section.closest('.landing-scroll') as HTMLElement | null
+
+    const ctx = gsap.context(() => {
+      const tl = gsap.timeline({
+        scrollTrigger: { trigger: section, scroller: scroller ?? undefined, start: 'top 65%', once: true },
+      })
+      tl.from('.aip-reveal', { y: 26, opacity: 0, duration: 0.7, stagger: 0.09, ease: 'power3.out' })
+        .from('.aip-panel', { y: 44, opacity: 0, duration: 0.85, ease: 'power3.out' }, 0.15)
+        .from('.aip-m1', { y: 10, opacity: 0, duration: 0.4, ease: 'power2.out' }, 1.0)
+        .fromTo('.aip-typing', { opacity: 0 }, { opacity: 1, duration: 0.25 }, 1.5)
+        .to('.aip-typing', { opacity: 0, duration: 0.2 }, 2.5)
+        .from('.aip-m2', { y: 10, opacity: 0, duration: 0.4, ease: 'power2.out' }, 2.6)
+        .fromTo('.aip-typing', { opacity: 0 }, { opacity: 1, duration: 0.25 }, 3.3)
+        .to('.aip-typing', { opacity: 0, duration: 0.2 }, 4.2)
+        .from('.aip-m3', { y: 10, opacity: 0, duration: 0.4, ease: 'power2.out' }, 4.3)
+        .from('.aip-chips', { y: 8, opacity: 0, duration: 0.35, ease: 'power2.out' }, 4.75)
+    }, section)
+
+    return () => ctx.revert()
+  }, [])
+
+  const bubble = (user: boolean): React.CSSProperties => ({
+    maxWidth: '86%', padding: '11px 14px', fontSize: 14, lineHeight: 1.55,
+    borderRadius: user ? '12px 12px 4px 12px' : '12px 12px 12px 4px',
+    background: user ? 'var(--forest)' : 'var(--glass-2)',
+    color: user ? '#fff' : 'var(--ink)',
+    border: user ? 'none' : '1px solid var(--line)',
+    alignSelf: user ? 'flex-end' : 'flex-start',
+  })
+
+  return (
+    <section ref={sectionRef} style={{ padding: '100px 6%' }}>
+      <div
+        style={{
+          display: 'grid',
+          gridTemplateColumns: '1fr 1.1fr',
+          gap: 64,
+          alignItems: 'center',
+          maxWidth: 1180,
+          margin: '0 auto',
+        }}
+      >
+        {/* Copy */}
+        <div>
+          <div className="aip-reveal"><SectionTag>ASSISTENTE AI</SectionTag></div>
+          <h2 className="aip-reveal" style={{ fontSize: 34, fontWeight: 700, marginTop: 12, color: 'var(--ink)', lineHeight: 1.15 }}>
+            Un orchestratore che fa tutto il giro per te.
+          </h2>
+          <p className="aip-reveal" style={{ fontSize: 15.5, color: 'var(--muted)', lineHeight: 1.65, marginTop: 18 }}>
+            Descrivi il pezzo rotto in linguaggio naturale: l’AI lo cerca nell’archivio della
+            community, sceglie il produttore disponibile più vicino e prepara ordine e
+            preventivo. Tu confermi, la rete stampa.
+          </p>
+          <div className="aip-reveal" style={{ display: 'flex', flexDirection: 'column', gap: 9, marginTop: 22 }}>
+            {['Ricerca nell’archivio', 'Matchmaking produttori', 'Ordine e tracking'].map(s => (
+              <div key={s} style={{ ...AIP_MONO, fontSize: 12, letterSpacing: '0.08em', textTransform: 'uppercase', color: 'var(--cyan)', display: 'flex', alignItems: 'center', gap: 9 }}>
+                <span style={{ width: 5, height: 5, borderRadius: '50%', background: 'var(--cyan)' }} />
+                {s}
+              </div>
+            ))}
+          </div>
+          <div className="aip-reveal" style={{ marginTop: 30 }}>
+            <PrimaryButton onClick={() => navigate('/app/dashboard')}>Provalo nella demo</PrimaryButton>
+          </div>
+        </div>
+
+        {/* Chat mockup — stessa UI del TeseoAssistant in /app */}
+        <div
+          className="aip-panel"
+          style={{
+            background: 'var(--glass)', border: '1px solid var(--line-2)',
+            borderRadius: 'var(--radius)', overflow: 'hidden',
+            boxShadow: '0 24px 60px rgba(9,15,5,.14)',
+          }}
+        >
+          <div style={{ background: 'var(--forest)', padding: '14px 18px', display: 'flex', alignItems: 'center', gap: 10 }}>
+            <span style={{ width: 30, height: 30, borderRadius: 9, background: 'rgba(178,235,118,.14)', display: 'grid', placeItems: 'center', color: 'var(--lemongrass)' }}>
+              <Sparkles size={15} />
+            </span>
+            <div>
+              <div style={{ color: '#fff', fontSize: 13.5, fontWeight: 600 }}>Teseo AI</div>
+              <div style={{ ...AIP_MONO, color: 'var(--lemongrass)', fontSize: 10, letterSpacing: '0.08em', textTransform: 'uppercase' }}>
+                Orchestratore · online
+              </div>
+            </div>
+          </div>
+
+          <div style={{ padding: 20, display: 'flex', flexDirection: 'column', gap: 11, minHeight: 340 }}>
+            <div className="aip-m1" style={bubble(true)}>
+              Si è rotto il gancio dell’appendiabiti in ingresso. Si può rifare?
+            </div>
+            <div className="aip-m2" style={bubble(false)}>
+              Trovato: <b>«Gancio modulare da parete» v2.3</b> nell’archivio community —
+              validato dai maker, 1.842 download, ★ 4.9.
+            </div>
+            <div className="aip-m3" style={bubble(false)}>
+              FabLab Bovisa è disponibile a 4,1 km: in PLA costa <b style={AIP_MONO}>~€ 4</b>,
+              pronto domani entro le 12. Preparo l’ordine?
+            </div>
+            <div className="aip-chips" style={{ display: 'flex', gap: 7 }}>
+              {['Sì, procedi', 'Vedi alternative'].map(c => (
+                <span key={c} style={{ ...AIP_MONO, fontSize: 11, fontWeight: 600, letterSpacing: '0.03em', padding: '6px 11px', borderRadius: 7, border: '1px solid var(--line-2)', color: 'var(--cyan)' }}>
+                  {c} ›
+                </span>
+              ))}
+            </div>
+            <div className="aip-typing" style={{ display: 'flex', gap: 4, padding: '11px 13px', borderRadius: '12px 12px 12px 4px', background: 'var(--glass-2)', border: '1px solid var(--line)', width: 'fit-content', opacity: 0 }}>
+              {[0, 1, 2].map(i => (
+                <span key={i} style={{ width: 5, height: 5, borderRadius: '50%', background: 'var(--muted)', animation: 'blink 1s infinite', animationDelay: `${i * 0.18}s` }} />
+              ))}
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+  )
+}
+
 /* ────────────────── FOR FABLAB / MAKER ────────────────── */
+// Feed "live" della rete: la sequenza racconta ordine → matchmaking → assegnazione
+// → slicing AI → coda, cioè esattamente le tre feature elencate a sinistra.
+const FABLAB_FEED = [
+  { label: 'Nuovo ordine', msg: 'Un vicino cerca un cardine finestra' },
+  { label: 'Matchmaking', msg: '3 laboratori attivi entro 2 km' },
+  { label: 'È tuo', msg: 'Assegnato a te · 820 m · €14', match: true },
+  { label: 'Slicing AI', msg: 'File pronto al posto tuo · 1h 20m' },
+  { label: 'In coda', msg: 'Parte da sola sulla tua stampante' },
+]
+
 function ForFablabSection() {
   const navigate = useNavigate()
+  const sectionRef = useRef<HTMLElement>(null)
   const featureList = [
     'Ordini in automatico dal matchmaking di rete',
     'Compenso e reputazione per ogni stampa validata',
     'Slicing AI integrato e certificazione qualità',
   ]
 
-  const orders = [
-    { dot: 'pdot-active', num: '#TES-0041', name: 'Cardine finestra · PETG riciclato', status: 'sp-print', statusLabel: 'In stampa' },
-    { dot: 'pdot-idle', num: '#TES-0040', name: 'Manopola forno · ABS', status: 'sp-new', statusLabel: 'In coda' },
-    { dot: 'pdot-active', num: '#TES-0039', name: 'Ingranaggio tapparella · Nylon', status: 'sp-ready', statusLabel: 'Pronto' },
-  ]
+  useEffect(() => {
+    const section = sectionRef.current
+    if (!section) return
+    const scroller = section.closest('.landing-scroll') as HTMLElement | null
+
+    const ctx = gsap.context(() => {
+      // Loop del feed: le righe compaiono una alla volta, la riga MATCH pulsa,
+      // poi tutto sfuma e riparte (paused: parte a fine entrance).
+      const lines = gsap.utils.toArray<HTMLElement>('.ffl-line')
+      const offsets = [0, 0.9, 1.8, 3.2, 4.0]
+      const loop = gsap.timeline({ repeat: -1, repeatDelay: 2, paused: true })
+      lines.forEach((line, i) => {
+        loop.fromTo(line, { opacity: 0, y: 10 }, { opacity: 1, y: 0, duration: 0.45, ease: 'power2.out' }, offsets[i])
+      })
+      loop.fromTo(
+        '.ffl-match',
+        { boxShadow: '0 0 0 0 rgba(178,235,118,.4)' },
+        { boxShadow: '0 0 0 14px rgba(178,235,118,0)', duration: 1.2, ease: 'power2.out' },
+        offsets[2] + 0.15,
+      )
+      loop.to(lines, { opacity: 0, y: -6, duration: 0.4, stagger: 0.06, ease: 'power1.in' }, '+=2.6')
+
+      // Entrance on scroll
+      const tl = gsap.timeline({
+        scrollTrigger: { trigger: section, scroller: scroller ?? undefined, start: 'top 65%', once: true },
+      })
+      tl.from('.ffl-reveal', { y: 26, opacity: 0, duration: 0.7, stagger: 0.09, ease: 'power3.out' })
+        .from('.ffl-panel', { y: 48, opacity: 0, duration: 0.9, ease: 'power3.out' }, 0.2)
+        .call(() => loop.play(), [], 1.0)
+
+      gsap.to('.ffl-dot', { opacity: 0.25, repeat: -1, yoyo: true, duration: 0.8, ease: 'power1.inOut' })
+      gsap.to('.ffl-cursor', { opacity: 0, repeat: -1, yoyo: true, duration: 0.5, ease: 'steps(1)' })
+    }, section)
+
+    return () => ctx.revert()
+  }, [])
 
   return (
-    <section id="fablab" style={{ padding: '80px 6%', display: 'flex', gap: 60, alignItems: 'center', background: 'rgba(63,115,8,.02)' }}>
-      {/* Left */}
-      <div style={{ flex: 1, display: 'flex', flexDirection: 'column', gap: 20, maxWidth: 480 }}>
-        <SectionTag>PER FABLAB E MAKER</SectionTag>
-        <h2 style={{ fontSize: 34, fontWeight: 700, color: 'var(--ink)' }}>
-          Hai una stampante? Sei già parte della rete.
-        </h2>
-        <p style={{ fontSize: 15, color: 'var(--muted)', lineHeight: 1.6 }}>
-          Il 44% degli appassionati stamperebbe volentieri per gli altri, ma resta un hobby isolato:
-          nessun canale, nessun compenso, nessun riconoscimento. Teseo trasforma chi sa stampare
-          in un nodo attivo della rete di quartiere.
-        </p>
+    <section
+      id="fablab"
+      ref={sectionRef}
+      className="land-block land-block--forest"
+      style={{ padding: '110px 6%' }}
+    >
+      {/* Griglia blueprint su scuro */}
+      <div
+        style={{
+          position: 'absolute',
+          inset: 0,
+          pointerEvents: 'none',
+          backgroundImage:
+            'linear-gradient(rgba(178,235,118,.05) 1px, transparent 1px), linear-gradient(90deg, rgba(178,235,118,.05) 1px, transparent 1px)',
+          backgroundSize: '48px 48px',
+        }}
+      />
 
-        {/* Feature list */}
-        <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
-          {featureList.map((item, i) => (
-            <div key={i} style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-              <CheckCircle2 size={16} color="var(--cyan)" style={{ flexShrink: 0 }} />
-              <span style={{ fontSize: 14, color: 'var(--ink)' }}>{item}</span>
-            </div>
-          ))}
+      <div style={{ position: 'relative', display: 'flex', gap: 60, alignItems: 'center', flexWrap: 'wrap' }}>
+        {/* Left */}
+        <div style={{ flex: '1 1 380px', display: 'flex', flexDirection: 'column', gap: 20, maxWidth: 480 }}>
+          <span
+            className="ffl-reveal"
+            style={{
+              fontFamily: 'var(--mono)',
+              fontSize: 12,
+              letterSpacing: '0.08em',
+              color: '#b2eb76',
+              textTransform: 'uppercase',
+            }}
+          >
+            Per FabLab e Maker
+          </span>
+          <h2
+            className="ffl-reveal"
+            style={{ fontSize: 'clamp(28px, 3.2vw, 40px)', fontWeight: 700, lineHeight: 1.15, letterSpacing: '-.01em', color: '#fff' }}
+          >
+            Hai una stampante?<br />
+            <span style={{ color: '#b2eb76' }}>Sei già un nodo della rete.</span>
+          </h2>
+          <p className="ffl-reveal" style={{ fontSize: 15, color: 'rgba(255,255,255,.6)', lineHeight: 1.7 }}>
+            Unisciti alla rete di FabLab e maker che stampano i ricambi per chi non può più trovarli. Ogni stampa ti dà reputazione, compenso e la soddisfazione di salvare un oggetto dalla discarica.
+          </p>
+
+          <div className="ffl-reveal" style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
+            {featureList.map((item, i) => (
+              <div key={i} style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+                <CheckCircle2 size={16} color="#b2eb76" style={{ flexShrink: 0 }} />
+                <span style={{ fontSize: 14, color: 'rgba(255,255,255,.85)' }}>{item}</span>
+              </div>
+            ))}
+          </div>
+
+          <button
+            className="ffl-reveal"
+            onClick={() => navigate('/fablab/dashboard')}
+            onMouseEnter={e => { e.currentTarget.style.background = 'rgba(178,235,118,.12)' }}
+            onMouseLeave={e => { e.currentTarget.style.background = 'transparent' }}
+            style={{
+              alignSelf: 'flex-start',
+              marginTop: 6,
+              height: 46,
+              padding: '0 26px',
+              borderRadius: 12,
+              border: '1px solid rgba(178,235,118,.5)',
+              background: 'transparent',
+              color: '#b2eb76',
+              fontSize: 14,
+              fontWeight: 600,
+              fontFamily: 'inherit',
+              cursor: 'pointer',
+              transition: 'background .2s',
+            }}
+          >
+            Registra il tuo laboratorio &rarr;
+          </button>
         </div>
 
-        <GhostButton style={{ alignSelf: 'flex-start', marginTop: 4 }} onClick={() => navigate('/fablab/dashboard')}>
-          Registra il tuo laboratorio &rarr;
-        </GhostButton>
-      </div>
-
-      {/* Right — Dashboard mockup */}
-      <div className="anim-float" style={{ flex: 1, minHeight: 380, animationDuration: '9s', position: 'relative' }}>
-        <div
-          style={{
-            border: '1px solid var(--line-2)',
-            borderRadius: 18,
-            padding: 18,
-            background: 'rgba(63,115,8,.04)',
-            backdropFilter: 'blur(14px)',
-            WebkitBackdropFilter: 'blur(14px)',
-            position: 'relative',
-          }}
-        >
-          {/* Reg marks */}
-          <div className="reg-tl" />
-          <div className="reg-tr" />
-          <div className="reg-bl" />
-          <div className="reg-br" />
-
-          {/* Header row */}
+        {/* Right — feed live della rete */}
+        <div className="ffl-panel" style={{ flex: '1 1 420px', position: 'relative' }}>
           <div
             style={{
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'space-between',
-              marginBottom: 16,
+              position: 'relative',
+              border: '1px solid rgba(178,235,118,.25)',
+              borderRadius: 16,
+              padding: 20,
+              background: 'rgba(178,235,118,.04)',
             }}
           >
-            <span
-              style={{
-                fontFamily: 'var(--mono)',
-                fontSize: 11,
-                color: 'var(--muted)',
-                textTransform: 'uppercase',
-                letterSpacing: '0.08em',
-              }}
-            >
-              Dashboard FabLab
-            </span>
-            <span className="status-pill sp-print">2 NUOVI ORDINI</span>
-          </div>
-
-          {/* KPI mini strip */}
-          <div
-            style={{
-              display: 'grid',
-              gridTemplateColumns: 'repeat(3, 1fr)',
-              gap: 8,
-              marginBottom: 16,
-            }}
-          >
-            {[
-              { n: '05', label: 'In stampa' },
-              { n: '08', label: 'In coda' },
-              { n: '02', label: 'Pronti' },
-            ].map((kpi, i) => (
+            {/* Tick angolari lemongrass */}
+            {(['tl', 'tr', 'bl', 'br'] as const).map(c => (
               <div
-                key={i}
+                key={c}
                 style={{
-                  background: 'rgba(63,115,8,.06)',
-                  borderRadius: 10,
-                  padding: '10px 12px',
-                  textAlign: 'center',
+                  position: 'absolute',
+                  width: 14,
+                  height: 14,
+                  opacity: 0.6,
+                  top: c[0] === 't' ? -1 : undefined,
+                  bottom: c[0] === 'b' ? -1 : undefined,
+                  left: c[1] === 'l' ? -1 : undefined,
+                  right: c[1] === 'r' ? -1 : undefined,
+                  borderTop: c[0] === 't' ? '1px solid #b2eb76' : undefined,
+                  borderBottom: c[0] === 'b' ? '1px solid #b2eb76' : undefined,
+                  borderLeft: c[1] === 'l' ? '1px solid #b2eb76' : undefined,
+                  borderRight: c[1] === 'r' ? '1px solid #b2eb76' : undefined,
                 }}
-              >
-                <div style={{ fontFamily: 'var(--mono)', fontSize: 20, fontWeight: 700, color: 'var(--ink)' }}>
-                  {kpi.n}
-                </div>
-                <div style={{ fontSize: 11, color: 'var(--muted)', marginTop: 2 }}>{kpi.label}</div>
-              </div>
+              />
             ))}
-          </div>
 
-          {/* Orders */}
-          <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
-            {orders.map((o, i) => (
-              <div
-                key={i}
+            {/* Header */}
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 16 }}>
+              <span
                 style={{
-                  display: 'flex',
-                  alignItems: 'center',
-                  gap: 10,
-                  padding: '8px 10px',
-                  background: 'rgba(63,115,8,.04)',
-                  borderRadius: 10,
-                  border: '1px solid var(--line)',
+                  fontFamily: 'var(--mono)',
+                  fontSize: 11,
+                  color: 'rgba(255,255,255,.55)',
+                  textTransform: 'uppercase',
+                  letterSpacing: '0.08em',
                 }}
               >
-                <span
-                  className={o.dot}
+                Rete Teseo · Live
+              </span>
+              <span style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+                <span className="ffl-dot" style={{ width: 7, height: 7, borderRadius: '50%', background: '#b2eb76' }} />
+                <span style={{ fontFamily: 'var(--mono)', fontSize: 10, letterSpacing: '0.08em', color: '#b2eb76' }}>
+                  ONLINE
+                </span>
+              </span>
+            </div>
+
+            {/* Feed */}
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
+              {FABLAB_FEED.map((line, i) => (
+                <div
+                  key={i}
+                  className={`ffl-line${line.match ? ' ffl-match' : ''}`}
                   style={{
-                    width: 8,
-                    height: 8,
-                    borderRadius: '50%',
-                    flexShrink: 0,
-                  }}
-                />
-                <span
-                  style={{
-                    fontFamily: 'var(--mono)',
-                    fontSize: 10,
-                    color: 'var(--cyan)',
-                    flexShrink: 0,
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: 14,
+                    padding: '13px 14px',
+                    borderRadius: 10,
+                    opacity: 0,
+                    ...(line.match
+                      ? { background: 'rgba(178,235,118,.1)', border: '1px solid rgba(178,235,118,.4)' }
+                      : { background: 'rgba(178,235,118,.04)', border: '1px solid rgba(178,235,118,.12)' }),
                   }}
                 >
-                  {o.num}
-                </span>
-                <span style={{ fontSize: 12, color: 'var(--ink)', flex: 1 }}>{o.name}</span>
-                <span className={`status-pill ${o.status}`} style={{ fontSize: 9 }}>
-                  {o.statusLabel}
-                </span>
-              </div>
-            ))}
+                  <span
+                    style={{
+                      fontFamily: 'var(--mono)',
+                      fontSize: 11,
+                      letterSpacing: '0.08em',
+                      textTransform: 'uppercase',
+                      flexShrink: 0,
+                      minWidth: 108,
+                      color: line.match ? '#18280e' : '#b2eb76',
+                      background: line.match ? '#b2eb76' : 'rgba(178,235,118,.1)',
+                      border: '1px solid rgba(178,235,118,.35)',
+                      borderRadius: 6,
+                      padding: '4px 8px',
+                      textAlign: 'center',
+                    }}
+                  >
+                    {line.label}
+                  </span>
+                  <span style={{ fontSize: 15, color: line.match ? '#b2eb76' : 'rgba(255,255,255,.8)' }}>{line.msg}</span>
+                </div>
+              ))}
+              <span className="ffl-cursor" style={{ fontFamily: 'var(--mono)', color: '#b2eb76', paddingLeft: 14 }}>▮</span>
+            </div>
           </div>
         </div>
       </div>
@@ -817,10 +1069,10 @@ function FinalCtaSection() {
   const navigate = useNavigate()
   return (
     <section
+      className="land-block land-block--sage"
       style={{
         padding: '100px 6%',
         textAlign: 'center',
-        position: 'relative',
       }}
     >
       {/* Glow */}
@@ -879,12 +1131,17 @@ export default function Landing() {
   return (
     <div className="landing-scroll">
       <LandingNav />
-      <HeroSection />
-      <ProblemBar />
+      {/* Blocco sage: hero + dati survey */}
+      <div className="land-block land-block--sage">
+        <HeroSection />
+        <ProblemBar />
+      </div>
+      <TrustedBySection />
       <HowItWorksSection />
       <PrintBuildScroll />
       <TwoPathsSection />
       <FeaturesSection />
+      <AssistantPreviewSection />
       <ForFablabSection />
       <FinalCtaSection />
       <LandingFooter />

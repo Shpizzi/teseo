@@ -5,7 +5,6 @@ import * as THREE from 'three'
 import gsap from 'gsap'
 import { ScrollTrigger } from 'gsap/ScrollTrigger'
 import { buildDisplacedGeo } from './PrintViewer3D'
-import { SectionTag } from './LandingChrome'
 
 gsap.registerPlugin(ScrollTrigger)
 
@@ -118,6 +117,8 @@ export default function PrintBuildScroll() {
           overflow: 'hidden',
           display: 'flex',
           alignItems: 'center',
+          margin: '0 12px',
+          borderRadius: 24,
         }}
       >
         {/* Griglia blueprint su scuro */}
@@ -158,15 +159,13 @@ export default function PrintBuildScroll() {
 
         {/* Colonna testo */}
         <div style={{ flex: '0 0 40%', padding: '0 5% 0 8%', position: 'relative', zIndex: 2 }}>
-          <SectionTag>STRATO DOPO STRATO</SectionTag>
           <h2
             style={{
-              fontSize: 'clamp(28px, 3.4vw, 44px)',
+              fontSize: 'clamp(44px, 5.6vw, 76px)',
               fontWeight: 800,
-              lineHeight: 1.12,
+              lineHeight: 1.05,
               letterSpacing: '-.02em',
               color: '#f4faed',
-              marginTop: 18,
             }}
           >
             Così nasce il tuo ricambio.
@@ -191,10 +190,6 @@ export default function PrintBuildScroll() {
             </div>
             <div style={{ height: 3, background: 'rgba(244,250,237,.15)', marginTop: 10, overflow: 'hidden' }}>
               <div ref={barRef} style={{ height: '100%', width: '0%', background: 'var(--lemongrass)' }} />
-            </div>
-            <div style={{ display: 'flex', justifyContent: 'space-between', marginTop: 8 }}>
-              <span style={{ fontFamily: 'var(--mono)', fontSize: 10, color: 'rgba(244,250,237,.4)', letterSpacing: '0.06em' }}>PETG RICICLATO · 0,2mm</span>
-              <span style={{ fontFamily: 'var(--mono)', fontSize: 10, color: 'rgba(244,250,237,.4)', letterSpacing: '0.06em' }}>NOZZLE 0.4 · 230°C</span>
             </div>
           </div>
         </div>

@@ -7,6 +7,7 @@ import {
   Users,
   MapPin,
   MessageSquare,
+  Leaf,
   Menu,
 } from 'lucide-react'
 import Sidebar, { type NavItem } from '../components/Sidebar'
@@ -23,6 +24,7 @@ const userNavItems: NavItem[] = [
   { label: 'Community',  icon: <Users size={20} />,            href: '/app/community' },
   { label: 'Produttori', icon: <MapPin size={20} />,           href: '/app/produttori' },
   { label: 'Messaggi',   icon: <MessageSquare size={20} />,    href: '/app/messages', badge: unreadCount },
+  { label: 'Impatto',    icon: <Leaf size={20} />,             href: '/app/impatto' },
 ]
 
 export default function UserLayout() {
