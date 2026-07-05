@@ -295,6 +295,28 @@ body::before {
     50% { opacity: 0.25; }
   }
 
+  /* AI streaming: cursore + testo "thinking" shimmer */
+  .ai-cursor {
+    display: inline-block;
+    width: 7px;
+    height: 13px;
+    margin-left: 2px;
+    vertical-align: -1px;
+    background: var(--cyan);
+    animation: blink 0.9s infinite;
+  }
+  @keyframes shimmer {
+    to { background-position: -200% 0; }
+  }
+  .ai-shimmer {
+    background: linear-gradient(90deg, var(--muted) 38%, var(--cyan) 50%, var(--muted) 62%);
+    background-size: 200% 100%;
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+    animation: shimmer 1.5s linear infinite;
+  }
+
   /* Deadline chips */
   .dl-urgent { background: var(--cyan); color: #fff; font-weight: 700; }
   .dl-today  { background: transparent; border: 1px solid var(--cyan); color: var(--cyan); }

@@ -8,6 +8,7 @@ import PrimaryButton from '../components/PrimaryButton'
 import GlassCard from '../components/GlassCard'
 import { LandingNav, LandingFooter, SectionTag, GhostButton } from '../components/LandingChrome'
 import PrintBuildScroll from '../components/PrintBuildScroll'
+import StreamText from '../components/StreamText'
 
 gsap.registerPlugin(ScrollTrigger)
 
@@ -124,7 +125,7 @@ function HeroSection() {
 
         {/* CTA row */}
         <div className="anim-fadeUp-d3" style={{ display: 'flex', flexDirection: 'row', gap: 12, justifyContent: 'center' }}>
-          <PrimaryButton style={{ height: 48, fontSize: 15, padding: '0 28px' }} onClick={() => navigate('/app/dashboard')}>
+          <PrimaryButton style={{ height: 48, fontSize: 15, padding: '0 28px' }} onClick={() => navigate('/onboarding')}>
             <ScanLine size={18} />
             Ripara il tuo primo oggetto
           </PrimaryButton>
@@ -690,9 +691,21 @@ function FeaturesSection() {
 // Conversazione scriptata: anteprima del TeseoAssistant vero che vive in /app/dashboard.
 const AIP_MONO: React.CSSProperties = { fontFamily: 'var(--mono)' }
 
+// Sequenza "powered by AI": il messaggio utente appare, l'AI mostra una riga di
+// reasoning in shimmer, poi la risposta streama token per token come un LLM.
+// step: 0 idle · 1 user · 2 think1 · 3 stream m2 · 4 think2 · 5 stream m3 · 6 chips
+const AIP_SCRIPT = {
+  user: 'Si è rotto il gancio dell’appendiabiti in ingresso. Si può rifare?',
+  think1: 'Cerco nell’archivio della community…',
+  m2: 'Trovato: «Gancio modulare da parete» v2.3 nell’archivio community — validato dai maker, 1.842 download, ★ 4.9.',
+  think2: 'Confronto i produttori disponibili vicino a te…',
+  m3: 'FabLab Bovisa è disponibile a 4,1 km: in PLA costa ~€ 4, pronto domani entro le 12. Preparo l’ordine?',
+}
+
 function AssistantPreviewSection() {
   const navigate = useNavigate()
   const sectionRef = useRef<HTMLElement>(null)
+  const [step, setStep] = useState(0)
 
   useEffect(() => {
     const section = sectionRef.current
@@ -705,18 +718,19 @@ function AssistantPreviewSection() {
       })
       tl.from('.aip-reveal', { y: 26, opacity: 0, duration: 0.7, stagger: 0.09, ease: 'power3.out' })
         .from('.aip-panel', { y: 44, opacity: 0, duration: 0.85, ease: 'power3.out' }, 0.15)
-        .from('.aip-m1', { y: 10, opacity: 0, duration: 0.4, ease: 'power2.out' }, 1.0)
-        .fromTo('.aip-typing', { opacity: 0 }, { opacity: 1, duration: 0.25 }, 1.5)
-        .to('.aip-typing', { opacity: 0, duration: 0.2 }, 2.5)
-        .from('.aip-m2', { y: 10, opacity: 0, duration: 0.4, ease: 'power2.out' }, 2.6)
-        .fromTo('.aip-typing', { opacity: 0 }, { opacity: 1, duration: 0.25 }, 3.3)
-        .to('.aip-typing', { opacity: 0, duration: 0.2 }, 4.2)
-        .from('.aip-m3', { y: 10, opacity: 0, duration: 0.4, ease: 'power2.out' }, 4.3)
-        .from('.aip-chips', { y: 8, opacity: 0, duration: 0.35, ease: 'power2.out' }, 4.75)
+        .call(() => setStep(s => Math.max(s, 1)), [], 0.9)
     }, section)
 
     return () => ctx.revert()
   }, [])
+
+  // Gli step "user" e "think" avanzano a tempo; quelli in streaming avanzano via onDone.
+  useEffect(() => {
+    const delays: Record<number, number> = { 1: 700, 2: 1600, 4: 1600 }
+    if (!(step in delays)) return
+    const t = setTimeout(() => setStep(s => s + 1), delays[step])
+    return () => clearTimeout(t)
+  }, [step])
 
   const bubble = (user: boolean): React.CSSProperties => ({
     maxWidth: '86%', padding: '11px 14px', fontSize: 14, lineHeight: 1.55,
@@ -759,7 +773,7 @@ function AssistantPreviewSection() {
             ))}
           </div>
           <div className="aip-reveal" style={{ marginTop: 30 }}>
-            <PrimaryButton onClick={() => navigate('/app/dashboard')}>Provalo nella demo</PrimaryButton>
+            <PrimaryButton onClick={() => navigate('/onboarding')}>Provalo ora</PrimaryButton>
           </div>
         </div>
 
@@ -785,29 +799,38 @@ function AssistantPreviewSection() {
           </div>
 
           <div style={{ padding: 20, display: 'flex', flexDirection: 'column', gap: 11, minHeight: 340 }}>
-            <div className="aip-m1" style={bubble(true)}>
-              Si è rotto il gancio dell’appendiabiti in ingresso. Si può rifare?
-            </div>
-            <div className="aip-m2" style={bubble(false)}>
-              Trovato: <b>«Gancio modulare da parete» v2.3</b> nell’archivio community —
-              validato dai maker, 1.842 download, ★ 4.9.
-            </div>
-            <div className="aip-m3" style={bubble(false)}>
-              FabLab Bovisa è disponibile a 4,1 km: in PLA costa <b style={AIP_MONO}>~€ 4</b>,
-              pronto domani entro le 12. Preparo l’ordine?
-            </div>
-            <div className="aip-chips" style={{ display: 'flex', gap: 7 }}>
-              {['Sì, procedi', 'Vedi alternative'].map(c => (
-                <span key={c} style={{ ...AIP_MONO, fontSize: 11, fontWeight: 600, letterSpacing: '0.03em', padding: '6px 11px', borderRadius: 7, border: '1px solid var(--line-2)', color: 'var(--cyan)' }}>
-                  {c} ›
+            {step >= 1 && (
+              <div style={{ ...bubble(true), animation: 'fadeUp .45s cubic-bezier(.4,0,.2,1) both' }}>
+                {AIP_SCRIPT.user}
+              </div>
+            )}
+            {step >= 3 && (
+              <div style={bubble(false)}>
+                <StreamText text={AIP_SCRIPT.m2} onDone={() => setStep(s => Math.max(s, 4))} />
+              </div>
+            )}
+            {step >= 5 && (
+              <div style={bubble(false)}>
+                <StreamText text={AIP_SCRIPT.m3} onDone={() => setStep(s => Math.max(s, 6))} />
+              </div>
+            )}
+            {(step === 2 || step === 4) && (
+              <div style={{ display: 'flex', alignItems: 'center', gap: 8, padding: '4px 2px' }}>
+                <Sparkles size={13} color="var(--cyan)" style={{ animation: 'blink 1.5s infinite' }} />
+                <span className="ai-shimmer" style={{ fontSize: 12.5, fontWeight: 500 }}>
+                  {step === 2 ? AIP_SCRIPT.think1 : AIP_SCRIPT.think2}
                 </span>
-              ))}
-            </div>
-            <div className="aip-typing" style={{ display: 'flex', gap: 4, padding: '11px 13px', borderRadius: '12px 12px 12px 4px', background: 'var(--glass-2)', border: '1px solid var(--line)', width: 'fit-content', opacity: 0 }}>
-              {[0, 1, 2].map(i => (
-                <span key={i} style={{ width: 5, height: 5, borderRadius: '50%', background: 'var(--muted)', animation: 'blink 1s infinite', animationDelay: `${i * 0.18}s` }} />
-              ))}
-            </div>
+              </div>
+            )}
+            {step >= 6 && (
+              <div style={{ display: 'flex', gap: 7, animation: 'fadeUp .45s cubic-bezier(.4,0,.2,1) both' }}>
+                {['Sì, procedi', 'Vedi alternative'].map(c => (
+                  <span key={c} style={{ ...AIP_MONO, fontSize: 11, fontWeight: 600, letterSpacing: '0.03em', padding: '6px 11px', borderRadius: 7, border: '1px solid var(--line-2)', color: 'var(--cyan)' }}>
+                    {c} ›
+                  </span>
+                ))}
+              </div>
+            )}
           </div>
         </div>
       </div>
@@ -1102,7 +1125,7 @@ function FinalCtaSection() {
           position: 'relative',
         }}
       >
-        <PrimaryButton style={{ height: 52, fontSize: 16, padding: '0 32px' }} onClick={() => navigate('/app/dashboard')}>
+        <PrimaryButton style={{ height: 52, fontSize: 16, padding: '0 32px' }} onClick={() => navigate('/onboarding')}>
           <Package size={20} />
           Ripara il primo oggetto
         </PrimaryButton>

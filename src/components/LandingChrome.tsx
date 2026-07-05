@@ -74,7 +74,7 @@ export function LandingNav() {
         >
           Accedi
         </a>
-        <PrimaryButton style={{ height: 38, padding: '0 18px', fontSize: 13 }} onClick={() => navigate('/app/dashboard')}>
+        <PrimaryButton style={{ height: 38, padding: '0 18px', fontSize: 13 }} onClick={() => navigate('/onboarding')}>
           Inizia gratis
         </PrimaryButton>
       </div>
@@ -156,7 +156,7 @@ export function LandingFooter() {
           <span style={{ color: '#b2eb76' }}>si ripara.</span>
         </h2>
         <button
-          onClick={() => navigate('/app/dashboard')}
+          onClick={() => navigate('/onboarding')}
           onMouseEnter={e => { e.currentTarget.style.transform = 'scale(0.98)' }}
           onMouseLeave={e => { e.currentTarget.style.transform = 'none' }}
           style={{

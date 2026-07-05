@@ -4,6 +4,7 @@ import ComeFunziona from './pages/ComeFunziona'
 import Impatto from './pages/Impatto'
 import CommunityPublic from './pages/CommunityPublic'
 import Componenti from './pages/Componenti'
+import Onboarding from './pages/Onboarding'
 import UserLayout from './layouts/UserLayout'
 import FablabLayout from './layouts/FablabLayout'
 import FablabSlicingLayout from './layouts/FablabSlicingLayout'
@@ -35,6 +36,7 @@ export default function App() {
       <Route path="/impatto" element={<Impatto />} />
       <Route path="/community" element={<CommunityPublic />} />
       <Route path="/componenti" element={<Componenti />} />
+      <Route path="/onboarding" element={<Onboarding />} />
       <Route path="/app" element={<UserLayout />}>
         <Route index element={<Navigate to="dashboard" replace />} />
         <Route path="dashboard" element={<UserDashboard />} />
