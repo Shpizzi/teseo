@@ -60,20 +60,15 @@ body::before {
 /* La griglia blueprint non è più globale: vive solo dentro le sezioni
    che la usano (.land-grid, superfici scure, viewport) */
 
-/* ===== SCROLLBAR ===== */
+/* ===== SCROLLBAR — invisibile ovunque, lo scroll resta ===== */
+* {
+  scrollbar-width: none; /* Firefox */
+  -ms-overflow-style: none;
+}
 ::-webkit-scrollbar {
-  width: 6px;
-  height: 6px;
-}
-::-webkit-scrollbar-track {
-  background: transparent;
-}
-::-webkit-scrollbar-thumb {
-  background: rgba(9, 15, 5, 0.18);
-  border-radius: 3px;
-}
-::-webkit-scrollbar-thumb:hover {
-  background: rgba(9, 15, 5, 0.32);
+  width: 0;
+  height: 0;
+  display: none;
 }
 
 /* ===== COMPONENTS ===== */
@@ -373,6 +368,38 @@ body::before {
     white-space: nowrap;
     font-family: var(--mono);
     letter-spacing: 0.03em;
+    color: var(--ink);
+  }
+
+  /* Pin mappa reale (FablabMap / MapLibre) */
+  .fmap-pin {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 4px;
+  }
+  .fmap-dot {
+    width: 14px;
+    height: 14px;
+    border-radius: 50% 50% 50% 0;
+    transform: rotate(45deg);
+    background: var(--cyan);
+    box-shadow: 0 0 0 5px rgba(63, 115, 8, 0.16);
+  }
+  .fmap-pin--you .fmap-dot {
+    background: var(--forest);
+    box-shadow: 0 0 0 5px rgba(24, 40, 14, 0.16);
+  }
+  .fmap-label {
+    font-family: var(--mono);
+    font-size: 10px;
+    font-weight: 600;
+    letter-spacing: 0.03em;
+    background: rgba(255, 255, 255, 0.95);
+    border: 1px solid var(--line-2);
+    border-radius: 5px;
+    padding: 2px 7px;
+    white-space: nowrap;
     color: var(--ink);
   }
 

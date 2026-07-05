@@ -26,6 +26,10 @@ export type KpiData = {
   trendUp?: boolean
 }
 
+export type MaterialRating = { material: string; rating: number }
+
+export type ProducerReview = { author: string; date: string; rating: number; text: string }
+
 export type NearbyProducer = {
   id: string
   name: string
@@ -33,6 +37,14 @@ export type NearbyProducer = {
   technologies: string
   rating: number
   available: boolean
+  lng: number
+  lat: number
+  photo: string
+  gallery: string[]
+  materialRatings: MaterialRating[]
+  reviews: ProducerReview[]
+  address: string
+  hours: string
 }
 
 // ===== MOCK DATA =====
@@ -41,7 +53,7 @@ export const userProjects: Project[] = [
   {
     id: 'p1',
     name: 'Demogor — statuetta articolata',
-    fablab: 'FabLab Lambrate',
+    fablab: 'Tillverka',
     material: 'ABS rosso',
     progress: 84,
     status: 'printing',
@@ -54,7 +66,7 @@ export const userProjects: Project[] = [
   {
     id: 'p2',
     name: 'Supporto cuffie da scrivania',
-    fablab: 'FabLab Bovisa',
+    fablab: 'FabLab Milano',
     material: 'PLA',
     progress: 46,
     status: 'printing',
@@ -75,7 +87,7 @@ export const userProjects: Project[] = [
   {
     id: 'p4',
     name: 'Ricambio cardine finestra',
-    fablab: 'MakerSpace Navigli',
+    fablab: 'DamA Space',
     material: 'PLA',
     progress: 100,
     status: 'ready',
@@ -113,27 +125,73 @@ export const userKpis: KpiData[] = [
 export const nearbyProducers: NearbyProducer[] = [
   {
     id: 'fab1',
-    name: 'FabLab Lambrate',
+    name: 'Tillverka',
     distance: '1.2 km',
     technologies: 'FDM, Resina',
     rating: 4.8,
     available: false,
+    lng: 9.2264829,
+    lat: 45.4880178,
+    photo: '/landing/fablab-a.jpg',
+    gallery: ['/landing/fablab-a.jpg', '/landing/fablab-b.jpg', '/landing/fablab-d.jpg'],
+    materialRatings: [
+      { material: 'PLA', rating: 4.9 },
+      { material: 'PETG', rating: 4.8 },
+      { material: 'Resina', rating: 4.6 },
+    ],
+    reviews: [
+      { author: 'Marco T.', date: 'giu 2026', rating: 5, text: 'Manico della moka stampato in un giorno, incastro perfetto al primo colpo.' },
+      { author: 'Giulia P.', date: 'mag 2026', rating: 5, text: 'Super disponibili: mi hanno aiutato a scegliere il materiale giusto.' },
+      { author: 'Roberto L.', date: 'apr 2026', rating: 4, text: 'Ottima qualità, tempi un filo più lunghi del previsto.' },
+    ],
+    address: 'Via Andrea Maria Ampere 122, Milano',
+    hours: 'Lun–Ven 9:00–19:00 · Sab 10:00–13:00',
   },
   {
     id: 'fab2',
-    name: 'FabLab Bovisa',
+    name: 'FabLab Milano',
     distance: '4.1 km',
     technologies: 'FDM, Laser',
     rating: 4.9,
     available: true,
+    lng: 9.1736348,
+    lat: 45.4884318,
+    photo: '/landing/fablab-b.jpg',
+    gallery: ['/landing/fablab-b.jpg', '/landing/fablab-c.jpg', '/landing/fablab-e.jpg'],
+    materialRatings: [
+      { material: 'PLA', rating: 5.0 },
+      { material: 'ABS', rating: 4.8 },
+      { material: 'Nylon', rating: 4.7 },
+    ],
+    reviews: [
+      { author: 'Francesca R.', date: 'giu 2026', rating: 5, text: 'La statuetta è venuta identica al modello. Comunicazione perfetta in chat.' },
+      { author: 'Andrea S.', date: 'giu 2026', rating: 5, text: 'Cardine della finestra: 6 euro e mezza giornata. Incredibile.' },
+    ],
+    address: 'Via Galileo Ferraris 1, Milano',
+    hours: 'Lun–Sab 9:00–20:00',
   },
   {
     id: 'fab3',
-    name: 'MakerSpace Navigli',
+    name: 'DamA Space',
     distance: '2.7 km',
     technologies: 'FDM, SLA, SLS',
     rating: 4.6,
     available: true,
+    lng: 9.1801072,
+    lat: 45.4500249,
+    photo: '/landing/fablab-c.jpg',
+    gallery: ['/landing/fablab-c.jpg', '/landing/fablab-d.jpg', '/landing/fablab-a.jpg'],
+    materialRatings: [
+      { material: 'Resina', rating: 4.9 },
+      { material: 'PLA', rating: 4.5 },
+      { material: 'PETG', rating: 4.4 },
+    ],
+    reviews: [
+      { author: 'Elena V.', date: 'mag 2026', rating: 5, text: 'Ricambio in resina per un giocattolo: dettaglio pazzesco.' },
+      { author: 'Davide M.', date: 'apr 2026', rating: 4, text: 'Buon lavoro, il ritiro serale è comodissimo.' },
+    ],
+    address: 'Corso S. Gottardo 19, Milano',
+    hours: 'Mar–Dom 10:00–22:00',
   },
 ]
 

@@ -559,7 +559,7 @@ export default function FablabDashboard() {
               Stampanti
             </h3>
             <button
-              onClick={() => navigate('/fablab/stampanti')}
+              onClick={() => navigate('/fablab/coda')}
               style={{
                 background: 'none',
                 border: 'none',

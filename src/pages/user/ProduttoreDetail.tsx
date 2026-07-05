@@ -1,15 +1,8 @@
 import { useParams, useNavigate } from 'react-router-dom'
-import { Star } from 'lucide-react'
+import { Star, ArrowLeft, MapPin, Clock } from 'lucide-react'
 import GlassCard from '../../components/GlassCard'
 import PrimaryButton from '../../components/PrimaryButton'
 import { producers, conversations } from '../../mock/user-pages'
-
-const fakePrinters = [
-  { name: 'Bambu X1 · 01', status: 'active' as const },
-  { name: 'Prusa MK4 · 02', status: 'active' as const },
-  { name: 'Formlabs SLA · 03', status: 'idle' as const },
-  { name: 'Ender CNC · 04', status: 'err' as const },
-]
 
 export default function ProduttoreDetail() {
   const { id } = useParams<{ id: string }>()
@@ -36,129 +29,119 @@ export default function ProduttoreDetail() {
   }
 
   const conversationId = conversations.find(c => c.fablab === producer.name)?.id
-
-  const utilizationPct = Math.round((fakePrinters.filter(p => p.status === 'active').length / fakePrinters.length) * 100)
+  const label: React.CSSProperties = {
+    fontSize: 10, fontFamily: 'var(--mono)', color: 'var(--muted)',
+    textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: 5,
+  }
 
   return (
     <>
-      {/* Back button */}
+      {/* Back */}
       <div style={{ flex: '0 0 auto' }}>
         <button
           onClick={() => navigate('/app/produttori')}
           style={{
-            background: 'none',
-            border: 'none',
-            cursor: 'pointer',
-            color: 'var(--muted)',
-            fontFamily: 'var(--mono)',
-            fontSize: 12,
-            padding: 0,
+            display: 'flex', alignItems: 'center', gap: 8,
+            background: 'var(--glass)', border: '1px solid var(--line-2)', borderRadius: 10,
+            color: 'var(--ink)', fontFamily: 'inherit', fontWeight: 600, fontSize: 13,
+            padding: '9px 14px', cursor: 'pointer',
           }}
         >
-          ← Produttori
+          <ArrowLeft size={15} />
+          Produttori
         </button>
       </div>
 
-      {/* Header card */}
-      <GlassCard
-        hero
-        style={{
-          padding: '20px 24px',
-          display: 'flex',
-          alignItems: 'center',
-          gap: 16,
-          flex: '0 0 auto',
-        }}
-      >
-        {/* Availability dot */}
-        <div
-          style={{
-            width: 12,
-            height: 12,
-            borderRadius: '50%',
-            flex: '0 0 auto',
-            background: producer.available ? 'var(--cyan)' : 'transparent',
-            boxShadow: producer.available ? 'none' : 'inset 0 0 0 1.5px var(--cyan)',
-          }}
+      {/* Header card: foto + info, stile scheda Google Maps */}
+      <GlassCard hero style={{ padding: 0, display: 'flex', overflow: 'hidden', flex: '0 0 auto' }}>
+        <img
+          src={producer.photo}
+          alt={producer.name}
+          style={{ width: 260, height: 148, objectFit: 'cover', flex: '0 0 auto', borderRight: '1px solid var(--line)' }}
         />
-
-        <div>
-          <h1 style={{ fontSize: 24, fontWeight: 700, color: 'var(--ink)', marginBottom: 3 }}>
-            {producer.name}
-          </h1>
-          <div style={{ fontSize: 12, fontFamily: 'var(--mono)', color: 'var(--muted)' }}>
-            {producer.city}
-          </div>
-        </div>
-
-        {/* Rating */}
-        <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginLeft: 16 }}>
-          <Star size={14} fill="currentColor" style={{ color: 'var(--cyan)' }} />
-          <span style={{ fontFamily: 'var(--mono)', color: 'var(--cyan)', fontSize: 14, fontWeight: 700 }}>
-            {producer.rating}
-          </span>
-        </div>
-
-        {/* Certified badge */}
-        <span
-          style={{
-            fontSize: 10,
-            fontFamily: 'var(--mono)',
-            border: '1px solid var(--line-2)',
-            borderRadius: 100,
-            padding: '4px 12px',
-            color: 'var(--muted)',
-          }}
-        >
-          FabLab certificato
-        </span>
-
-        {/* Technologies */}
-        <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap' }}>
-          {producer.technologies.map(tech => (
-            <span
-              key={tech}
+        <div style={{ flex: 1, padding: '20px 24px', display: 'flex', flexDirection: 'column', gap: 8, minWidth: 0 }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+            <div
               style={{
-                fontSize: 10,
-                fontFamily: 'var(--mono)',
-                border: '1px solid var(--line)',
-                borderRadius: 5,
-                padding: '3px 8px',
-                color: 'var(--muted)',
+                width: 12, height: 12, borderRadius: '50%', flex: '0 0 auto',
+                background: producer.available ? 'var(--cyan)' : 'transparent',
+                boxShadow: producer.available ? 'none' : 'inset 0 0 0 1.5px var(--cyan)',
+              }}
+            />
+            <h1 style={{ fontSize: 24, fontWeight: 700, color: 'var(--ink)' }}>{producer.name}</h1>
+            <span style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+              <Star size={14} fill="currentColor" style={{ color: 'var(--cyan)' }} />
+              <span style={{ fontFamily: 'var(--mono)', color: 'var(--cyan)', fontSize: 14, fontWeight: 700 }}>
+                {producer.rating}
+              </span>
+              <span style={{ fontFamily: 'var(--mono)', color: 'var(--muted)', fontSize: 11 }}>
+                ({producer.reviews})
+              </span>
+            </span>
+            <span
+              style={{
+                fontSize: 10, fontFamily: 'var(--mono)', border: '1px solid var(--line-2)',
+                borderRadius: 100, padding: '4px 12px', color: 'var(--muted)',
               }}
             >
-              {tech}
+              FabLab certificato
             </span>
-          ))}
-        </div>
-
-        <div style={{ marginLeft: 'auto' }}>
-          <PrimaryButton onClick={() => navigate('/app/new', { state: { producerId: producer.id } })}>
-            Stampa con questo FabLab
-          </PrimaryButton>
+            <div style={{ marginLeft: 'auto' }}>
+              <PrimaryButton onClick={() => navigate('/app/new', { state: { producerId: producer.id } })}>
+                Stampa con questo FabLab
+              </PrimaryButton>
+            </div>
+          </div>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 18, fontFamily: 'var(--mono)', fontSize: 12, color: 'var(--muted)' }}>
+            <span style={{ display: 'flex', alignItems: 'center', gap: 5 }}><MapPin size={12} /> {producer.address}</span>
+            <span style={{ display: 'flex', alignItems: 'center', gap: 5 }}><Clock size={12} /> {producer.hours}</span>
+            <span>{producer.distance}</span>
+          </div>
+          <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap' }}>
+            {producer.technologies.map(tech => (
+              <span
+                key={tech}
+                style={{
+                  fontSize: 10, fontFamily: 'var(--mono)', border: '1px solid var(--line)',
+                  borderRadius: 5, padding: '3px 8px', color: 'var(--muted)',
+                }}
+              >
+                {tech}
+              </span>
+            ))}
+          </div>
         </div>
       </GlassCard>
 
-      {/* 3-col grid */}
-      <div style={{ flex: 1, display: 'grid', gridTemplateColumns: '2fr 1fr 1fr', gap: 16, minHeight: 0 }}>
+      {/* 3-col grid: info generali · galleria · recensioni */}
+      <div style={{ flex: 1, display: 'grid', gridTemplateColumns: '1.2fr 1fr 1fr', gap: 16, minHeight: 0 }}>
 
-        {/* Col 1: description */}
+        {/* Col 1: blocco info generale */}
         <GlassCard style={{ padding: 22, display: 'flex', flexDirection: 'column', gap: 16, overflow: 'auto' }}>
           <h3 style={{ fontSize: 12, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.08em', color: 'var(--ink)' }}>
-            Descrizione
+            Informazioni
           </h3>
 
           <p style={{ fontSize: 13.5, color: 'var(--muted)', lineHeight: 1.6 }}>
             {producer.description}
           </p>
 
+          {/* Rating per materiale */}
           <div>
-            <div style={{ fontSize: 11, fontFamily: 'var(--mono)', color: 'var(--muted)', textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: 10 }}>
-              MATERIALI
-            </div>
-            <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6 }}>
-              {producer.materials.map(mat => (
-                <span key={mat} className="status-pill sp-new">{mat}</span>
+            <div style={label}>VALUTAZIONE PER MATERIALE</div>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 8, marginTop: 4 }}>
+              {producer.materialRatings.map(mr => (
+                <div key={mr.material} style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+                  <span style={{ fontFamily: 'var(--mono)', fontSize: 12, fontWeight: 600, color: 'var(--ink)', width: 58, flex: '0 0 auto' }}>
+                    {mr.material}
+                  </span>
+                  <div style={{ flex: 1, height: 5, background: 'rgba(9,15,5,.08)', borderRadius: 3, overflow: 'hidden' }}>
+                    <div style={{ width: `${(mr.rating / 5) * 100}%`, height: '100%', background: 'var(--cyan)' }} />
+                  </div>
+                  <span style={{ fontFamily: 'var(--mono)', fontSize: 12, fontWeight: 700, color: 'var(--cyan)', width: 30, textAlign: 'right' }}>
+                    {mr.rating.toFixed(1)}
+                  </span>
+                </div>
               ))}
             </div>
           </div>
@@ -168,8 +151,6 @@ export default function ProduttoreDetail() {
             {[
               { label: 'LAVORI COMPLETATI', value: producer.completedJobs.toString() },
               { label: 'TEMPO MEDIO', value: producer.avgTime },
-              { label: 'VALUTAZIONE', value: `${producer.rating} / 5.0` },
-              { label: 'RECENSIONI', value: producer.reviews.toString() },
             ].map(stat => (
               <div
                 key={stat.label}
@@ -189,118 +170,90 @@ export default function ProduttoreDetail() {
               </div>
             ))}
           </div>
+
+          <div style={{ marginTop: 'auto' }}>
+            <PrimaryButton style={{ width: '100%' }} onClick={() => navigate('/app/messages', { state: { conversationId } })}>
+              Avvia chat
+            </PrimaryButton>
+          </div>
         </GlassCard>
 
-        {/* Col 2: printers */}
-        <GlassCard style={{ padding: 22, display: 'flex', flexDirection: 'column', gap: 16, overflow: 'auto' }}>
+        {/* Col 2: galleria — foto del lab + foto mandate dagli utenti */}
+        <GlassCard style={{ padding: 22, display: 'flex', flexDirection: 'column', gap: 14, overflow: 'auto' }}>
           <h3 style={{ fontSize: 12, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.08em', color: 'var(--ink)' }}>
-            Stampanti
+            Galleria
           </h3>
-
-          {/* Conic ring */}
-          <div style={{ display: 'flex', alignItems: 'center', gap: 14 }}>
-            <div
-              className="conic-ring"
-              style={{
-                background: `conic-gradient(var(--cyan) 0 ${utilizationPct}%, rgba(63,115,8,.14) ${utilizationPct}% 100%)`,
-              }}
-            >
-              <div
-                style={{
-                  width: 44,
-                  height: 44,
-                  borderRadius: '50%',
-                  background: 'var(--bg)',
-                  display: 'grid',
-                  placeItems: 'center',
-                  fontSize: 11,
-                  fontFamily: 'var(--mono)',
-                  fontWeight: 700,
-                  color: 'var(--cyan)',
-                }}
-              >
-                {utilizationPct}%
-              </div>
-            </div>
-            <div>
-              <div style={{ fontSize: 13.5, fontWeight: 600, color: 'var(--ink)' }}>Utilizzo</div>
-              <div style={{ fontSize: 11, fontFamily: 'var(--mono)', color: 'var(--muted)', marginTop: 2 }}>
-                {fakePrinters.filter(p => p.status === 'active').length}/{fakePrinters.length} attive
-              </div>
-            </div>
-          </div>
-
-          <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
-            {fakePrinters.map(printer => (
-              <div key={printer.name} style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-                <div
-                  className={`pdot-${printer.status}`}
+          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10 }}>
+            {producer.gallery.map((g, i) => (
+              <figure key={i} style={{ margin: 0, ...(i === 0 ? { gridColumn: '1 / -1' } : {}) }}>
+                <img
+                  src={g.src}
+                  alt={g.by}
                   style={{
-                    width: 8,
-                    height: 8,
-                    borderRadius: '50%',
-                    flex: '0 0 auto',
+                    width: '100%',
+                    aspectRatio: i === 0 ? '16 / 8' : '4 / 3',
+                    objectFit: 'cover',
+                    borderRadius: 10,
+                    border: '1px solid var(--line)',
+                    display: 'block',
                   }}
                 />
-                <span style={{ fontSize: 12.5, color: 'var(--ink)', fontWeight: 500, flex: 1 }}>
-                  {printer.name}
-                </span>
-                <span style={{ fontSize: 10.5, fontFamily: 'var(--mono)', color: 'var(--muted)' }}>
-                  {printer.status === 'active' ? 'attiva' : printer.status === 'idle' ? 'inattiva' : 'errore'}
-                </span>
-              </div>
+                <figcaption style={{ fontFamily: 'var(--mono)', fontSize: 9.5, color: 'var(--muted-2)', marginTop: 4, letterSpacing: '0.03em' }}>
+                  {g.by}
+                </figcaption>
+              </figure>
             ))}
           </div>
         </GlassCard>
 
-        {/* Col 3: contact */}
-        <GlassCard style={{ padding: 22, display: 'flex', flexDirection: 'column', gap: 16, overflow: 'auto' }}>
-          <h3 style={{ fontSize: 12, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.08em', color: 'var(--ink)' }}>
-            Contatta
-          </h3>
-
-          <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
-            <div>
-              <div style={{ fontSize: 10, fontFamily: 'var(--mono)', color: 'var(--muted)', textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: 4 }}>ORARI</div>
-              <div style={{ fontSize: 13.5, fontWeight: 600, color: 'var(--ink)' }}>Lun–Ven</div>
-              <div style={{ fontSize: 12, fontFamily: 'var(--mono)', color: 'var(--muted)', marginTop: 2 }}>09:00–19:00</div>
-            </div>
-            <div style={{ height: 1, background: 'var(--line)' }} />
-            <div>
-              <div style={{ fontSize: 10, fontFamily: 'var(--mono)', color: 'var(--muted)', textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: 4 }}>INDIRIZZO</div>
-              <div style={{ fontSize: 13.5, fontWeight: 600, color: 'var(--ink)' }}>Via Ventura 12</div>
-              <div style={{ fontSize: 12, fontFamily: 'var(--mono)', color: 'var(--muted)', marginTop: 2 }}>{producer.city}</div>
-            </div>
+        {/* Col 3: recensioni */}
+        <GlassCard style={{ padding: 22, display: 'flex', flexDirection: 'column', gap: 14, overflow: 'auto' }}>
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+            <h3 style={{ fontSize: 12, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.08em', color: 'var(--ink)' }}>
+              Recensioni
+            </h3>
+            <span style={{ fontFamily: 'var(--mono)', fontSize: 11, color: 'var(--muted)' }}>
+              {producer.reviews} totali
+            </span>
           </div>
 
-          <div style={{ marginTop: 'auto', display: 'flex', flexDirection: 'column', gap: 10 }}>
-            <PrimaryButton onClick={() => navigate('/app/messages', { state: { conversationId } })}>
-              Avvia chat
-            </PrimaryButton>
-            <button
-              onClick={() => navigate('/app/produttori')}
+          {producer.reviewsList.map((r, i) => (
+            <div
+              key={i}
               style={{
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                gap: 8,
-                background: 'transparent',
-                color: 'var(--cyan)',
-                border: '1px solid var(--line-2)',
-                fontFamily: 'inherit',
-                fontWeight: 600,
-                fontSize: 13.5,
-                padding: '10px 20px',
-                borderRadius: 100,
-                cursor: 'pointer',
-                transition: '0.2s',
+                padding: 14,
+                background: 'var(--glass)',
+                border: '1px solid var(--line)',
+                borderRadius: 'var(--radius-sm)',
               }}
-              onMouseEnter={e => { (e.currentTarget as HTMLButtonElement).style.background = 'var(--glass-2)' }}
-              onMouseLeave={e => { (e.currentTarget as HTMLButtonElement).style.background = 'transparent' }}
             >
-              Vedi mappa
-            </button>
-          </div>
+              <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 7 }}>
+                <span
+                  style={{
+                    width: 26, height: 26, borderRadius: '50%', flex: '0 0 auto',
+                    background: 'rgba(63,115,8,.12)', border: '1px solid var(--line-2)',
+                    color: 'var(--cyan)', display: 'grid', placeItems: 'center',
+                    fontFamily: 'var(--mono)', fontSize: 10.5, fontWeight: 700,
+                  }}
+                >
+                  {r.author.split(' ').map(w => w[0]).join('')}
+                </span>
+                <span style={{ fontSize: 13, fontWeight: 600, color: 'var(--ink)', flex: 1 }}>{r.author}</span>
+                <span style={{ fontFamily: 'var(--mono)', fontSize: 10.5, color: 'var(--muted)' }}>{r.date}</span>
+              </div>
+              <div style={{ display: 'flex', gap: 2, marginBottom: 7 }}>
+                {Array.from({ length: 5 }).map((_, s) => (
+                  <Star
+                    key={s}
+                    size={11}
+                    fill={s < r.rating ? 'var(--cyan)' : 'transparent'}
+                    style={{ color: s < r.rating ? 'var(--cyan)' : 'var(--line-2)' }}
+                  />
+                ))}
+              </div>
+              <p style={{ fontSize: 12.5, color: 'var(--muted)', lineHeight: 1.55 }}>{r.text}</p>
+            </div>
+          ))}
         </GlassCard>
       </div>
     </>

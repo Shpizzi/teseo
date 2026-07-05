@@ -1,19 +1,23 @@
 import { useState } from 'react'
-import { Plus, RotateCcw } from 'lucide-react'
+import { Plus, RotateCcw, LayoutGrid, List } from 'lucide-react'
 import { useNavigate, useLocation } from 'react-router-dom'
 import PrimaryButton from '../../components/PrimaryButton'
 import GlassCard from '../../components/GlassCard'
 import StatusPill from '../../components/StatusPill'
 import ProgressBar from '../../components/ProgressBar'
 import { userProjects, type Project } from '../../mock'
-import { historyProjects } from '../../mock/user-pages'
+import { historyProjects, type HistoryProject } from '../../mock/user-pages'
 
 // Ordine appena confermato in /app/new: arriva via location.state e viene
 // mostrato in cima alla lista, evidenziato (l'ordine non deve "svanire").
 type NewOrderState = { newOrder?: { name: string; fablab: string } } | null
 
+// "12 mag 2025" → "mag 2025": lo storico si raggruppa per mese
+const monthOf = (d: string) => d.split(' ').slice(1).join(' ')
+
 export default function Progetti() {
   const [activeTab, setActiveTab] = useState<'corsi' | 'storico'>('corsi')
+  const [view, setView] = useState<'grid' | 'list'>('grid')
   const navigate = useNavigate()
   const newOrder = (useLocation().state as NewOrderState)?.newOrder
 
@@ -25,6 +29,15 @@ export default function Progetti() {
     : undefined
   const inCorso = [...(justOrdered ? [justOrdered] : []), ...userProjects]
   const inStampa = inCorso.filter(p => p.status === 'printing').length
+
+  const historyByMonth = historyProjects.reduce<{ month: string; items: HistoryProject[] }[]>((acc, p) => {
+    const m = monthOf(p.completedDate)
+    const g = acc.find(x => x.month === m)
+    if (g) g.items.push(p)
+    else acc.push({ month: m, items: [p] })
+    return acc
+  }, [])
+
   const tabStyle = (tab: 'corsi' | 'storico') => ({
     padding: '8px 18px',
     borderRadius: 100,
@@ -37,6 +50,231 @@ export default function Progetti() {
     background: activeTab === tab ? 'var(--cyan)' : 'transparent',
     color: activeTab === tab ? '#f4faed' : 'var(--muted)',
   })
+
+  const viewBtnStyle = (v: 'grid' | 'list') => ({
+    width: 34,
+    height: 34,
+    borderRadius: 9,
+    border: 'none',
+    cursor: 'pointer',
+    display: 'grid' as const,
+    placeItems: 'center' as const,
+    background: view === v ? 'var(--cyan)' : 'transparent',
+    color: view === v ? '#f4faed' : 'var(--muted)',
+    transition: '0.18s',
+  })
+
+  /* ── Card (vista a quadri) ── */
+  const projectCard = (project: Project) => {
+    const isNew = project.id === 'new'
+    const isDraft = project.status === 'draft' && !project.fablab
+    return (
+      <div
+        key={project.id}
+        onClick={isNew ? undefined : () => navigate(`/app/progetti/${project.id}`)}
+        style={{ cursor: isNew ? 'default' : 'pointer' }}
+      >
+        <GlassCard
+          style={{
+            padding: 18,
+            display: 'flex',
+            flexDirection: 'column',
+            gap: 12,
+            cursor: 'inherit',
+            transition: '0.2s',
+            ...(isNew ? { border: '1px solid var(--cyan)' } : {}),
+          }}
+        >
+          <div style={{ display: 'flex', alignItems: 'flex-start', gap: 12 }}>
+            <div className="thumb-mini" />
+            <div style={{ flex: 1, minWidth: 0 }}>
+              <div style={{ fontWeight: 600, fontSize: 14.5, color: 'var(--ink)', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                {project.name}
+              </div>
+              <div style={{ fontSize: 11.5, fontFamily: 'var(--mono)', color: 'var(--muted)', marginTop: 3 }}>
+                {isDraft ? 'Bozza · nessun produttore' : `${project.fablab} · ${project.material}`}
+              </div>
+            </div>
+          </div>
+
+          <ProgressBar value={project.progress} label={`${project.progress}%`} />
+
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 10 }}>
+            <StatusPill status={project.status} label={isNew ? 'Inviato' : undefined} />
+            {isDraft ? (
+              <button
+                onClick={e => {
+                  e.stopPropagation()
+                  navigate('/app/new', { state: { modelName: project.name } })
+                }}
+                style={{
+                  background: 'transparent', color: 'var(--cyan)', border: '1px solid var(--line-2)',
+                  fontFamily: 'inherit', fontWeight: 600, fontSize: 12, padding: '6px 14px',
+                  borderRadius: 100, cursor: 'pointer', transition: '0.18s',
+                }}
+              >
+                Trova produttore →
+              </button>
+            ) : (
+              project.eta && (
+                <span style={{ fontSize: 11, fontFamily: 'var(--mono)', color: 'var(--muted)' }}>
+                  {project.eta}
+                </span>
+              )
+            )}
+          </div>
+        </GlassCard>
+      </div>
+    )
+  }
+
+  /* ── Riga (vista lista) ── */
+  const projectRow = (project: Project) => {
+    const isNew = project.id === 'new'
+    const isDraft = project.status === 'draft' && !project.fablab
+    return (
+      <div
+        key={project.id}
+        onClick={isNew ? undefined : () => navigate(`/app/progetti/${project.id}`)}
+        style={{
+          display: 'flex',
+          alignItems: 'center',
+          gap: 14,
+          padding: 16,
+          borderRadius: 'var(--radius-sm)',
+          background: 'var(--glass)',
+          border: `1px solid ${isNew ? 'var(--cyan)' : 'var(--line)'}`,
+          cursor: isNew ? 'default' : 'pointer',
+          transition: '0.2s',
+        }}
+      >
+        <div className="thumb-mini" />
+        <div style={{ flex: 1, minWidth: 0 }}>
+          <div style={{ fontWeight: 600, fontSize: 14.5, color: 'var(--ink)', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+            {project.name}
+          </div>
+          <div style={{ fontSize: 11.5, fontFamily: 'var(--mono)', color: 'var(--muted)', marginTop: 3 }}>
+            {isDraft ? 'Bozza · nessun produttore' : `${project.fablab} · ${project.material}`}
+            {project.eta ? ` · ${project.eta}` : ''}
+          </div>
+        </div>
+        {project.status === 'printing' && (
+          <div style={{ width: 140, flex: '0 0 auto' }}>
+            <ProgressBar value={project.progress} label={`${project.progress}%`} />
+          </div>
+        )}
+        <StatusPill status={project.status} label={isNew ? 'Inviato' : undefined} />
+      </div>
+    )
+  }
+
+  /* ── Storico: card + riga ── */
+  const historyRow = (project: HistoryProject) => (
+    <div
+      key={project.id}
+      style={{
+        display: 'flex',
+        alignItems: 'center',
+        gap: 14,
+        padding: 16,
+        borderRadius: 'var(--radius-sm)',
+        background: 'var(--glass)',
+        border: '1px solid var(--line)',
+        transition: '0.2s',
+      }}
+    >
+      <div className="thumb-mini" />
+      <div style={{ flex: 1, minWidth: 0 }}>
+        <div style={{ fontWeight: 600, fontSize: 14.5, color: 'var(--ink)', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+          {project.name}
+        </div>
+        <div style={{ fontSize: 11.5, fontFamily: 'var(--mono)', color: 'var(--muted)', marginTop: 3 }}>
+          {project.fablab} · {project.material} · {project.completedDate}
+        </div>
+      </div>
+      <div style={{ fontFamily: 'var(--mono)', color: 'var(--cyan)', fontSize: 13, fontWeight: 600 }}>
+        {project.cost}
+      </div>
+      <StatusPill
+        status={project.status === 'completed' ? 'ready' : 'draft'}
+        label={project.status === 'completed' ? 'Completato' : 'Annullato'}
+      />
+      {project.status === 'completed' && (
+        <button
+          onClick={() => navigate('/app/new', { state: { modelName: project.name } })}
+          title="Riordina lo stesso pezzo"
+          style={{
+            display: 'flex', alignItems: 'center', gap: 6,
+            background: 'transparent', color: 'var(--cyan)', border: '1px solid var(--line-2)',
+            fontFamily: 'inherit', fontWeight: 600, fontSize: 12, padding: '6px 14px',
+            borderRadius: 100, cursor: 'pointer', transition: '0.18s', flex: '0 0 auto',
+          }}
+        >
+          <RotateCcw size={13} />
+          Ristampa
+        </button>
+      )}
+    </div>
+  )
+
+  const historyCard = (project: HistoryProject) => (
+    <GlassCard key={project.id} style={{ padding: 18, display: 'flex', flexDirection: 'column', gap: 12 }}>
+      <div style={{ display: 'flex', alignItems: 'flex-start', gap: 12 }}>
+        <div className="thumb-mini" />
+        <div style={{ flex: 1, minWidth: 0 }}>
+          <div style={{ fontWeight: 600, fontSize: 14.5, color: 'var(--ink)', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+            {project.name}
+          </div>
+          <div style={{ fontSize: 11.5, fontFamily: 'var(--mono)', color: 'var(--muted)', marginTop: 3 }}>
+            {project.fablab} · {project.material} · {project.completedDate}
+          </div>
+        </div>
+      </div>
+      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 10 }}>
+        <StatusPill
+          status={project.status === 'completed' ? 'ready' : 'draft'}
+          label={project.status === 'completed' ? 'Completato' : 'Annullato'}
+        />
+        <span style={{ fontFamily: 'var(--mono)', color: 'var(--cyan)', fontSize: 13, fontWeight: 600 }}>{project.cost}</span>
+      </div>
+      {project.status === 'completed' && (
+        <button
+          onClick={() => navigate('/app/new', { state: { modelName: project.name } })}
+          style={{
+            display: 'flex', alignItems: 'center', gap: 6, alignSelf: 'flex-start',
+            background: 'transparent', color: 'var(--cyan)', border: '1px solid var(--line-2)',
+            fontFamily: 'inherit', fontWeight: 600, fontSize: 12, padding: '6px 14px',
+            borderRadius: 100, cursor: 'pointer', transition: '0.18s',
+          }}
+        >
+          <RotateCcw size={13} />
+          Ristampa
+        </button>
+      )}
+    </GlassCard>
+  )
+
+  const monthHeader = (m: string) => (
+    <div
+      key={'h-' + m}
+      style={{
+        gridColumn: '1 / -1',
+        fontFamily: 'var(--mono)',
+        fontSize: 11,
+        fontWeight: 600,
+        letterSpacing: '0.1em',
+        textTransform: 'uppercase',
+        color: 'var(--muted)',
+        padding: '10px 2px 2px',
+        display: 'flex',
+        alignItems: 'center',
+        gap: 12,
+      }}
+    >
+      {m}
+      <span style={{ flex: 1, height: 1, background: 'var(--line)' }} />
+    </div>
+  )
 
   return (
     <>
@@ -57,153 +295,65 @@ export default function Progetti() {
         </PrimaryButton>
       </div>
 
-      {/* Tabs */}
-      <div
-        style={{
-          display: 'flex',
-          gap: 4,
-          flex: '0 0 auto',
-          background: 'var(--glass)',
-          border: '1px solid var(--line)',
-          borderRadius: 100,
-          padding: 4,
-          width: 'fit-content',
-        }}
-      >
-        <button style={tabStyle('corsi')} onClick={() => setActiveTab('corsi')}>
-          In corso &nbsp;{inCorso.length}
-        </button>
-        <button style={tabStyle('storico')} onClick={() => setActiveTab('storico')}>
-          Storico &nbsp;{historyProjects.length}
-        </button>
+      {/* Tabs + toggle vista */}
+      <div style={{ display: 'flex', alignItems: 'center', gap: 12, flex: '0 0 auto' }}>
+        <div
+          style={{
+            display: 'flex',
+            gap: 4,
+            background: 'var(--glass)',
+            border: '1px solid var(--line)',
+            borderRadius: 100,
+            padding: 4,
+            width: 'fit-content',
+          }}
+        >
+          <button style={tabStyle('corsi')} onClick={() => setActiveTab('corsi')}>
+            In corso &nbsp;{inCorso.length}
+          </button>
+          <button style={tabStyle('storico')} onClick={() => setActiveTab('storico')}>
+            Storico &nbsp;{historyProjects.length}
+          </button>
+        </div>
+        <div style={{ flex: 1 }} />
+        <div
+          style={{
+            display: 'flex',
+            gap: 3,
+            background: 'var(--glass)',
+            border: '1px solid var(--line)',
+            borderRadius: 11,
+            padding: 3,
+          }}
+        >
+          <button style={viewBtnStyle('grid')} onClick={() => setView('grid')} aria-label="Vista a quadri" title="Vista a quadri">
+            <LayoutGrid size={16} />
+          </button>
+          <button style={viewBtnStyle('list')} onClick={() => setView('list')} aria-label="Vista a lista" title="Vista a lista">
+            <List size={16} />
+          </button>
+        </div>
       </div>
 
       {/* Content */}
       <div style={{ flex: 1, minHeight: 0, overflow: 'auto' }}>
         {activeTab === 'corsi' ? (
-          <div
-            style={{
-              display: 'grid',
-              gridTemplateColumns: '1fr 1fr',
-              gap: 14,
-              alignContent: 'start',
-            }}
-          >
-            {inCorso.map(project => {
-              const isNew = project.id === 'new'
-              const isDraft = project.status === 'draft' && !project.fablab
-              return (
-                <div
-                  key={project.id}
-                  onClick={isNew ? undefined : () => navigate(`/app/progetti/${project.id}`)}
-                  style={{ cursor: isNew ? 'default' : 'pointer' }}
-                >
-                  <GlassCard
-                    style={{
-                      padding: 18,
-                      display: 'flex',
-                      flexDirection: 'column',
-                      gap: 12,
-                      cursor: 'inherit',
-                      transition: '0.2s',
-                      ...(isNew ? { border: '1px solid var(--cyan)' } : {}),
-                    }}
-                  >
-                    {/* Header */}
-                    <div style={{ display: 'flex', alignItems: 'flex-start', gap: 12 }}>
-                      <div className="thumb-mini" />
-                      <div style={{ flex: 1, minWidth: 0 }}>
-                        <div style={{ fontWeight: 600, fontSize: 14.5, color: 'var(--ink)', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
-                          {project.name}
-                        </div>
-                        <div style={{ fontSize: 11.5, fontFamily: 'var(--mono)', color: 'var(--muted)', marginTop: 3 }}>
-                          {isDraft ? 'Bozza · nessun produttore' : `${project.fablab} · ${project.material}`}
-                        </div>
-                      </div>
-                    </div>
-
-                    {/* Progress */}
-                    <ProgressBar value={project.progress} label={`${project.progress}%`} />
-
-                    {/* Footer */}
-                    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 10 }}>
-                      <StatusPill status={project.status} label={isNew ? 'Inviato' : undefined} />
-                      {isDraft ? (
-                        <button
-                          onClick={e => {
-                            e.stopPropagation()
-                            navigate('/app/new', { state: { modelName: project.name } })
-                          }}
-                          style={{
-                            background: 'transparent', color: 'var(--cyan)', border: '1px solid var(--line-2)',
-                            fontFamily: 'inherit', fontWeight: 600, fontSize: 12, padding: '6px 14px',
-                            borderRadius: 100, cursor: 'pointer', transition: '0.18s',
-                          }}
-                        >
-                          Trova produttore →
-                        </button>
-                      ) : (
-                        project.eta && (
-                          <span style={{ fontSize: 11, fontFamily: 'var(--mono)', color: 'var(--muted)' }}>
-                            {project.eta}
-                          </span>
-                        )
-                      )}
-                    </div>
-                  </GlassCard>
-                </div>
-              )
-            })}
+          view === 'grid' ? (
+            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 14, alignContent: 'start' }}>
+              {inCorso.map(projectCard)}
+            </div>
+          ) : (
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 11 }}>
+              {inCorso.map(projectRow)}
+            </div>
+          )
+        ) : view === 'grid' ? (
+          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 14, alignContent: 'start' }}>
+            {historyByMonth.map(g => [monthHeader(g.month), ...g.items.map(historyCard)])}
           </div>
         ) : (
           <div style={{ display: 'flex', flexDirection: 'column', gap: 11 }}>
-            {historyProjects.map(project => (
-              <div
-                key={project.id}
-                style={{
-                  display: 'flex',
-                  alignItems: 'center',
-                  gap: 14,
-                  padding: 16,
-                  borderRadius: 'var(--radius-sm)',
-                  background: 'var(--glass)',
-                  border: '1px solid var(--line)',
-                  transition: '0.2s',
-                }}
-              >
-                <div className="thumb-mini" />
-                <div style={{ flex: 1, minWidth: 0 }}>
-                  <div style={{ fontWeight: 600, fontSize: 14.5, color: 'var(--ink)', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
-                    {project.name}
-                  </div>
-                  <div style={{ fontSize: 11.5, fontFamily: 'var(--mono)', color: 'var(--muted)', marginTop: 3 }}>
-                    {project.fablab} · {project.material} · {project.completedDate}
-                  </div>
-                </div>
-                <div style={{ fontFamily: 'var(--mono)', color: 'var(--cyan)', fontSize: 13, fontWeight: 600 }}>
-                  {project.cost}
-                </div>
-                <StatusPill
-                  status={project.status === 'completed' ? 'ready' : 'draft'}
-                  label={project.status === 'completed' ? 'Completato' : 'Annullato'}
-                />
-                {project.status === 'completed' && (
-                  <button
-                    onClick={() => navigate('/app/new', { state: { modelName: project.name } })}
-                    title="Riordina lo stesso pezzo"
-                    style={{
-                      display: 'flex', alignItems: 'center', gap: 6,
-                      background: 'transparent', color: 'var(--cyan)', border: '1px solid var(--line-2)',
-                      fontFamily: 'inherit', fontWeight: 600, fontSize: 12, padding: '6px 14px',
-                      borderRadius: 100, cursor: 'pointer', transition: '0.18s', flex: '0 0 auto',
-                    }}
-                  >
-                    <RotateCcw size={13} />
-                    Ristampa
-                  </button>
-                )}
-              </div>
-            ))}
+            {historyByMonth.map(g => [monthHeader(g.month), ...g.items.map(historyRow)])}
           </div>
         )}
       </div>

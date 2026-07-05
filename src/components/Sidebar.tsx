@@ -1,6 +1,7 @@
 import type { ReactNode } from 'react'
 import { Link, useLocation } from 'react-router-dom'
-import { Package, X } from 'lucide-react'
+import { X } from 'lucide-react'
+import { TeseoLogo } from './LandingChrome'
 
 export type NavItem = {
   label: string
@@ -20,26 +21,55 @@ type SidebarProps = {
     role: string
     href?: string
   }
+  // Variante scura (forest): usata dal ramo FabLab per distinguerlo
+  // a colpo d'occhio dallo spazio utente.
+  dark?: boolean
   // When onClose is provided, the sidebar renders as a mobile off-canvas drawer
   // controlled by `open`. Omit both for the static desktop column.
   open?: boolean
   onClose?: () => void
 }
 
-export default function Sidebar({ items, brand, user, open, onClose }: SidebarProps) {
+export default function Sidebar({ items, brand, user, dark, open, onClose }: SidebarProps) {
   const location = useLocation()
   const isDrawer = onClose !== undefined
 
+  const c = dark
+    ? {
+        ink: '#f4faed',
+        muted: 'rgba(244,250,237,.6)',
+        line: 'rgba(178,235,118,.2)',
+        hoverBg: 'rgba(178,235,118,.1)',
+        activeBg: 'var(--lemongrass)',
+        activeInk: 'var(--forest)',
+        accent: 'var(--lemongrass)',
+        accentBg: 'rgba(178,235,118,.14)',
+        aside: 'var(--forest)',
+      }
+    : {
+        ink: 'var(--ink)',
+        muted: 'var(--muted)',
+        line: 'var(--line)',
+        hoverBg: 'var(--glass-2)',
+        activeBg: 'var(--cyan)',
+        activeInk: '#f4faed',
+        accent: 'var(--cyan)',
+        accentBg: 'rgba(63,115,8,.12)',
+        aside: 'var(--glass)',
+      }
+
   const inner = (
     <>
-      {/* Brand block */}
+      {/* Brand block — solo nel drawer mobile: sul desktop il logo vive
+          nella topbar stile Shopify */}
+      {isDrawer && (
       <div
         style={{
           display: 'flex',
           alignItems: 'center',
           gap: 11,
           padding: '4px 8px 18px',
-          borderBottom: '1px dashed var(--line)',
+          borderBottom: `1px dashed ${c.line}`,
           marginBottom: 8,
         }}
       >
@@ -48,15 +78,15 @@ export default function Sidebar({ items, brand, user, open, onClose }: SidebarPr
             width: 38,
             height: 38,
             borderRadius: 11,
-            background: 'rgba(63,115,8,.12)',
-            border: '1px solid var(--line-2)',
+            background: c.accentBg,
+            border: `1px solid ${c.line}`,
             display: 'grid',
             placeItems: 'center',
-            color: 'var(--cyan)',
+            color: c.accent,
             flex: '0 0 auto',
           }}
         >
-          <Package size={19} />
+          <TeseoLogo size={19} color="currentColor" />
         </span>
         <span style={{ flex: 1, minWidth: 0 }}>
           <div
@@ -64,7 +94,7 @@ export default function Sidebar({ items, brand, user, open, onClose }: SidebarPr
               fontWeight: 800,
               fontSize: 16,
               letterSpacing: '0.12em',
-              color: 'var(--ink)',
+              color: c.ink,
             }}
           >
             TESEO
@@ -72,7 +102,7 @@ export default function Sidebar({ items, brand, user, open, onClose }: SidebarPr
           <div
             style={{
               display: 'block',
-              color: 'var(--muted)',
+              color: c.muted,
               fontWeight: 500,
               fontSize: 10,
               letterSpacing: '0.02em',
@@ -89,14 +119,15 @@ export default function Sidebar({ items, brand, user, open, onClose }: SidebarPr
             aria-label="Chiudi menu"
             style={{
               width: 32, height: 32, flex: '0 0 auto', borderRadius: 9,
-              background: 'transparent', border: '1px solid var(--line)',
-              color: 'var(--muted)', display: 'grid', placeItems: 'center', cursor: 'pointer',
+              background: 'transparent', border: `1px solid ${c.line}`,
+              color: c.muted, display: 'grid', placeItems: 'center', cursor: 'pointer',
             }}
           >
             <X size={16} />
           </button>
         )}
       </div>
+      )}
 
       {/* Nav items */}
       {items.map(item => {
@@ -112,8 +143,8 @@ export default function Sidebar({ items, brand, user, open, onClose }: SidebarPr
               gap: 13,
               padding: '11px 13px',
               borderRadius: 11,
-              color: isActive ? '#f4faed' : 'var(--muted)',
-              background: isActive ? 'var(--cyan)' : 'transparent',
+              color: isActive ? c.activeInk : c.muted,
+              background: isActive ? c.activeBg : 'transparent',
               cursor: 'pointer',
               transition: '0.18s',
               fontWeight: 600,
@@ -122,13 +153,13 @@ export default function Sidebar({ items, brand, user, open, onClose }: SidebarPr
             }}
             onMouseEnter={e => {
               if (!isActive) {
-                ;(e.currentTarget as HTMLAnchorElement).style.color = 'var(--ink)'
-                ;(e.currentTarget as HTMLAnchorElement).style.background = 'var(--glass-2)'
+                ;(e.currentTarget as HTMLAnchorElement).style.color = c.ink
+                ;(e.currentTarget as HTMLAnchorElement).style.background = c.hoverBg
               }
             }}
             onMouseLeave={e => {
               if (!isActive) {
-                ;(e.currentTarget as HTMLAnchorElement).style.color = 'var(--muted)'
+                ;(e.currentTarget as HTMLAnchorElement).style.color = c.muted
                 ;(e.currentTarget as HTMLAnchorElement).style.background = 'transparent'
               }
             }}
@@ -141,8 +172,8 @@ export default function Sidebar({ items, brand, user, open, onClose }: SidebarPr
               <span
                 style={{
                   marginLeft: 'auto',
-                  background: isActive ? 'rgba(255,255,255,0.25)' : 'var(--cyan)',
-                  color: '#f4faed',
+                  background: isActive ? (dark ? 'rgba(24,40,14,.3)' : 'rgba(255,255,255,0.25)') : c.accent,
+                  color: dark && !isActive ? 'var(--forest)' : '#f4faed',
                   fontSize: 10.5,
                   fontWeight: 700,
                   padding: '1px 7px',
@@ -171,7 +202,7 @@ export default function Sidebar({ items, brand, user, open, onClose }: SidebarPr
           gap: 11,
           padding: 9,
           borderRadius: 12,
-          border: '1px solid var(--line)',
+          border: `1px solid ${c.line}`,
           cursor: user.href ? 'pointer' : 'default',
           textDecoration: 'none',
           pointerEvents: user.href ? 'auto' : 'none',
@@ -182,9 +213,9 @@ export default function Sidebar({ items, brand, user, open, onClose }: SidebarPr
             width: 36,
             height: 36,
             borderRadius: '50%',
-            background: 'rgba(63,115,8,.12)',
-            border: '1px solid var(--line-2)',
-            color: 'var(--cyan)',
+            background: c.accentBg,
+            border: `1px solid ${c.line}`,
+            color: c.accent,
             display: 'grid',
             placeItems: 'center',
             fontWeight: 700,
@@ -196,13 +227,13 @@ export default function Sidebar({ items, brand, user, open, onClose }: SidebarPr
           {user.initials}
         </span>
         <span>
-          <div style={{ fontSize: 13.5, fontWeight: 600, lineHeight: 1.2, color: 'var(--ink)' }}>
+          <div style={{ fontSize: 13.5, fontWeight: 600, lineHeight: 1.2, color: c.ink }}>
             {user.name}
           </div>
           <div
             style={{
               display: 'block',
-              color: 'var(--muted)',
+              color: c.muted,
               fontSize: 10.5,
               fontWeight: 500,
               fontFamily: 'var(--mono)',
@@ -217,10 +248,10 @@ export default function Sidebar({ items, brand, user, open, onClose }: SidebarPr
   )
 
   const asideBase: React.CSSProperties = {
-    background: 'var(--glass)',
+    background: c.aside,
     backdropFilter: 'blur(14px)',
     WebkitBackdropFilter: 'blur(14px)',
-    border: '1px solid var(--line)',
+    border: `1px solid ${dark ? 'rgba(178,235,118,.25)' : 'var(--line)'}`,
     borderRadius: 'var(--radius)',
     display: 'flex',
     flexDirection: 'column',
@@ -263,7 +294,7 @@ export default function Sidebar({ items, brand, user, open, onClose }: SidebarPr
           left: 12,
           width: 'min(272px, 82vw)',
           zIndex: 41,
-          background: 'var(--bg-2)',
+          background: dark ? 'var(--forest)' : 'var(--bg-2)',
           overflow: 'auto',
           transform: open ? 'translateX(0)' : 'translateX(calc(-100% - 16px))',
           transition: 'transform 0.26s cubic-bezier(.4,0,.2,1)',

@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { Star, Download } from 'lucide-react'
-import { useNavigate } from 'react-router-dom'
+import { useNavigate, useSearchParams } from 'react-router-dom'
 import SearchBar from '../../components/SearchBar'
 import GlassCard from '../../components/GlassCard'
 import { communityModels } from '../../mock/user-pages'
@@ -8,8 +8,9 @@ import { communityModels } from '../../mock/user-pages'
 const categories = ['Tutti', 'Casa', 'FabLab', 'Accessori', 'Meccanica', 'Gaming', 'Elettronica']
 
 export default function Community() {
+  const [searchParams] = useSearchParams()
   const [activeCategory, setActiveCategory] = useState('Tutti')
-  const [query, setQuery] = useState('')
+  const [query, setQuery] = useState(searchParams.get('q') ?? '')
   const navigate = useNavigate()
 
   const filtered = communityModels
@@ -37,10 +38,10 @@ export default function Community() {
       <div style={{ display: 'flex', alignItems: 'center', gap: 14, flex: '0 0 auto' }}>
         <div>
           <h1 style={{ fontWeight: 600, fontSize: 25, letterSpacing: '-0.01em', color: 'var(--ink)' }}>
-            Community
+            Archivio pezzi
           </h1>
           <p style={{ color: 'var(--muted)', fontSize: 12, marginTop: 3, fontFamily: 'var(--mono)', letterSpacing: '0.02em' }}>
-            3.2K MODELLI CONDIVISI
+            3.2K RICAMBI E MODELLI CONDIVISI DALLA COMMUNITY
           </p>
         </div>
         <div style={{ flex: 1 }} />

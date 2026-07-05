@@ -1,9 +1,11 @@
 import { useState } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
+import { ArrowLeft, MessageSquare } from 'lucide-react'
 import GlassCard from '../../components/GlassCard'
 import StatusPill from '../../components/StatusPill'
 import PrintViewer3D from '../../components/PrintViewer3D'
 import ProgressBar from '../../components/ProgressBar'
+import PrimaryButton from '../../components/PrimaryButton'
 import { userProjects, projectTimeline } from '../../mock'
 import { toast } from '../../components/Toast'
 
@@ -48,36 +50,50 @@ export default function ProgettoDetail() {
       `}</style>
 
       {/* Topbar */}
-      <div style={{ display: 'flex', alignItems: 'center', gap: 14, flex: '0 0 auto' }}>
+      <div style={{ display: 'flex', alignItems: 'center', gap: 16, flex: '0 0 auto' }}>
         <button
           onClick={() => navigate('/app/progetti')}
+          aria-label="Torna ai progetti"
           style={{
-            background: 'none',
-            border: 'none',
-            cursor: 'pointer',
-            color: 'var(--muted)',
-            fontFamily: 'var(--mono)',
-            fontSize: 12,
-            padding: 0,
             display: 'flex',
             alignItems: 'center',
-            gap: 6,
+            gap: 8,
+            background: 'var(--glass)',
+            border: '1px solid var(--line-2)',
+            borderRadius: 10,
+            color: 'var(--ink)',
+            fontFamily: 'inherit',
+            fontWeight: 600,
+            fontSize: 13,
+            padding: '9px 14px',
+            cursor: 'pointer',
+            transition: 'background .15s, border-color .15s',
           }}
+          onMouseEnter={e => { e.currentTarget.style.background = 'var(--glass-2)'; e.currentTarget.style.borderColor = 'var(--cyan)' }}
+          onMouseLeave={e => { e.currentTarget.style.background = 'var(--glass)'; e.currentTarget.style.borderColor = 'var(--line-2)' }}
         >
-          ← Progetti
+          <ArrowLeft size={15} />
+          Progetti
         </button>
         <div>
-          <h1 style={{ fontWeight: 600, fontSize: 22, letterSpacing: '-0.01em', color: 'var(--ink)' }}>
+          <div style={{ fontFamily: 'var(--mono)', fontSize: 10.5, color: 'var(--muted-2)', letterSpacing: '0.06em', textTransform: 'uppercase' }}>
+            Progetti / {project.name}
+          </div>
+          <h1 style={{ fontWeight: 600, fontSize: 22, letterSpacing: '-0.01em', color: 'var(--ink)', marginTop: 2 }}>
             {project.name}
           </h1>
-          <p style={{ color: 'var(--muted)', fontSize: 12, marginTop: 3, fontFamily: 'var(--mono)', letterSpacing: '0.02em' }}>
-            {project.fablab || 'Nessun produttore'} · {project.material || '—'}
-          </p>
         </div>
+        <div style={{ flex: 1 }} />
+        {!isDraft && (
+          <PrimaryButton onClick={() => navigate('/app/messages', { state: { conversationId: project.conversationId } })}>
+            <MessageSquare size={16} />
+            Scrivi al produttore
+          </PrimaryButton>
+        )}
       </div>
 
-      {/* Main 3-col layout */}
-      <div style={{ flex: 1, display: 'grid', gridTemplateColumns: '1fr 1.4fr 1fr', gap: 16, minHeight: 0 }}>
+      {/* Main 3-col layout — timeline e gestione in evidenza a destra */}
+      <div style={{ flex: 1, display: 'grid', gridTemplateColumns: '1fr 1.3fr 1.1fr', gap: 16, minHeight: 0 }}>
 
         {/* Left: project details */}
         <GlassCard style={{ padding: 22, display: 'flex', flexDirection: 'column', gap: 16, overflow: 'auto' }}>
@@ -157,20 +173,6 @@ export default function ProgettoDetail() {
               </button>
             ) : (
               <>
-                <button
-                  onClick={() => navigate('/app/messages', { state: { conversationId: project.conversationId } })}
-                  style={{
-                    display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8,
-                    background: 'var(--forest)', color: '#fff', border: 'none',
-                    fontFamily: 'inherit', fontWeight: 700, fontSize: 14,
-                    padding: '0 20px', height: 44, borderRadius: 100, cursor: 'pointer',
-                    width: '100%', transition: '0.2s',
-                  }}
-                  onMouseEnter={e => { (e.currentTarget as HTMLButtonElement).style.background = 'var(--cyan)' }}
-                  onMouseLeave={e => { (e.currentTarget as HTMLButtonElement).style.background = 'var(--forest)' }}
-                >
-                  Contatta produttore
-                </button>
                 {project.status === 'printing' && (
                   confirmCancel ? (
                     <div style={{ display: 'flex', flexDirection: 'column', gap: 8, border: '1px dashed var(--line-2)', borderRadius: 11, padding: 12 }}>
@@ -258,9 +260,9 @@ export default function ProgettoDetail() {
             FIG. 01 — MODEL PREVIEW
           </div>
 
-          {/* 3D Viewer — clipping pilotato dall'avanzamento reale del progetto */}
+          {/* 3D Viewer — modello reale scansionato, clipping sull'avanzamento del progetto */}
           <div style={{ flex: 1, position: 'relative', minHeight: 0 }}>
-            <PrintViewer3D progress={isDraft ? 100 : project.progress} />
+            <PrintViewer3D modelUrl="/meshes/remote.glb" progress={isDraft ? 100 : project.progress} tone="light" />
           </div>
 
           {/* Progress badge (solo se la stampa esiste davvero) */}
@@ -307,11 +309,16 @@ export default function ProgettoDetail() {
           )}
         </GlassCard>
 
-        {/* Right: timeline */}
-        <GlassCard style={{ padding: 22, display: 'flex', flexDirection: 'column', overflow: 'auto' }}>
-          <h3 style={{ fontSize: 12, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.08em', color: 'var(--ink)', marginBottom: 20 }}>
-            Timeline
-          </h3>
+        {/* Right: timeline + gestione — la parte in evidenza della pagina */}
+        <GlassCard hero style={{ padding: 22, display: 'flex', flexDirection: 'column', overflow: 'auto' }}>
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 20 }}>
+            <h3 style={{ fontSize: 12, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.08em', color: 'var(--ink)' }}>
+              Timeline del progetto
+            </h3>
+            <span style={{ fontFamily: 'var(--mono)', fontSize: 11, fontWeight: 700, color: 'var(--cyan)' }}>
+              {Math.max(currentStep + 1, 0)}/{timelineSteps.length}
+            </span>
+          </div>
 
           <div style={{ display: 'flex', flexDirection: 'column', gap: 0 }}>
             {timelineSteps.map((step, i) => (
@@ -320,30 +327,43 @@ export default function ProgettoDetail() {
                 <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', flex: '0 0 auto' }}>
                   <div
                     style={{
-                      width: 10,
-                      height: 10,
+                      width: 12,
+                      height: 12,
                       borderRadius: '50%',
                       background: step.done ? 'var(--cyan)' : 'transparent',
                       border: step.done ? 'none' : '1.5px solid var(--line-2)',
                       flex: '0 0 auto',
-                      marginTop: 3,
+                      marginTop: i === currentStep ? 15 : 3,
                       animation: i === currentStep && project.status === 'printing' ? 'pulseRing 2s infinite' : 'none',
                     }}
                   />
                   {i < timelineSteps.length - 1 && (
                     <div
                       style={{
-                        width: 1,
+                        width: 2,
                         flex: 1,
-                        minHeight: 32,
-                        background: 'var(--line)',
+                        minHeight: 30,
+                        background: step.done && timelineSteps[i + 1].done ? 'var(--cyan)' : 'var(--line)',
                       }}
                     />
                   )}
                 </div>
 
-                {/* Right: content */}
-                <div style={{ paddingBottom: i < timelineSteps.length - 1 ? 24 : 0 }}>
+                {/* Right: content — lo step corrente è un blocco evidenziato */}
+                <div
+                  style={{
+                    flex: 1,
+                    marginBottom: i < timelineSteps.length - 1 ? 14 : 0,
+                    ...(i === currentStep
+                      ? {
+                          background: 'rgba(63,115,8,.07)',
+                          border: '1px solid var(--line-2)',
+                          borderRadius: 10,
+                          padding: '11px 14px',
+                        }
+                      : { padding: '0 0 6px' }),
+                  }}
+                >
                   <div
                     style={{
                       fontSize: i === currentStep ? 15 : 13.5,
@@ -354,13 +374,36 @@ export default function ProgettoDetail() {
                   >
                     {step.label}
                   </div>
-                  <div style={{ fontSize: 11, fontFamily: 'var(--mono)', color: 'var(--muted)' }}>
+                  <div style={{ fontSize: 11, fontFamily: 'var(--mono)', color: i === currentStep ? 'var(--cyan)' : 'var(--muted)' }}>
                     {step.date}
                   </div>
                 </div>
               </div>
             ))}
           </div>
+
+          {/* CTA messaggi in coda alla timeline */}
+          {!isDraft && (
+            <div style={{ marginTop: 'auto', paddingTop: 18, borderTop: '1px solid var(--line)', display: 'flex', flexDirection: 'column', gap: 8 }}>
+              <span style={{ fontFamily: 'var(--mono)', fontSize: 10, letterSpacing: '0.08em', textTransform: 'uppercase', color: 'var(--muted-2)' }}>
+                Domande sulla stampa?
+              </span>
+              <button
+                onClick={() => navigate('/app/messages', { state: { conversationId: project.conversationId } })}
+                style={{
+                  display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8,
+                  background: 'transparent', color: 'var(--cyan)', border: '1px solid var(--cyan)',
+                  fontFamily: 'inherit', fontWeight: 600, fontSize: 13.5,
+                  height: 42, borderRadius: 100, cursor: 'pointer', transition: 'background .15s',
+                }}
+                onMouseEnter={e => { e.currentTarget.style.background = 'rgba(63,115,8,.07)' }}
+                onMouseLeave={e => { e.currentTarget.style.background = 'transparent' }}
+              >
+                <MessageSquare size={15} />
+                Apri la chat con {project.fablab}
+              </button>
+            </div>
+          )}
         </GlassCard>
       </div>
     </>

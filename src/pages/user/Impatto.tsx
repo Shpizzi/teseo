@@ -1,4 +1,5 @@
 import { Link } from 'react-router-dom'
+import { TreePine, Car, Smartphone, Target } from 'lucide-react'
 import GlassCard from '../../components/GlassCard'
 import { userImpactRows } from '../../mock'
 
@@ -10,6 +11,16 @@ const heroStats = [
   { value: String(userImpactRows.length).padStart(2, '0'), label: 'oggetti salvati dalla discarica' },
   { value: '~2 Wh', label: 'per pezzo da archivio (vs ~28)' },
 ]
+
+// Equivalenze relatabili (stile report d'impatto Tesla):
+// un albero assorbe ~20 kg CO₂/anno · auto ~0,12 kg/km · ricarica phone ~0,008 kg
+const equivalences = [
+  { icon: <TreePine size={18} />, value: (totCo2 / 20).toFixed(1).replace('.', ','), unit: 'alberi', label: 'CO₂ assorbita da alberi in un anno' },
+  { icon: <Car size={18} />, value: String(Math.round(totCo2 / 0.12)), unit: 'km', label: 'di viaggio in auto evitati' },
+  { icon: <Smartphone size={18} />, value: Math.round(totCo2 / 0.008).toLocaleString('it-IT'), unit: 'ricariche', label: 'di smartphone equivalenti' },
+]
+
+const MILESTONE_KG = 50
 
 export default function Impatto() {
   return (
@@ -38,6 +49,7 @@ export default function Impatto() {
             flexWrap: 'wrap',
             alignItems: 'flex-end',
             gap: '22px 44px',
+            flex: '0 0 auto',
           }}
         >
           <div
@@ -76,6 +88,59 @@ export default function Impatto() {
             ))}
           </div>
         </div>
+
+        {/* Equivalenze — numeri relatabili, uno per tile */}
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 14, flex: '0 0 auto' }}>
+          {equivalences.map(eq => (
+            <GlassCard key={eq.label} style={{ padding: 20, display: 'flex', flexDirection: 'column', gap: 10 }}>
+              <span
+                style={{
+                  width: 34, height: 34, borderRadius: 10,
+                  background: 'var(--bg-2)', border: '1px solid var(--line)',
+                  display: 'grid', placeItems: 'center', color: 'var(--cyan)',
+                }}
+              >
+                {eq.icon}
+              </span>
+              <div>
+                <span style={{ fontFamily: 'var(--mono)', fontSize: 30, fontWeight: 700, color: 'var(--ink)', lineHeight: 1 }}>
+                  {eq.value}
+                </span>
+                <span style={{ fontFamily: 'var(--mono)', fontSize: 14, fontWeight: 600, color: 'var(--cyan)', marginLeft: 7 }}>
+                  {eq.unit}
+                </span>
+              </div>
+              <div style={{ fontSize: 12.5, color: 'var(--muted)', lineHeight: 1.45 }}>{eq.label}</div>
+            </GlassCard>
+          ))}
+        </div>
+
+        {/* Traguardo — progressione verso il prossimo milestone */}
+        <GlassCard style={{ padding: 20, display: 'flex', alignItems: 'center', gap: 18, flex: '0 0 auto' }}>
+          <span
+            style={{
+              width: 40, height: 40, borderRadius: 11, flex: '0 0 auto',
+              background: 'var(--bg-2)', border: '1px solid var(--line)',
+              display: 'grid', placeItems: 'center', color: 'var(--cyan)',
+            }}
+          >
+            <Target size={19} />
+          </span>
+          <div style={{ flex: 1, minWidth: 0 }}>
+            <div style={{ display: 'flex', alignItems: 'baseline', gap: 10 }}>
+              <span style={{ fontSize: 14, fontWeight: 700, color: 'var(--ink)' }}>Prossimo traguardo: {MILESTONE_KG} kg CO₂</span>
+              <span style={{ fontFamily: 'var(--mono)', fontSize: 12, fontWeight: 700, color: 'var(--cyan)' }}>
+                {Math.round((totCo2 / MILESTONE_KG) * 100)}%
+              </span>
+            </div>
+            <div className="progress-track" style={{ marginTop: 10 }}>
+              <span className="progress-track-fill" style={{ width: `${Math.min(100, (totCo2 / MILESTONE_KG) * 100)}%` }} />
+            </div>
+            <div style={{ fontFamily: 'var(--mono)', fontSize: 10.5, color: 'var(--muted)', marginTop: 7, letterSpacing: '0.04em' }}>
+              ANCORA {(MILESTONE_KG - totCo2).toFixed(1).replace('.', ',')} KG — CIRCA 2 RIPARAZIONI
+            </div>
+          </div>
+        </GlassCard>
 
         {/* Per-object breakdown */}
         <GlassCard style={{ padding: 18 }}>

@@ -106,9 +106,10 @@ function orchestrate(input: string): Msg {
 
 const mono: React.CSSProperties = { fontFamily: 'var(--mono)' }
 
-export default function TeseoAssistant() {
+/* Drawer laterale destro (stile Shopify Sidekick): si apre dall'icona AI
+   in topbar, non più chatbot flottante in basso a destra. */
+export default function TeseoAssistant({ open, onClose }: { open: boolean; onClose: () => void }) {
   const navigate = useNavigate()
-  const [open, setOpen] = useState(false)
   const [msgs, setMsgs] = useState<Msg[]>([
     { role: 'assistant', text: 'Ciao Francesca! Sono l\'assistente di Teseo: orchestro ricerca, produttori e ordini per te. Chiedimi qualsiasi cosa.' },
   ])
@@ -132,34 +133,36 @@ export default function TeseoAssistant() {
     }, 900 + Math.random() * 600)
   }
 
-  if (!open) {
-    return (
-      <button
-        onClick={() => setOpen(true)}
-        className="btn-spade"
-        style={{
-          position: 'fixed', right: 26, bottom: 26, zIndex: 60,
-          height: 46, padding: '0 20px', fontSize: 13.5,
-          display: 'flex', alignItems: 'center', gap: 9,
-          boxShadow: '0 8px 24px rgba(9,15,5,.18)',
-        }}
-      >
-        <Sparkles size={16} />
-        Chiedi a Teseo
-      </button>
-    )
-  }
+  // Domande in arrivo dalla barra "Chiedi all'AI" della dashboard
+  useEffect(() => {
+    const h = (e: Event) => {
+      const q = (e as CustomEvent).detail
+      if (typeof q === 'string') send(q)
+    }
+    window.addEventListener('teseo:ask', h)
+    return () => window.removeEventListener('teseo:ask', h)
+  })
 
+  /* Pannello inline stile Shopify Sidekick: affianca il contenuto (che si
+     restringe), con il gap del layout tra i due. Resta montato per non
+     perdere la conversazione: da chiuso collassa a larghezza 0. */
   return (
     <div
       style={{
-        position: 'fixed', right: 26, bottom: 26, zIndex: 60,
-        width: 392, height: 'min(560px, calc(100vh - 52px))',
-        background: 'var(--glass)', border: '1px solid var(--line-2)',
-        borderRadius: 'var(--radius)', boxShadow: '0 18px 48px rgba(9,15,5,.22)',
+        flex: '0 0 auto',
+        width: open ? 'min(380px, 30vw)' : 0,
+        // da chiuso annulla il gap del flex parent
+        marginLeft: open ? 0 : -16,
+        height: '100%',
+        background: 'var(--glass)',
+        border: open ? '1px solid var(--line-2)' : 'none',
+        borderRadius: 'var(--radius)',
         display: 'flex', flexDirection: 'column', overflow: 'hidden',
+        transition: 'width .3s cubic-bezier(.4,0,.2,1), margin-left .3s cubic-bezier(.4,0,.2,1)',
       }}
     >
+      {/* Wrapper a larghezza fissa: il contenuto non si schiaccia durante l'animazione */}
+      <div style={{ width: 'min(380px, 30vw)', minWidth: 300, height: '100%', display: 'flex', flexDirection: 'column', marginLeft: 'auto' }}>
       {/* Header forest */}
       <div style={{ background: 'var(--forest)', padding: '14px 16px', display: 'flex', alignItems: 'center', gap: 10, flex: '0 0 auto' }}>
         <span style={{ width: 30, height: 30, borderRadius: 9, background: 'rgba(178,235,118,.14)', display: 'grid', placeItems: 'center', color: 'var(--lemongrass)' }}>
@@ -167,11 +170,8 @@ export default function TeseoAssistant() {
         </span>
         <div style={{ flex: 1 }}>
           <div style={{ color: '#fff', fontSize: 13.5, fontWeight: 600 }}>Teseo AI</div>
-          <div style={{ ...mono, color: 'var(--lemongrass)', fontSize: 10, letterSpacing: '0.08em', textTransform: 'uppercase' }}>
-            Orchestratore · online
-          </div>
         </div>
-        <button onClick={() => setOpen(false)} style={{ background: 'none', border: 'none', color: 'rgba(255,255,255,.7)', cursor: 'pointer', padding: 4 }}>
+        <button onClick={onClose} style={{ background: 'none', border: 'none', color: 'rgba(255,255,255,.7)', cursor: 'pointer', padding: 4 }}>
           <X size={17} />
         </button>
       </div>
@@ -260,6 +260,7 @@ export default function TeseoAssistant() {
           <Send size={15} />
         </button>
       </form>
+      </div>
     </div>
   )
 }

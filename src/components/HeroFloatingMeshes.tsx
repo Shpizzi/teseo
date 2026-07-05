@@ -229,25 +229,25 @@ export function FloatItem({
 export default function HeroFloatingMeshes() {
   return (
     <div aria-hidden style={{ position: 'absolute', inset: 0, zIndex: 0 }}>
-      <FloatItem style={{ top: '15%', left: '15%' }} size={155} duration="7s" tiltZ={-0.25}>
+      <FloatItem style={{ top: '12%', left: '12%' }} size={230} duration="7s" tiltZ={-0.25}>
         <Tazza />
       </FloatItem>
-      <FloatItem style={{ top: '9%', left: '38%' }} size={120} duration="9s" delay="0.5s" speed={0.28} tiltZ={0.18}>
+      <FloatItem style={{ top: '7%', left: '38%' }} size={170} duration="9s" delay="0.5s" speed={0.28} tiltZ={0.18}>
         <Moka />
       </FloatItem>
-      <FloatItem style={{ top: '14%', right: '15%' }} size={165} duration="8s" delay="1s" tiltZ={0.3}>
+      <FloatItem style={{ top: '11%', right: '11%' }} size={245} duration="8s" delay="1s" tiltZ={0.3}>
         <Cuffie />
       </FloatItem>
-      <FloatItem style={{ top: '47%', left: '11%' }} size={150} duration="8.5s" delay="1.5s" tilt={0.15} tiltZ={-0.15} speed={0.3}>
+      <FloatItem style={{ top: '45%', left: '7%' }} size={220} duration="8.5s" delay="1.5s" tilt={0.15} tiltZ={-0.15} speed={0.3}>
         <Occhiali />
       </FloatItem>
-      <FloatItem style={{ top: '45%', right: '10%' }} size={140} duration="7.5s" delay="0.8s" tilt={0.35} tiltZ={0.2} speed={0.45} axis="z">
+      <FloatItem style={{ top: '43%', right: '7%' }} size={205} duration="7.5s" delay="0.8s" tilt={0.35} tiltZ={0.2} speed={0.45} axis="z">
         <Ingranaggio />
       </FloatItem>
-      <FloatItem style={{ bottom: '11%', left: '23%' }} size={145} duration="9s" delay="2s">
+      <FloatItem style={{ bottom: '8%', left: '20%' }} size={200} duration="9s" delay="2s">
         <Telecomando />
       </FloatItem>
-      <FloatItem style={{ bottom: '10%', right: '21%' }} size={160} duration="8s" delay="1.2s" tiltZ={-0.2}>
+      <FloatItem style={{ bottom: '7%', right: '18%' }} size={235} duration="8s" delay="1.2s" tiltZ={-0.2}>
         <Sedia />
       </FloatItem>
     </div>

@@ -22,7 +22,6 @@ export default function Coda() {
   const navigate = useNavigate()
   const [queue, setQueue] = useState(printQueue)
   const activePrinters = printersFull.filter(p => p.status === 'active')
-  const queuedItems = queue.filter(q => q.status === 'queued')
   const printingCount = queue.filter(q => q.status === 'printing').length
 
   // Sposta un elemento in coda di una posizione (solo tra i queued)
@@ -59,13 +58,13 @@ export default function Coda() {
       <div style={{ display: 'flex', alignItems: 'center', gap: 14, flex: '0 0 auto' }}>
         <div>
           <h1 style={{ fontWeight: 600, fontSize: 25, letterSpacing: '-0.01em', color: 'var(--ink)' }}>
-            Coda di stampa
+            Coda e stampanti
           </h1>
           <p style={{
             color: 'var(--muted)', fontSize: 12, marginTop: 3,
             fontWeight: 500, fontFamily: 'var(--mono)', letterSpacing: '0.02em',
           }}>
-            {queue.length} ELEMENTI · {printingCount} IN STAMPA
+            {queue.length} IN CODA · {printingCount} IN STAMPA · {printersFull.length} STAMPANTI
           </p>
         </div>
         <div style={{ flex: 1 }} />
@@ -99,15 +98,6 @@ export default function Coda() {
             }}>
               Coda attiva
             </h3>
-            <Link
-              to="/fablab/stampanti"
-              style={{
-                fontFamily: 'var(--mono)', fontSize: 11, color: 'var(--cyan)',
-                fontWeight: 600, letterSpacing: '0.04em', textDecoration: 'none',
-              }}
-            >
-              GESTISCI STAMPANTI ›
-            </Link>
           </div>
 
           {/* Queue list */}
@@ -242,17 +232,18 @@ export default function Coda() {
         {/* ── Colonna destra ── */}
         <div style={{ display: 'flex', flexDirection: 'column', gap: 16, minHeight: 0, overflow: 'hidden' }}>
 
-          {/* Top: Stampanti attive */}
-          <GlassCard style={{ padding: 18, display: 'flex', flexDirection: 'column', flex: '0 0 auto' }}>
+          {/* Parco stampanti completo (la vecchia pagina Stampanti vive qui) */}
+          <GlassCard style={{ padding: 18, display: 'flex', flexDirection: 'column', flex: 1, minHeight: 0, overflow: 'hidden' }}>
             <h3 style={{
               fontWeight: 600, fontSize: 12, letterSpacing: '0.07em',
               textTransform: 'uppercase', color: 'var(--ink)', marginBottom: 14,
+              flex: '0 0 auto',
             }}>
-              Stampanti attive
+              Parco stampanti
             </h3>
 
             {/* Utilization ring + info */}
-            <div style={{ display: 'flex', alignItems: 'center', gap: 14, marginBottom: 14 }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 14, marginBottom: 14, flex: '0 0 auto' }}>
               <div className="conic-ring">
                 <div style={{
                   width: 48, height: 48, borderRadius: '50%', background: 'var(--bg-2)',
@@ -267,61 +258,42 @@ export default function Coda() {
                   {Math.round(activePrinters.length / printersFull.length * 100)}% utilizzo
                 </div>
                 <div style={{ fontFamily: 'var(--mono)', fontSize: 10.5, color: 'var(--muted)', marginTop: 3 }}>
-                  {activePrinters.length} attive · {printersFull.filter(p => p.status === 'idle').length} idle
+                  {activePrinters.length} attive · {printersFull.filter(p => p.status === 'idle').length} idle ·{' '}
+                  {printersFull.filter(p => p.status === 'error').length} in errore
                 </div>
               </div>
             </div>
 
-            {/* Active printer list */}
-            <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
-              {activePrinters.map(p => (
+            {/* Tutte le stampanti, con stato e azione contestuale */}
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 8, overflow: 'auto', flex: 1 }}>
+              {printersFull.map(p => (
                 <div key={p.id} style={{
                   display: 'flex', alignItems: 'center', gap: 10,
                   padding: '10px 12px', borderRadius: 11,
-                  background: 'var(--glass)', border: '1px solid var(--line)',
+                  background: 'var(--glass)',
+                  border: `1px ${p.status === 'error' ? 'dashed #e40014' : 'solid var(--line)'}`,
                 }}>
-                  <span className="pdot-active" style={{ width: 10, height: 10, borderRadius: '50%', flex: '0 0 auto', display: 'block' }} />
+                  <span
+                    className={p.status === 'active' ? 'pdot-active' : p.status === 'error' ? 'pdot-err' : 'pdot-idle'}
+                    style={{ width: 10, height: 10, borderRadius: '50%', flex: '0 0 auto', display: 'block' }}
+                  />
                   <div style={{ flex: 1, minWidth: 0 }}>
                     <div style={{ fontWeight: 600, fontSize: 13, color: 'var(--ink)' }}>{p.name}</div>
-                    <div style={{ fontFamily: 'var(--mono)', fontSize: 10.5, color: 'var(--muted)', marginTop: 1 }}>
-                      {p.orderId} · {p.material}
+                    <div style={{ fontFamily: 'var(--mono)', fontSize: 10.5, color: p.status === 'error' ? '#e40014' : 'var(--muted)', marginTop: 1, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                      {p.status === 'active' && `${p.orderId} · ${p.material}`}
+                      {p.status === 'idle' && `${p.model} · libera`}
+                      {p.status === 'error' && p.errorMessage}
+                      {p.status === 'maintenance' && `manutenzione · ${p.lastMaintenance}`}
                     </div>
                   </div>
-                  <span style={{ fontFamily: 'var(--mono)', fontWeight: 700, fontSize: 12, color: 'var(--cyan)' }}>
-                    {p.progress}%
-                  </span>
-                </div>
-              ))}
-            </div>
-          </GlassCard>
-
-          {/* Bottom: Prossime in coda */}
-          <GlassCard style={{ padding: 18, display: 'flex', flexDirection: 'column', flex: 1, minHeight: 0, overflow: 'hidden' }}>
-            <h3 style={{
-              fontWeight: 600, fontSize: 12, letterSpacing: '0.07em',
-              textTransform: 'uppercase', color: 'var(--ink)', marginBottom: 14,
-              flex: '0 0 auto',
-            }}>
-              Prossime in coda
-            </h3>
-            <div style={{ display: 'flex', flexDirection: 'column', gap: 8, overflow: 'auto', flex: 1 }}>
-              {[...queuedItems].sort((a, b) => a.position - b.position).map(item => (
-                <div key={item.id} style={{
-                  display: 'flex', alignItems: 'center', gap: 10,
-                  padding: '10px 12px', borderRadius: 11,
-                  background: 'var(--glass)', border: '1px solid var(--line)',
-                }}>
-                  <div style={{ flex: 1, minWidth: 0 }}>
-                    <div style={{ fontFamily: 'var(--mono)', fontSize: 10, color: 'var(--cyan)', marginBottom: 2 }}>
-                      ORD · {item.ordNum}
-                    </div>
-                    <div style={{ fontWeight: 600, fontSize: 13, color: 'var(--ink)', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
-                      {item.name}
-                    </div>
-                  </div>
-                  <span style={{ fontFamily: 'var(--mono)', fontSize: 11, color: 'var(--muted)', flex: '0 0 auto' }}>
-                    {item.estimatedTime}
-                  </span>
+                  {p.status === 'active' && (
+                    <span style={{ fontFamily: 'var(--mono)', fontWeight: 700, fontSize: 12, color: 'var(--cyan)', flex: '0 0 auto' }}>
+                      {p.progress}%
+                    </span>
+                  )}
+                  {p.status === 'idle' && <span className="status-pill sp-new" style={{ flex: '0 0 auto' }}>Libera</span>}
+                  {p.status === 'error' && <span className="status-pill sp-err" style={{ flex: '0 0 auto' }}>Errore</span>}
+                  {p.status === 'maintenance' && <span className="status-pill sp-new" style={{ flex: '0 0 auto', borderStyle: 'dashed' }}>Manutenzione</span>}
                 </div>
               ))}
             </div>

@@ -3,7 +3,9 @@ import { Star } from 'lucide-react'
 import { useNavigate } from 'react-router-dom'
 import SearchBar from '../../components/SearchBar'
 import GlassCard from '../../components/GlassCard'
+import FablabMap from '../../components/FablabMap'
 import { producers } from '../../mock/user-pages'
+import { milanoFablabs } from '../../mock/fablab-milano'
 
 const techFilters = ['Tutti', 'FDM', 'Resina', 'SLA', 'Laser']
 const distFilters = ['< 2 km', '< 5 km', 'Tutti']
@@ -110,123 +112,98 @@ export default function Produttori() {
                 el.style.background = 'var(--glass)'
               }}
             >
-              {/* Top row */}
-              <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 8 }}>
-                <span
+              {/* Foto + intestazione, stile scheda Google Maps */}
+              <div style={{ display: 'flex', gap: 14 }}>
+                <img
+                  src={producer.photo}
+                  alt={producer.name}
                   style={{
-                    width: 8,
-                    height: 8,
-                    borderRadius: '50%',
+                    width: 108,
+                    height: 96,
+                    borderRadius: 10,
+                    objectFit: 'cover',
                     flex: '0 0 auto',
-                    background: producer.available ? 'var(--cyan)' : 'transparent',
-                    boxShadow: producer.available ? 'none' : 'inset 0 0 0 1.5px var(--cyan)',
+                    border: '1px solid var(--line)',
                   }}
                 />
-                <span style={{ fontSize: 16, fontWeight: 600, color: 'var(--ink)', flex: 1 }}>
-                  {producer.name}
-                </span>
-                <span style={{ fontFamily: 'var(--mono)', color: 'var(--cyan)', fontSize: 12, fontWeight: 600 }}>
-                  {producer.distance}
-                </span>
-              </div>
+                <div style={{ flex: 1, minWidth: 0 }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 6 }}>
+                    <span
+                      style={{
+                        width: 8,
+                        height: 8,
+                        borderRadius: '50%',
+                        flex: '0 0 auto',
+                        background: producer.available ? 'var(--cyan)' : 'transparent',
+                        boxShadow: producer.available ? 'none' : 'inset 0 0 0 1.5px var(--cyan)',
+                      }}
+                    />
+                    <span style={{ fontSize: 16, fontWeight: 600, color: 'var(--ink)', flex: 1, minWidth: 0, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                      {producer.name}
+                    </span>
+                    <span style={{ fontFamily: 'var(--mono)', color: 'var(--cyan)', fontSize: 12, fontWeight: 600 }}>
+                      {producer.distance}
+                    </span>
+                  </div>
 
-              {/* Rating */}
-              <div style={{ display: 'flex', alignItems: 'center', gap: 5, marginBottom: 10 }}>
-                <Star size={12} fill="currentColor" style={{ color: 'var(--cyan)' }} />
-                <span style={{ fontFamily: 'var(--mono)', color: 'var(--cyan)', fontSize: 12, fontWeight: 600 }}>
-                  {producer.rating}
-                </span>
-                <span style={{ fontFamily: 'var(--mono)', color: 'var(--muted)', fontSize: 11 }}>
-                  ({producer.reviews} recensioni)
-                </span>
-              </div>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 5, marginBottom: 8 }}>
+                    <Star size={12} fill="currentColor" style={{ color: 'var(--cyan)' }} />
+                    <span style={{ fontFamily: 'var(--mono)', color: 'var(--cyan)', fontSize: 12, fontWeight: 600 }}>
+                      {producer.rating}
+                    </span>
+                    <span style={{ fontFamily: 'var(--mono)', color: 'var(--muted)', fontSize: 11 }}>
+                      ({producer.reviews} recensioni)
+                    </span>
+                    <span style={{ flex: 1 }} />
+                    <span style={{ fontFamily: 'var(--mono)', color: 'var(--muted)', fontSize: 11 }}>
+                      {producer.avgTime}
+                    </span>
+                  </div>
 
-              {/* Technologies */}
-              <div style={{ display: 'flex', gap: 5, flexWrap: 'wrap', marginBottom: 10 }}>
-                {producer.technologies.map(tech => (
-                  <span
-                    key={tech}
-                    style={{
-                      fontSize: 10,
-                      fontFamily: 'var(--mono)',
-                      border: '1px solid var(--line)',
-                      borderRadius: 5,
-                      padding: '3px 8px',
-                      color: 'var(--muted)',
-                    }}
-                  >
-                    {tech}
-                  </span>
-                ))}
-              </div>
-
-              {/* Footer */}
-              <div style={{ display: 'flex', gap: 16 }}>
-                <span style={{ fontFamily: 'var(--mono)', color: 'var(--muted)', fontSize: 11 }}>
-                  {producer.completedJobs} lavori
-                </span>
-                <span style={{ fontFamily: 'var(--mono)', color: 'var(--muted)', fontSize: 11 }}>
-                  {producer.avgTime}
-                </span>
+                  {/* Rating per tipologia di materiale */}
+                  <div style={{ display: 'flex', gap: 5, flexWrap: 'wrap' }}>
+                    {producer.materialRatings.map(mr => (
+                      <span
+                        key={mr.material}
+                        style={{
+                          display: 'inline-flex',
+                          alignItems: 'center',
+                          gap: 4,
+                          fontSize: 10,
+                          fontFamily: 'var(--mono)',
+                          fontWeight: 600,
+                          border: '1px solid var(--line)',
+                          borderRadius: 5,
+                          padding: '3px 8px',
+                          color: 'var(--muted)',
+                        }}
+                      >
+                        {mr.material}
+                        <Star size={9} fill="var(--cyan)" style={{ color: 'var(--cyan)' }} />
+                        <span style={{ color: 'var(--cyan)' }}>{mr.rating.toFixed(1)}</span>
+                      </span>
+                    ))}
+                  </div>
+                </div>
               </div>
             </div>
           ))}
         </div>
 
-        {/* Right: map preview */}
-        <GlassCard
-          style={{
-            position: 'relative',
-            overflow: 'hidden',
-          }}
-        >
-          {/* Map grid */}
-          <div
-            style={{
-              position: 'absolute',
-              inset: 0,
-              background: '#18280e',
-            }}
+        {/* Right: mappa reale (MapLibre + OpenFreeMap) */}
+        <GlassCard style={{ position: 'relative', overflow: 'hidden' }}>
+          {/* Mappa reale: i 4 profili in evidenza (cliccabili) + il resto della rete dal KMZ */}
+          <FablabMap
+            pins={[
+              { name: 'Tu', lng: 9.19, lat: 45.4685, you: true },
+              ...producers.map(p => ({ id: p.id, name: p.name, lng: p.lng, lat: p.lat })),
+              ...milanoFablabs
+                .filter(f => !producers.some(p => p.name === f.name))
+                .map(f => ({ name: f.name, lng: f.lng, lat: f.lat, compact: true })),
+            ]}
+            zoom={11.2}
+            onPinClick={pid => navigate('/app/produttori/' + pid)}
           />
-          <div
-            style={{
-              position: 'absolute',
-              inset: 0,
-              backgroundImage:
-                'linear-gradient(rgba(63,115,8,.10) 1px,transparent 1px),linear-gradient(90deg,rgba(63,115,8,.10) 1px,transparent 1px)',
-              backgroundSize: '28px 28px',
-            }}
-          />
-
-          {/* Roads */}
-          <div style={{ position: 'absolute', top: '44%', left: 0, right: 0, height: 8, background: 'rgba(63,115,8,.12)' }} />
-          <div style={{ position: 'absolute', top: '20%', left: 0, right: 0, height: 5, background: 'rgba(63,115,8,.08)' }} />
-          <div style={{ position: 'absolute', left: '38%', top: 0, bottom: 0, width: 8, background: 'rgba(63,115,8,.12)' }} />
-          <div style={{ position: 'absolute', left: '68%', top: 0, bottom: 0, width: 5, background: 'rgba(63,115,8,.08)' }} />
-
-          {/* You */}
-          <div className="mpin you" style={{ left: '50%', top: '52%' }}>
-            <span className="t">TU</span>
-            <span className="pd" />
-          </div>
-
-          {/* Producer pins */}
-          <div className="mpin" style={{ left: '24%', top: '32%', cursor: 'pointer' }} onClick={() => navigate('/app/produttori/fab1')}>
-            <span className="t">LAMBRATE</span>
-            <span className="pd" />
-          </div>
-          <div className="mpin" style={{ left: '70%', top: '46%', cursor: 'pointer' }} onClick={() => navigate('/app/produttori/fab3')}>
-            <span className="t">NAVIGLI</span>
-            <span className="pd" />
-          </div>
-          <div className="mpin" style={{ left: '60%', top: '72%', cursor: 'pointer' }} onClick={() => navigate('/app/produttori/fab2')}>
-            <span className="t">BOVISA</span>
-            <span className="pd" />
-          </div>
-          <div className="mpin" style={{ left: '40%', top: '18%', cursor: 'pointer' }} onClick={() => navigate('/app/produttori/fab4')}>
-            <span className="t">POLIMI</span>
-            <span className="pd" />
-          </div>
         </GlassCard>
       </div>
     </>

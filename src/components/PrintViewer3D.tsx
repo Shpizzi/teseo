@@ -68,14 +68,24 @@ function normalizeGeo(src: THREE.BufferGeometry): THREE.BufferGeometry {
   return g
 }
 
+type Tone = 'dark' | 'light'
+
+// Su superfici scure il wireframe è lemongrass/carta; su card bianche
+// servono moss/forest o non si vede niente.
+const TONES = {
+  dark:  { fill: 0xb2eb76, wire: 0xf4faed, ghost: 0xb2eb76, plate: 0xb2eb76, fillOp: 0.10, wireOp: 0.50 },
+  light: { fill: 0x3f7308, wire: 0x18280e, ghost: 0x3f7308, plate: 0x3f7308, fillOp: 0.10, wireOp: 0.55 },
+} as const
+
 type BodyProps = {
   geo: THREE.BufferGeometry
   onProgressChange: (p: number) => void
   progress?: number // 0-100: blocca il clipping sull'avanzamento reale (niente animazione demo)
+  tone: Tone
 }
 
 // Shared render: printed/to-print clipping split + auto-rotation + build plate.
-function PrintBody({ geo, onProgressChange, progress }: BodyProps) {
+function PrintBody({ geo, onProgressChange, progress, tone }: BodyProps) {
   const groupRef = useRef<THREE.Group>(null)
   const progressRef = useRef(progress !== undefined ? progress / 100 : 0.62)
   const dirRef = useRef(1)
@@ -101,34 +111,36 @@ function PrintBody({ geo, onProgressChange, progress }: BodyProps) {
 
   const plateGeo = useMemo(() => new THREE.CylinderGeometry(1.3, 1.3, 0.16, 64), [])
 
+  const c = TONES[tone]
+
   return (
     <group ref={groupRef}>
-      {/* printed part — cyan fill */}
+      {/* printed part — fill */}
       <mesh geometry={geo}>
-        <meshBasicMaterial color={0xb2eb76} transparent opacity={0.10} clippingPlanes={[clipSolid]} side={THREE.DoubleSide} />
+        <meshBasicMaterial color={c.fill} transparent opacity={c.fillOp} clippingPlanes={[clipSolid]} side={THREE.DoubleSide} />
       </mesh>
-      {/* printed part — white wireframe */}
+      {/* printed part — wireframe */}
       <mesh geometry={geo}>
-        <meshBasicMaterial color={0xf4faed} wireframe transparent opacity={0.50} clippingPlanes={[clipSolid]} />
+        <meshBasicMaterial color={c.wire} wireframe transparent opacity={c.wireOp} clippingPlanes={[clipSolid]} />
       </mesh>
-      {/* to-print — faint cyan wireframe */}
+      {/* to-print — faint wireframe */}
       <mesh geometry={geo}>
-        <meshBasicMaterial color={0xb2eb76} wireframe transparent opacity={0.16} clippingPlanes={[clipWire]} />
+        <meshBasicMaterial color={c.ghost} wireframe transparent opacity={0.16} clippingPlanes={[clipWire]} />
       </mesh>
       {/* build plate */}
       <mesh geometry={plateGeo} position={[0, -1.32, 0]}>
-        <meshBasicMaterial color={0xb2eb76} wireframe transparent opacity={0.3} />
+        <meshBasicMaterial color={c.plate} wireframe transparent opacity={0.3} />
       </mesh>
     </group>
   )
 }
 
-function ProceduralMesh({ onProgressChange, progress }: { onProgressChange: (p: number) => void; progress?: number }) {
+function ProceduralMesh({ onProgressChange, progress, tone }: { onProgressChange: (p: number) => void; progress?: number; tone: Tone }) {
   const geo = useMemo(() => buildDisplacedGeo(), [])
-  return <PrintBody geo={geo} onProgressChange={onProgressChange} progress={progress} />
+  return <PrintBody geo={geo} onProgressChange={onProgressChange} progress={progress} tone={tone} />
 }
 
-function LoadedMesh({ url, onProgressChange, progress }: { url: string; onProgressChange: (p: number) => void; progress?: number }) {
+function LoadedMesh({ url, onProgressChange, progress, tone }: { url: string; onProgressChange: (p: number) => void; progress?: number; tone: Tone }) {
   const { scene } = useGLTF(url)
   const geo = useMemo(() => {
     scene.updateMatrixWorld(true)
@@ -142,19 +154,20 @@ function LoadedMesh({ url, onProgressChange, progress }: { url: string; onProgre
     })
     return normalizeGeo(picked ?? new THREE.IcosahedronGeometry(1, 2))
   }, [scene])
-  return <PrintBody geo={geo} onProgressChange={onProgressChange} progress={progress} />
+  return <PrintBody geo={geo} onProgressChange={onProgressChange} progress={progress} tone={tone} />
 }
 
 type PrintViewer3DProps = {
   onProgressChange?: (p: number) => void
   modelUrl?: string // load a scanned .glb; omit for the procedural mesh
   progress?: number // 0-100: pin del clipping sull'avanzamento reale
+  tone?: Tone // 'light' per i viewer dentro card bianche
 }
 
 // Fetch the scanned mesh ahead of the result state so the viewer isn't blank.
 useGLTF.preload('/meshes/remote.glb')
 
-export default function PrintViewer3D({ onProgressChange, modelUrl, progress }: PrintViewer3DProps) {
+export default function PrintViewer3D({ onProgressChange, modelUrl, progress, tone = 'dark' }: PrintViewer3DProps) {
   const cb = onProgressChange ?? (() => {})
   return (
     <Canvas
@@ -172,7 +185,7 @@ export default function PrintViewer3D({ onProgressChange, modelUrl, progress }: 
           </Html>
         }
       >
-        {modelUrl ? <LoadedMesh url={modelUrl} onProgressChange={cb} progress={progress} /> : <ProceduralMesh onProgressChange={cb} progress={progress} />}
+        {modelUrl ? <LoadedMesh url={modelUrl} onProgressChange={cb} progress={progress} tone={tone} /> : <ProceduralMesh onProgressChange={cb} progress={progress} tone={tone} />}
       </Suspense>
     </Canvas>
   )

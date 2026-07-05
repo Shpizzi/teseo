@@ -1,19 +1,41 @@
 import type { ReactNode, CSSProperties } from 'react'
-import { Package, ArrowRight, ScanLine } from 'lucide-react'
+import { ArrowRight, ScanLine } from 'lucide-react'
 import { useNavigate, Link } from 'react-router-dom'
 import PrimaryButton from './PrimaryButton'
 import { FloatItem, Tazza, Moka, Cuffie, Occhiali, Telecomando, Ingranaggio, Sedia } from './HeroFloatingMeshes'
 
 /* Chrome condiviso dalle pagine pubbliche: nav, footer, helper di sezione */
 
+/* Logo Teseo: filo di Arianna / labirinto — spirale concentrica che è anche
+   il percorso di stampa di uno slicer. Sostituisce il pacco (spedizioni). */
+export function TeseoLogo({ size = 22, color = 'var(--cyan)' }: { size?: number; color?: string }) {
+  return (
+    <svg width={size} height={size} viewBox="0 0 24 24" fill="none" aria-hidden>
+      <path d="M12 3a9 9 0 1 0 9 9" stroke={color} strokeWidth="2.1" strokeLinecap="round" />
+      <path d="M12 16.5A4.5 4.5 0 1 1 16.5 12" stroke={color} strokeWidth="2.1" strokeLinecap="round" />
+      <circle cx="12" cy="12" r="1.7" fill={color} />
+    </svg>
+  )
+}
+
+/* One-page: i pulsanti della navbar portano alle sezioni della landing */
 const NAV_LINKS = [
-  { label: 'Come funziona', to: '/come-funziona' },
-  { label: 'Impatto', to: '/impatto' },
-  { label: 'Community', to: '/community' },
+  { label: 'Come funziona', hash: 'come-funziona' },
+  { label: 'Impatto', hash: 'impatto' },
+  { label: 'Community', hash: 'community' },
 ]
+
+export function scrollToSection(hash: string) {
+  const el = document.getElementById(hash)
+  el?.scrollIntoView({ behavior: 'smooth', block: 'start' })
+}
 
 export function LandingNav() {
   const navigate = useNavigate()
+  const goTo = (hash: string) => {
+    if (window.location.pathname === '/') scrollToSection(hash)
+    else navigate(`/#${hash}`)
+  }
   return (
     <nav
       style={{
@@ -31,8 +53,8 @@ export function LandingNav() {
         gap: 40,
       }}
     >
-      <Link to="/" style={{ display: 'flex', alignItems: 'center', gap: 8, flexShrink: 0, textDecoration: 'none' }}>
-        <Package size={20} color="var(--cyan)" />
+      <Link to="/" style={{ display: 'flex', alignItems: 'center', gap: 9, flexShrink: 0, textDecoration: 'none' }}>
+        <TeseoLogo />
         <span style={{ fontWeight: 800, fontSize: 16, letterSpacing: '0.12em', color: 'var(--ink)' }}>
           TESEO
         </span>
@@ -40,21 +62,24 @@ export function LandingNav() {
 
       <div style={{ display: 'flex', alignItems: 'center', gap: 28, flex: 1 }}>
         {NAV_LINKS.map(link => (
-          <Link
-            key={link.to}
-            to={link.to}
+          <button
+            key={link.hash}
+            onClick={() => goTo(link.hash)}
             style={{
               color: 'var(--muted)',
-              textDecoration: 'none',
+              background: 'none',
+              border: 'none',
+              cursor: 'pointer',
+              fontFamily: 'inherit',
               fontSize: 14,
               fontWeight: 600,
               transition: 'color .2s',
             }}
-            onMouseEnter={e => { (e.currentTarget as HTMLAnchorElement).style.color = 'var(--ink)' }}
-            onMouseLeave={e => { (e.currentTarget as HTMLAnchorElement).style.color = 'var(--muted)' }}
+            onMouseEnter={e => { (e.currentTarget as HTMLButtonElement).style.color = 'var(--ink)' }}
+            onMouseLeave={e => { (e.currentTarget as HTMLButtonElement).style.color = 'var(--muted)' }}
           >
             {link.label}
-          </Link>
+          </button>
         ))}
       </div>
 
@@ -74,8 +99,8 @@ export function LandingNav() {
         >
           Accedi
         </a>
-        <PrimaryButton style={{ height: 38, padding: '0 18px', fontSize: 13 }} onClick={() => navigate('/onboarding')}>
-          Inizia gratis
+        <PrimaryButton style={{ height: 38, padding: '0 18px', fontSize: 13 }} onClick={() => navigate('/fablab/dashboard')}>
+          Iscrivi il tuo FabLab
         </PrimaryButton>
       </div>
     </nav>
@@ -95,7 +120,14 @@ const FOOTER_MESHES: { el: ReactNode; left: string; top: string; size: number; t
 ]
 
 const FOOTER_COLS: { title: string; links: { label: string; to: string }[] }[] = [
-  { title: 'Piattaforma', links: NAV_LINKS },
+  {
+    title: 'Piattaforma',
+    links: [
+      { label: 'Come funziona', to: '/come-funziona' },
+      { label: 'Impatto', to: '/impatto' },
+      { label: 'Community', to: '/community' },
+    ],
+  },
   {
     title: 'App',
     links: [
@@ -108,8 +140,8 @@ const FOOTER_COLS: { title: string; links: { label: string; to: string }[] }[] =
     title: 'FabLab',
     links: [
       { label: 'Dashboard', to: '/fablab/dashboard' },
-      { label: 'Coda di stampa', to: '/fablab/coda' },
-      { label: 'Stampanti', to: '/fablab/stampanti' },
+      { label: 'Coda e stampanti', to: '/fablab/coda' },
+      { label: 'Ordini', to: '/fablab/ordini' },
     ],
   },
 ]
@@ -279,7 +311,7 @@ export function LandingFooter() {
         }}
       >
         <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
-          <Package size={16} color="#b2eb76" />
+          <TeseoLogo size={16} color="#b2eb76" />
           <span style={{ fontWeight: 700, fontSize: 14, letterSpacing: '0.1em' }}>TESEO</span>
         </div>
         <span style={{ fontFamily: 'var(--mono)', fontSize: 11, color: 'rgba(255,255,255,.4)' }}>

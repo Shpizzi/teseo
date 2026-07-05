@@ -1,9 +1,10 @@
 import { useState, useRef } from 'react'
-import { Upload, Camera, Check, Star, Sparkles } from 'lucide-react'
+import { Upload, Camera, Check, Star, Sparkles, X } from 'lucide-react'
 import { useNavigate, useLocation } from 'react-router-dom'
 import GlassCard from '../../components/GlassCard'
 import PrimaryButton from '../../components/PrimaryButton'
 import SearchBar from '../../components/SearchBar'
+import PrintViewer3D from '../../components/PrintViewer3D'
 import ScanView from '../../scan/ScanView'
 import { producers } from '../../mock/user-pages'
 import { toast } from '../../components/Toast'
@@ -19,7 +20,10 @@ type IncomingState = { modelName?: string; producerId?: string } | null
 export default function NuovaStampa() {
   const navigate = useNavigate()
   const incoming = (useLocation().state as IncomingState) ?? {}
-  const [step, setStep] = useState<Step>(incoming.modelName ? 2 : 1)
+  const [step, setStep] = useState<Step>(1)
+  // Anteprima del componente scelto: prima del fablab devi VEDERE il pezzo
+  // e confermare che è quello giusto (annulla/conferma).
+  const [previewing, setPreviewing] = useState(Boolean(incoming.modelName))
   const [selectedProducer, setSelectedProducer] = useState(incoming.producerId ?? '')
   const [notes, setNotes] = useState('')
   const [fileName, setFileName] = useState(incoming.modelName ?? '')
@@ -106,6 +110,80 @@ export default function NuovaStampa() {
           setStep(3)
         }}
       />
+    )
+  }
+
+  // ── Anteprima componente: vedi il pezzo PRIMA di scegliere il fablab ──
+  if (previewing) {
+    return (
+      <>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 14, flex: '0 0 auto' }}>
+          <div>
+            <h1 style={{ fontWeight: 600, fontSize: 25, letterSpacing: '-0.01em', color: 'var(--ink)' }}>
+              È il pezzo che ti serve?
+            </h1>
+            <p style={{ fontFamily: 'var(--mono)', fontSize: 11, color: 'var(--muted)', letterSpacing: '0.04em', marginTop: 3 }}>
+              CONTROLLA IL COMPONENTE PRIMA DI SCEGLIERE IL FABLAB
+            </p>
+          </div>
+        </div>
+
+        <GlassCard hero style={{ flex: 1, position: 'relative', display: 'flex', flexDirection: 'column', overflow: 'hidden', minHeight: 0 }}>
+          <div className="reg-marks">
+            <div className="reg-tl" />
+            <div className="reg-tr" />
+            <div className="reg-bl" />
+            <div className="reg-br" />
+          </div>
+
+          <div
+            style={{
+              position: 'absolute', top: 16, left: '50%', transform: 'translateX(-50%)',
+              fontSize: 10, fontFamily: 'var(--mono)', color: 'var(--muted)',
+              letterSpacing: '0.1em', textTransform: 'uppercase', whiteSpace: 'nowrap', zIndex: 10,
+            }}
+          >
+            ANTEPRIMA COMPONENTE — {fileName || 'MODELLO'}
+          </div>
+
+          <div style={{ flex: 1, position: 'relative', minHeight: 0 }}>
+            <PrintViewer3D modelUrl="/meshes/remote.glb" progress={100} tone="light" />
+          </div>
+
+          {/* Meta + annulla/conferma */}
+          <div
+            style={{
+              flex: '0 0 auto', padding: '18px 24px', borderTop: '1px solid var(--line)',
+              display: 'flex', alignItems: 'center', gap: 16, background: 'var(--glass)', zIndex: 10,
+            }}
+          >
+            <div style={{ flex: 1, minWidth: 0 }}>
+              <div style={{ fontSize: 16, fontWeight: 700, color: 'var(--ink)' }}>{fileName}</div>
+              <div style={{ fontFamily: 'var(--mono)', fontSize: 11, color: 'var(--muted)', marginTop: 2 }}>
+                Ruota l&apos;anteprima per controllare forma e incastri · validato dalla community
+              </div>
+            </div>
+            <button
+              onClick={() => { setPreviewing(false); setFileName(incoming.modelName ? '' : fileName); setStep(1) }}
+              style={{
+                display: 'flex', alignItems: 'center', gap: 8,
+                background: 'transparent', color: 'var(--muted)', border: '1px solid var(--line-2)',
+                fontFamily: 'inherit', fontWeight: 600, fontSize: 13.5,
+                height: 44, padding: '0 22px', borderRadius: 100, cursor: 'pointer', transition: '0.2s',
+              }}
+              onMouseEnter={e => { e.currentTarget.style.background = 'var(--glass-2)' }}
+              onMouseLeave={e => { e.currentTarget.style.background = 'transparent' }}
+            >
+              <X size={15} />
+              Annulla, non è questo
+            </button>
+            <PrimaryButton onClick={() => { setPreviewing(false); setStep(2) }}>
+              <Check size={16} />
+              Conferma, scegli il FabLab →
+            </PrimaryButton>
+          </div>
+        </GlassCard>
+      </>
     )
   }
 
@@ -269,7 +347,7 @@ export default function NuovaStampa() {
                     key={hit.to + hit.name}
                     onClick={() => {
                       setFileName(hit.name)
-                      setStep(2)
+                      setPreviewing(true)
                     }}
                     style={{
                       display: 'flex', alignItems: 'center', gap: 12, padding: '11px 14px',
@@ -319,7 +397,7 @@ export default function NuovaStampa() {
           </button>
 
           <PrimaryButton
-            onClick={() => setStep(2)}
+            onClick={() => setPreviewing(true)}
             disabled={!fileName}
             title={fileName ? undefined : 'Carica un file 3D o scansiona un oggetto per continuare'}
           >

@@ -1,10 +1,10 @@
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { Download, Check } from 'lucide-react'
+import { Download, Check, LayoutGrid, List } from 'lucide-react'
 import SearchBar from '../../components/SearchBar'
 import GlassCard from '../../components/GlassCard'
 import { type DeadlineType } from '../../mock'
-import { useLiveOrders, setOrderStatus, type LiveStatus } from '../../mock/orderStore'
+import { useLiveOrders, setOrderStatus, type LiveStatus, type LiveOrder } from '../../mock/orderStore'
 import { toast } from '../../components/Toast'
 
 // ── DeadlineChip ──────────────────────────────────────────────
@@ -47,9 +47,11 @@ export function OrderStatusPill({ status }: { status: LiveStatus }) {
   return <span className="status-pill sp-err">Errore</span>
 }
 
-// ── Ordini ────────────────────────────────────────────────────
+// ── Ordini — stesso linguaggio della pagina progetti del cliente:
+//    tab a pillola, toggle quadri/lista, righe/card invece della tabella ──
 export default function Ordini() {
   const [activeTab, setActiveTab] = useState<TabKey>('new')
+  const [view, setView] = useState<'grid' | 'list'>('list')
   const [query, setQuery] = useState('')
   const [rejectingId, setRejectingId] = useState<string>()
   const [selected, setSelected] = useState<Set<string>>(new Set())
@@ -84,6 +86,229 @@ export default function Ordini() {
       return next
     })
   }
+
+  const tabStyle = (tab: TabKey) => ({
+    padding: '8px 16px',
+    borderRadius: 100,
+    cursor: 'pointer',
+    fontFamily: 'var(--mono)' as const,
+    fontSize: 12,
+    fontWeight: 600,
+    transition: '0.18s',
+    border: 'none',
+    display: 'flex',
+    alignItems: 'center',
+    gap: 7,
+    background: activeTab === tab ? 'var(--cyan)' : 'transparent',
+    color: activeTab === tab ? '#f4faed' : 'var(--muted)',
+  })
+
+  const viewBtnStyle = (v: 'grid' | 'list') => ({
+    width: 34,
+    height: 34,
+    borderRadius: 9,
+    border: 'none',
+    cursor: 'pointer',
+    display: 'grid' as const,
+    placeItems: 'center' as const,
+    background: view === v ? 'var(--cyan)' : 'transparent',
+    color: view === v ? '#f4faed' : 'var(--muted)',
+    transition: '0.18s',
+  })
+
+  /* Azioni contestuali per stato (condivise tra riga e card) */
+  const actions = (order: LiveOrder) => (
+    <div
+      style={{ display: 'flex', alignItems: 'center', gap: 6, justifyContent: 'flex-end' }}
+      onClick={e => e.stopPropagation()}
+    >
+      {order.status === 'new' && rejectingId !== order.id && (
+        <>
+          <button
+            onClick={() => setRejectingId(order.id)}
+            style={{
+              background: 'transparent', border: '1px solid var(--line-2)',
+              color: 'var(--muted)', fontFamily: 'inherit', fontWeight: 600,
+              fontSize: 12, padding: '5px 11px', borderRadius: '100px', cursor: 'pointer',
+            }}>
+            Rifiuta
+          </button>
+          <button
+            onClick={() => accept(order.id)}
+            style={{
+              background: 'var(--forest)', border: 'none', color: '#fff',
+              fontFamily: 'inherit', fontWeight: 700, fontSize: 12,
+              padding: '5px 13px', borderRadius: '100px', cursor: 'pointer',
+            }}>
+            Accetta
+          </button>
+        </>
+      )}
+      {order.status === 'new' && rejectingId === order.id && (
+        <>
+          <span style={{ fontSize: 11.5, color: 'var(--muted)', fontWeight: 600 }}>Rifiutare?</span>
+          <button
+            onClick={() => reject(order.id)}
+            style={{
+              background: 'transparent', border: '1px dashed #e40014', color: '#e40014',
+              fontFamily: 'inherit', fontWeight: 600, fontSize: 12,
+              padding: '5px 11px', borderRadius: '100px', cursor: 'pointer',
+            }}>
+            Sì
+          </button>
+          <button
+            onClick={() => setRejectingId(undefined)}
+            style={{
+              background: 'transparent', border: '1px solid var(--line)', color: 'var(--muted)',
+              fontFamily: 'inherit', fontWeight: 600, fontSize: 12,
+              padding: '5px 11px', borderRadius: '100px', cursor: 'pointer',
+            }}>
+            No
+          </button>
+        </>
+      )}
+      {order.status === 'accepted' && (
+        <button
+          onClick={() => navigate(`/fablab/slicing?ordine=${order.id}`)}
+          style={{
+            background: 'transparent', border: '1px solid var(--cyan)', color: 'var(--cyan)',
+            fontFamily: 'inherit', fontWeight: 600, fontSize: 12,
+            padding: '5px 13px', borderRadius: '100px', cursor: 'pointer',
+          }}>
+          Avvia slicing →
+        </button>
+      )}
+      {order.status === 'ready' && (
+        <button
+          onClick={() => toast(`${order.customer} avvisato: ordine pronto al ritiro`)}
+          style={{
+            background: 'transparent', border: 'none', color: 'var(--cyan)',
+            fontFamily: 'inherit', fontWeight: 600, fontSize: 12,
+            padding: '5px 10px', borderRadius: 8, cursor: 'pointer',
+          }}>
+          Avvisa cliente
+        </button>
+      )}
+      {order.status === 'error' && (
+        <button
+          onClick={() => navigate(`/fablab/ordini/${order.id}`)}
+          style={{
+            background: 'transparent', border: 'none', color: 'var(--cyan)',
+            fontFamily: 'inherit', fontWeight: 600, fontSize: 12,
+            padding: '5px 10px', borderRadius: 8, cursor: 'pointer',
+          }}>
+          Risolvi →
+        </button>
+      )}
+    </div>
+  )
+
+  /* ── Riga (vista lista) — come la riga progetti del cliente ── */
+  const orderRow = (order: LiveOrder) => (
+    <div
+      key={order.id}
+      onClick={() => navigate(`/fablab/ordini/${order.id}`)}
+      style={{
+        display: 'flex',
+        alignItems: 'center',
+        gap: 14,
+        padding: 16,
+        borderRadius: 'var(--radius-sm)',
+        background: 'var(--glass)',
+        border: '1px solid var(--line)',
+        cursor: 'pointer',
+        transition: '0.2s',
+      }}
+      onMouseEnter={e => { e.currentTarget.style.background = 'var(--glass-2)' }}
+      onMouseLeave={e => { e.currentTarget.style.background = 'var(--glass)' }}
+    >
+      {order.status === 'new' && (
+        <input
+          type="checkbox"
+          checked={selected.has(order.id)}
+          onChange={() => toggleSelected(order.id)}
+          onClick={e => e.stopPropagation()}
+          title="Seleziona per azioni multiple"
+          style={{ accentColor: 'var(--cyan)', cursor: 'pointer', margin: 0, flex: '0 0 auto' }}
+        />
+      )}
+      <div className="thumb-mini" />
+      <div style={{ flex: 1, minWidth: 0 }}>
+        <div style={{ fontFamily: 'var(--mono)', fontSize: 10, color: 'var(--cyan)', letterSpacing: '0.05em', marginBottom: 2 }}>
+          ORD · {order.ordNum}
+        </div>
+        <div style={{ fontWeight: 600, fontSize: 14.5, color: 'var(--ink)', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+          {order.name}
+        </div>
+        <div style={{ fontSize: 11.5, fontFamily: 'var(--mono)', color: 'var(--muted)', marginTop: 3 }}>
+          {order.customer} · {order.material}
+        </div>
+      </div>
+      {order.status === 'printing' && (
+        <div style={{ width: 120, flex: '0 0 auto', display: 'flex', alignItems: 'center', gap: 8 }}>
+          <div style={{ flex: 1, height: 5, borderRadius: 100, background: 'rgba(63,115,8,.14)', overflow: 'hidden' }}>
+            <div style={{ height: '100%', width: `${order.progress ?? 0}%`, background: 'var(--cyan)', transition: 'width 0.3s ease' }} />
+          </div>
+          <span style={{ fontFamily: 'var(--mono)', fontSize: 11, fontWeight: 700, color: 'var(--cyan)' }}>{order.progress ?? 0}%</span>
+        </div>
+      )}
+      <DeadlineChip type={order.deadline} label={order.deadlineLabel} />
+      <OrderStatusPill status={order.status} />
+      <div style={{ flex: '0 0 150px' }}>{actions(order)}</div>
+    </div>
+  )
+
+  /* ── Card (vista quadri) — come la card progetti del cliente ── */
+  const orderCard = (order: LiveOrder) => (
+    <div
+      key={order.id}
+      onClick={() => navigate(`/fablab/ordini/${order.id}`)}
+      style={{ cursor: 'pointer' }}
+    >
+      <GlassCard style={{ padding: 18, display: 'flex', flexDirection: 'column', gap: 12, cursor: 'inherit', transition: '0.2s' }}>
+        <div style={{ display: 'flex', alignItems: 'flex-start', gap: 12 }}>
+          <div className="thumb-mini" />
+          <div style={{ flex: 1, minWidth: 0 }}>
+            <div style={{ fontFamily: 'var(--mono)', fontSize: 10, color: 'var(--cyan)', letterSpacing: '0.05em', marginBottom: 2 }}>
+              ORD · {order.ordNum}
+            </div>
+            <div style={{ fontWeight: 600, fontSize: 14.5, color: 'var(--ink)', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+              {order.name}
+            </div>
+            <div style={{ fontSize: 11.5, fontFamily: 'var(--mono)', color: 'var(--muted)', marginTop: 3 }}>
+              {order.customer} · {order.material}
+            </div>
+          </div>
+          {order.status === 'new' && (
+            <input
+              type="checkbox"
+              checked={selected.has(order.id)}
+              onChange={() => toggleSelected(order.id)}
+              onClick={e => e.stopPropagation()}
+              title="Seleziona per azioni multiple"
+              style={{ accentColor: 'var(--cyan)', cursor: 'pointer', margin: 0, flex: '0 0 auto' }}
+            />
+          )}
+        </div>
+
+        {order.status === 'printing' && (
+          <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+            <div style={{ flex: 1, height: 5, borderRadius: 100, background: 'rgba(63,115,8,.14)', overflow: 'hidden' }}>
+              <div style={{ height: '100%', width: `${order.progress ?? 0}%`, background: 'var(--cyan)', transition: 'width 0.3s ease' }} />
+            </div>
+            <span style={{ fontFamily: 'var(--mono)', fontSize: 11, fontWeight: 700, color: 'var(--cyan)' }}>{order.progress ?? 0}%</span>
+          </div>
+        )}
+
+        <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+          <OrderStatusPill status={order.status} />
+          <DeadlineChip type={order.deadline} label={order.deadlineLabel} />
+          <span style={{ flex: 1 }} />
+          {actions(order)}
+        </div>
+      </GlassCard>
+    </div>
+  )
 
   return (
     <>
@@ -126,231 +351,73 @@ export default function Ordini() {
         </button>
       </div>
 
-      {/* ── Main card ── */}
-      <GlassCard hero style={{ padding: 22, display: 'flex', flexDirection: 'column', flex: 1, minHeight: 0, overflow: 'hidden' }}>
-        {/* Tabs */}
-        <div style={{ display: 'flex', gap: 6, marginBottom: 16, flex: '0 0 auto' }}>
-          {TABS.map(tab => {
-            const count = tabCount(tab.statuses)
-            const isActive = activeTab === tab.key
-            return (
-              <button
-                key={tab.key}
-                onClick={() => setActiveTab(tab.key)}
-                style={{
-                  display: 'flex', alignItems: 'center', gap: 6,
-                  padding: '6px 13px', borderRadius: 100,
-                  border: isActive ? '1px solid var(--cyan)' : '1px solid var(--line)',
-                  background: isActive ? 'rgba(63,115,8,.10)' : 'transparent',
-                  color: isActive ? 'var(--cyan)' : 'var(--muted)',
-                  fontFamily: 'inherit', fontWeight: 600, fontSize: 12.5,
-                  cursor: 'pointer', transition: '0.18s',
-                }}
-              >
-                {tab.label}
-                {tab.key !== 'all' && (
-                  <span style={{
-                    background: isActive ? 'var(--cyan)' : 'var(--glass-2)',
-                    color: isActive ? '#f4faed' : 'var(--muted)',
-                    fontFamily: 'var(--mono)', fontSize: 10, fontWeight: 700,
-                    padding: '1px 6px', borderRadius: 100,
-                  }}>
-                    {count}
-                  </span>
-                )}
-              </button>
-            )
-          })}
-        </div>
-
-        {/* Table header row */}
-        <div style={{
-          display: 'flex', alignItems: 'center', gap: 14,
-          padding: '12px 16px',
-          borderBottom: '1px solid var(--line)',
-          flex: '0 0 auto',
-        }}>
-          <span style={{ fontFamily: 'var(--mono)', fontSize: 10, color: 'var(--muted)', textTransform: 'uppercase', letterSpacing: '0.06em', flex: '0 0 100px' }}>Ordine</span>
-          <span style={{ fontFamily: 'var(--mono)', fontSize: 10, color: 'var(--muted)', textTransform: 'uppercase', letterSpacing: '0.06em', flex: '0 0 130px' }}>Cliente</span>
-          <span style={{ fontFamily: 'var(--mono)', fontSize: 10, color: 'var(--muted)', textTransform: 'uppercase', letterSpacing: '0.06em', flex: 1 }}>Prodotto</span>
-          <span style={{ fontFamily: 'var(--mono)', fontSize: 10, color: 'var(--muted)', textTransform: 'uppercase', letterSpacing: '0.06em', flex: '0 0 80px' }}>Materiale</span>
-          <span style={{ fontFamily: 'var(--mono)', fontSize: 10, color: 'var(--muted)', textTransform: 'uppercase', letterSpacing: '0.06em', flex: '0 0 90px' }}>Scadenza</span>
-          <span style={{ fontFamily: 'var(--mono)', fontSize: 10, color: 'var(--muted)', textTransform: 'uppercase', letterSpacing: '0.06em', flex: '0 0 80px' }}>Stato</span>
-          <span style={{ fontFamily: 'var(--mono)', fontSize: 10, color: 'var(--muted)', textTransform: 'uppercase', letterSpacing: '0.06em', flex: '0 0 160px', textAlign: 'right' }}>Azioni</span>
-        </div>
-
-        {/* Order rows */}
-        <div style={{ flex: 1, overflow: 'auto', display: 'flex', flexDirection: 'column' }}>
-          {filteredOrders.length === 0 && (
-            <div style={{ padding: 32, textAlign: 'center', color: 'var(--muted)', fontSize: 13 }}>
-              {query
-                ? <>Nessun ordine per «{query}».</>
-                : activeTab === 'new'
-                ? <>Nessun nuovo ordine da valutare — tutto smaltito.</>
-                : <>Nessun ordine in questo stato.</>}{' '}
-              <button
-                onClick={() => { setQuery(''); setActiveTab('all') }}
-                style={{ background: 'none', border: 'none', color: 'var(--cyan)', cursor: 'pointer', fontFamily: 'inherit', fontSize: 13, fontWeight: 600, padding: 0 }}
-              >
-                Vedi tutti gli ordini
-              </button>
-            </div>
-          )}
-          {filteredOrders.map(order => (
-            <div
-              key={order.id}
-              onClick={() => navigate(`/fablab/ordini/${order.id}`)}
-              style={{
-                display: 'flex', alignItems: 'center', gap: 14,
-                padding: '14px 16px',
-                borderBottom: '1px solid var(--line)',
-                cursor: 'pointer', transition: '0.18s',
-              }}
-              onMouseEnter={e => {
-                (e.currentTarget as HTMLDivElement).style.background = 'var(--glass-2)'
-              }}
-              onMouseLeave={e => {
-                (e.currentTarget as HTMLDivElement).style.background = 'transparent'
-              }}
-            >
-              {/* Ordine (+ checkbox bulk sui nuovi) */}
-              <span style={{
-                display: 'flex', alignItems: 'center', gap: 8,
-                fontFamily: 'var(--mono)', fontSize: 11,
-                color: 'var(--cyan)', flex: '0 0 100px',
-                letterSpacing: '0.04em',
-              }}>
-                {order.status === 'new' && (
-                  <input
-                    type="checkbox"
-                    checked={selected.has(order.id)}
-                    onChange={() => toggleSelected(order.id)}
-                    onClick={e => e.stopPropagation()}
-                    title="Seleziona per azioni multiple"
-                    style={{ accentColor: 'var(--cyan)', cursor: 'pointer', margin: 0 }}
-                  />
-                )}
-                {order.ordNum}
-              </span>
-
-              {/* Cliente */}
-              <span style={{ fontWeight: 600, fontSize: 14, flex: '0 0 130px', color: 'var(--ink)', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
-                {order.customer}
-              </span>
-
-              {/* Prodotto */}
-              <span style={{ fontWeight: 600, fontSize: 14, flex: 1, color: 'var(--ink)', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
-                {order.name}
-              </span>
-
-              {/* Materiale */}
-              <span style={{ fontFamily: 'var(--mono)', fontSize: 12, color: 'var(--muted)', flex: '0 0 80px' }}>
-                {order.material}
-              </span>
-
-              {/* Scadenza */}
-              <div style={{ flex: '0 0 90px' }}>
-                <DeadlineChip type={order.deadline} label={order.deadlineLabel} />
-              </div>
-
-              {/* Stato */}
-              <div style={{ flex: '0 0 80px' }}>
-                <OrderStatusPill status={order.status} />
-              </div>
-
-              {/* Azioni */}
-              <div
-                style={{ flex: '0 0 160px', display: 'flex', alignItems: 'center', gap: 6, justifyContent: 'flex-end' }}
-                onClick={e => e.stopPropagation()}
-              >
-                {order.status === 'new' && rejectingId !== order.id && (
-                  <>
-                    <button
-                      onClick={() => setRejectingId(order.id)}
-                      style={{
-                        background: 'transparent', border: '1px solid var(--line-2)',
-                        color: 'var(--muted)', fontFamily: 'inherit', fontWeight: 600,
-                        fontSize: 12, padding: '5px 11px', borderRadius: '100px', cursor: 'pointer',
-                      }}>
-                      Rifiuta
-                    </button>
-                    <button
-                      onClick={() => accept(order.id)}
-                      style={{
-                        background: 'var(--forest)', border: 'none', color: '#fff',
-                        fontFamily: 'inherit', fontWeight: 700, fontSize: 12,
-                        padding: '5px 13px', borderRadius: '100px', cursor: 'pointer',
-                      }}>
-                      Accetta
-                    </button>
-                  </>
-                )}
-                {order.status === 'new' && rejectingId === order.id && (
-                  <>
-                    <span style={{ fontSize: 11.5, color: 'var(--muted)', fontWeight: 600 }}>Rifiutare?</span>
-                    <button
-                      onClick={() => reject(order.id)}
-                      style={{
-                        background: 'transparent', border: '1px dashed #e40014', color: '#e40014',
-                        fontFamily: 'inherit', fontWeight: 600, fontSize: 12,
-                        padding: '5px 11px', borderRadius: '100px', cursor: 'pointer',
-                      }}>
-                      Sì
-                    </button>
-                    <button
-                      onClick={() => setRejectingId(undefined)}
-                      style={{
-                        background: 'transparent', border: '1px solid var(--line)', color: 'var(--muted)',
-                        fontFamily: 'inherit', fontWeight: 600, fontSize: 12,
-                        padding: '5px 11px', borderRadius: '100px', cursor: 'pointer',
-                      }}>
-                      No
-                    </button>
-                  </>
-                )}
-                {order.status === 'accepted' && (
-                  <button
-                    onClick={() => navigate(`/fablab/slicing?ordine=${order.id}`)}
-                    style={{
-                      background: 'transparent', border: '1px solid var(--cyan)', color: 'var(--cyan)',
-                      fontFamily: 'inherit', fontWeight: 600, fontSize: 12,
-                      padding: '5px 13px', borderRadius: '100px', cursor: 'pointer',
-                    }}>
-                    Avvia slicing →
-                  </button>
-                )}
-                {order.status === 'printing' && (
-                  <div style={{ width: 70, height: 5, borderRadius: 100, background: 'rgba(63,115,8,.14)', overflow: 'hidden' }}>
-                    <div style={{ height: '100%', width: `${order.progress ?? 0}%`, background: 'var(--cyan)', transition: 'width 0.3s ease' }} />
-                  </div>
-                )}
-                {order.status === 'ready' && (
-                  <button
-                    onClick={() => toast(`${order.customer} avvisato: ordine pronto al ritiro`)}
-                    style={{
-                      background: 'transparent', border: 'none', color: 'var(--cyan)',
-                      fontFamily: 'inherit', fontWeight: 600, fontSize: 12,
-                      padding: '5px 10px', borderRadius: 8, cursor: 'pointer',
-                    }}>
-                    Avvisa cliente
-                  </button>
-                )}
-                {order.status === 'error' && (
-                  <button
-                    onClick={() => navigate(`/fablab/ordini/${order.id}`)}
-                    style={{
-                      background: 'transparent', border: 'none', color: 'var(--cyan)',
-                      fontFamily: 'inherit', fontWeight: 600, fontSize: 12,
-                      padding: '5px 10px', borderRadius: 8, cursor: 'pointer',
-                    }}>
-                    Risolvi →
-                  </button>
-                )}
-              </div>
-            </div>
+      {/* Tabs + toggle vista — come la pagina progetti del cliente */}
+      <div style={{ display: 'flex', alignItems: 'center', gap: 12, flex: '0 0 auto' }}>
+        <div
+          style={{
+            display: 'flex',
+            gap: 4,
+            background: 'var(--glass)',
+            border: '1px solid var(--line)',
+            borderRadius: 100,
+            padding: 4,
+            width: 'fit-content',
+          }}
+        >
+          {TABS.map(tab => (
+            <button key={tab.key} style={tabStyle(tab.key)} onClick={() => setActiveTab(tab.key)}>
+              {tab.label}
+              {tab.key !== 'all' && <span style={{ opacity: 0.75 }}>{tabCount(tab.statuses)}</span>}
+            </button>
           ))}
         </div>
-      </GlassCard>
+        <div style={{ flex: 1 }} />
+        <div
+          style={{
+            display: 'flex',
+            gap: 3,
+            background: 'var(--glass)',
+            border: '1px solid var(--line)',
+            borderRadius: 11,
+            padding: 3,
+          }}
+        >
+          <button style={viewBtnStyle('grid')} onClick={() => setView('grid')} aria-label="Vista a quadri" title="Vista a quadri">
+            <LayoutGrid size={16} />
+          </button>
+          <button style={viewBtnStyle('list')} onClick={() => setView('list')} aria-label="Vista a lista" title="Vista a lista">
+            <List size={16} />
+          </button>
+        </div>
+      </div>
+
+      {/* Contenuto */}
+      <div style={{ flex: 1, minHeight: 0, overflow: 'auto' }}>
+        {filteredOrders.length === 0 && (
+          <div style={{ padding: 32, textAlign: 'center', color: 'var(--muted)', fontSize: 13 }}>
+            {query
+              ? <>Nessun ordine per «{query}».</>
+              : activeTab === 'new'
+              ? <>Nessun nuovo ordine da valutare — tutto smaltito.</>
+              : <>Nessun ordine in questo stato.</>}{' '}
+            <button
+              onClick={() => { setQuery(''); setActiveTab('all') }}
+              style={{ background: 'none', border: 'none', color: 'var(--cyan)', cursor: 'pointer', fontFamily: 'inherit', fontSize: 13, fontWeight: 600, padding: 0 }}
+            >
+              Vedi tutti gli ordini
+            </button>
+          </div>
+        )}
+        {view === 'grid' ? (
+          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 14, alignContent: 'start' }}>
+            {filteredOrders.map(orderCard)}
+          </div>
+        ) : (
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 11 }}>
+            {filteredOrders.map(orderRow)}
+          </div>
+        )}
+      </div>
     </>
   )
 }

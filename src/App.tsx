@@ -7,7 +7,6 @@ import Componenti from './pages/Componenti'
 import Onboarding from './pages/Onboarding'
 import UserLayout from './layouts/UserLayout'
 import FablabLayout from './layouts/FablabLayout'
-import FablabSlicingLayout from './layouts/FablabSlicingLayout'
 import UserDashboard from './pages/user/Dashboard'
 import Progetti from './pages/user/Progetti'
 import ProgettoDetail from './pages/user/ProgettoDetail'
@@ -26,7 +25,6 @@ import FablabSlicing from './pages/fablab/Slicing'
 import FablabOrdini from './pages/fablab/Ordini'
 import FablabOrdineDetail from './pages/fablab/OrdineDetail'
 import FablabCoda from './pages/fablab/Coda'
-import FablabStampanti from './pages/fablab/Stampanti'
 
 export default function App() {
   return (
@@ -58,11 +56,10 @@ export default function App() {
         <Route path="ordini" element={<FablabOrdini />} />
         <Route path="ordini/:id" element={<FablabOrdineDetail />} />
         <Route path="coda" element={<FablabCoda />} />
-        <Route path="stampanti" element={<FablabStampanti />} />
+        {/* Stampanti unite alla coda; slicing ora è coming soon dentro il layout */}
+        <Route path="stampanti" element={<Navigate to="/fablab/coda" replace />} />
+        <Route path="slicing" element={<FablabSlicing />} />
         <Route path="impatto" element={<FablabImpatto />} />
-      </Route>
-      <Route path="/fablab/slicing" element={<FablabSlicingLayout />}>
-        <Route index element={<FablabSlicing />} />
       </Route>
       <Route path="*" element={<Navigate to="/app/dashboard" replace />} />
     </Routes>

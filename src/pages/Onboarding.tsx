@@ -65,7 +65,7 @@ export default function Onboarding() {
             setThinking(null)
             push({
               role: 'assistant',
-              text: 'FabLab Bovisa è disponibile a 4,1 km: in PLA costa ~€ 4, pronto domani entro le 12. Preparo l’ordine?',
+              text: 'FabLab Milano è disponibile a 4,1 km: in PLA costa ~€ 4, pronto domani entro le 12. Preparo l’ordine?',
               after: () => setStage('confirm'),
             })
           }, 1600)
@@ -82,7 +82,7 @@ export default function Onboarding() {
       setThinking(null)
       push({
         role: 'assistant',
-        text: 'Fatto! Ho preparato la bozza dell’ordine con FabLab Bovisa: la trovi nella tua dashboard, insieme al tracking della stampa. Da qui in poi ci penso io.',
+        text: 'Fatto! Ho preparato la bozza dell’ordine con FabLab Milano: la trovi nella tua dashboard, insieme al tracking della stampa. Da qui in poi ci penso io.',
         after: () => setStage('done'),
       })
     }, 1600)
