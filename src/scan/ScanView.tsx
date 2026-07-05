@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from 'react'
-import { Camera, Upload, Check, Sparkles, Radar, RotateCcw, X } from 'lucide-react'
+import { Camera, Upload, Check, Sparkles, Radar, RotateCcw, X, Users } from 'lucide-react'
 import GlassCard from '../components/GlassCard'
 import PrimaryButton from '../components/PrimaryButton'
 import PrintViewer3D from '../components/PrintViewer3D'
@@ -14,11 +14,23 @@ import { producers } from '../mock/user-pages'
 const THRESHOLD = 0.2
 const DEMO_LABEL = 'remote control'
 
-type Phase = 'capture' | 'scanning' | 'confirm-object' | 'confirm-part' | 'result' | 'ai-generate' | 'match'
+type Phase = 'capture' | 'scanning' | 'confirm-object' | 'confirm-part' | 'result' | 'ai-generate' | 'ai-review' | 'match'
 
+// Synthetic entry for the AI-generated path: no pre-scanned glb → the viewer
+// falls back to the procedural mesh, which reads as "raw AI reconstruction".
+const AI_ENTRY: LibraryEntry = {
+  name: 'Oggetto scansionato',
+  glb: '',
+  part: 'Pezzo ricostruito con AI',
+  material: 'PLA (suggerito)',
+  note: 'Mesh generata dall\'AI da 3 scansioni: geometria approssimata, da verificare prima della stampa.',
+}
+
+// ponytail: la ScanView vive su fondo forest — i token ink/muted/line sono
+// pensati per fondo chiaro, qui servono le controparti chiare.
 const outlineBtn: React.CSSProperties = {
   display: 'flex', alignItems: 'center', gap: 8, background: 'transparent',
-  color: 'var(--cyan)', border: '1px solid var(--line-2)', fontFamily: 'inherit',
+  color: 'var(--lemongrass)', border: '1px solid rgba(255,255,255,.28)', fontFamily: 'inherit',
   fontWeight: 600, fontSize: 13.5, padding: '0 20px', height: 44,
   borderRadius: 100, cursor: 'pointer', transition: '0.2s', flex: '0 0 auto',
 }
@@ -34,6 +46,9 @@ export default function ScanView({ onClose, onRequest }: { onClose?: () => void;
   const [clipError, setClipError] = useState(false)
   const [uploadUrl, setUploadUrl] = useState<string>() // captured / uploaded frame
   const [match, setMatch] = useState<{ label: string; score: number; entry: LibraryEntry }>()
+  const [aiScans, setAiScans] = useState(0) // 0–3 scansioni extra della generazione AI
+  const [aiRunning, setAiRunning] = useState(false)
+  const [expertRequested, setExpertRequested] = useState(false)
 
   const videoRef = useRef<HTMLVideoElement>(null)
   const streamRef = useRef<MediaStream>()
@@ -120,6 +135,26 @@ export default function ScanView({ onClose, onRequest }: { onClose?: () => void;
 
   function reset() {
     setMatch(undefined); setUploadUrl(undefined); setProgress(0); setPhase('capture')
+    setAiScans(0); setAiRunning(false); setExpertRequested(false)
+  }
+
+  // ponytail: mock timed sequence — 3 "scansioni" poi ricostruzione mesh.
+  // La generazione vera (image-to-3D) è server-side e fuori scope demo.
+  function runAiGeneration() {
+    setAiRunning(true); setAiScans(0)
+    let n = 0
+    const step = () => {
+      if (phaseRef.current !== 'ai-generate') return // reset/uscita durante i timer
+      n += 1
+      setAiScans(n)
+      if (n < 3) setTimeout(step, 1100)
+      else setTimeout(() => {
+        if (phaseRef.current !== 'ai-generate') return
+        setMatch({ label: 'ai-mesh', score: 0.68, entry: AI_ENTRY })
+        setPhase('ai-review')
+      }, 1500)
+    }
+    setTimeout(step, 900)
   }
 
   function onFile(f?: File) {
@@ -152,26 +187,29 @@ export default function ScanView({ onClose, onRequest }: { onClose?: () => void;
         overflow: 'auto',
       }}
     >
+      {/* container centrato: su desktop il contenuto non si spalma a tutta larghezza */}
+      <div style={{ width: '100%', maxWidth: 1140, margin: '0 auto', flex: 1, display: 'flex', flexDirection: 'column', gap: 14, minHeight: 0 }}>
+
       {/* header row */}
       <div style={{ display: 'flex', alignItems: 'center', gap: 12, rowGap: 8, flexWrap: 'wrap', flex: '0 0 auto' }}>
-        <Radar size={18} style={{ color: 'var(--cyan)' }} />
-        <span style={{ fontFamily: 'var(--mono)', fontSize: 12, letterSpacing: '0.06em', color: 'var(--ink)' }}>
+        <Radar size={18} style={{ color: 'var(--lemongrass)' }} />
+        <span style={{ fontFamily: 'var(--mono)', fontSize: 12, letterSpacing: '0.06em', color: '#fff' }}>
           SCAN & RICONOSCIMENTO CV
         </span>
         {!modelReady && !clipError && (
-          <span style={{ fontFamily: 'var(--mono)', fontSize: 11, color: 'var(--muted)' }}>· inizializzazione CV…</span>
+          <span style={{ fontFamily: 'var(--mono)', fontSize: 11, color: 'rgba(255,255,255,.55)' }}>· inizializzazione CV…</span>
         )}
         {clipError && (
-          <span style={{ fontFamily: 'var(--mono)', fontSize: 11, color: 'var(--muted)' }}>· CV offline · modalità demo</span>
+          <span style={{ fontFamily: 'var(--mono)', fontSize: 11, color: 'rgba(255,255,255,.55)' }}>· CV offline · modalità demo</span>
         )}
         <div style={{ flex: 1 }} />
         {/* demo toggle */}
         <button
           onClick={() => setDemo(d => !d)}
           style={{ ...outlineBtn, height: 34, fontSize: 12,
-            borderColor: demo ? 'var(--cyan)' : 'var(--line)', color: demo ? 'var(--cyan)' : 'var(--muted)' }}
+            borderColor: demo ? 'var(--lemongrass)' : 'rgba(255,255,255,.2)', color: demo ? 'var(--lemongrass)' : 'rgba(255,255,255,.6)' }}
         >
-          <span style={{ width: 7, height: 7, borderRadius: '50%', background: demo ? 'var(--cyan)' : 'transparent', boxShadow: demo ? 'none' : 'inset 0 0 0 1.5px var(--line-2)' }} />
+          <span style={{ width: 7, height: 7, borderRadius: '50%', background: demo ? 'var(--lemongrass)' : 'transparent', boxShadow: demo ? 'none' : 'inset 0 0 0 1.5px rgba(255,255,255,.4)' }} />
           Demo
         </button>
         {onClose && (
@@ -225,10 +263,11 @@ export default function ScanView({ onClose, onRequest }: { onClose?: () => void;
       )}
 
       {/* CONFIRM (obj → part) → RESULT — shared viewer, phase-specific right panel */}
-      {(phase === 'confirm-object' || phase === 'confirm-part' || phase === 'result') && match && (
-        <div style={{ flex: 1, display: 'flex', flexWrap: 'wrap', gap: 16, minHeight: 0 }}>
-          {/* viewer — stays mounted across the confirmation steps */}
-          <div style={{ flex: '1 1 340px', position: 'relative', borderRadius: 18, overflow: 'hidden', border: '1px solid var(--line-2)', background: 'var(--bg-2)', minHeight: 300 }}>
+      {(phase === 'confirm-object' || phase === 'confirm-part' || phase === 'result' || phase === 'ai-review') && match && (
+        <div style={{ flex: 1, display: 'flex', flexWrap: 'wrap', alignItems: 'center', gap: 16, minHeight: 0 }}>
+          {/* viewer — stays mounted across the confirmation steps.
+              Superficie scura: le wireframe lemongrass/white del viewer sono pensate per fondo forest. */}
+          <div style={{ flex: '1 1 340px', position: 'relative', borderRadius: 18, overflow: 'hidden', border: '1px solid rgba(255,255,255,.14)', background: 'linear-gradient(160deg, #18280e, #122006)', height: 'min(68vh, 600px)', minHeight: 300 }}>
             <PrintViewer3D modelUrl={match.entry.glb} />
           </div>
 
@@ -250,7 +289,7 @@ export default function ScanView({ onClose, onRequest }: { onClose?: () => void;
                   <PrimaryButton onClick={() => setPhase('confirm-part')}><Check size={16} /> Sì, è questo</PrimaryButton>
                   <button style={outlineBtn} onClick={() => setPhase('ai-generate')}>No, è un altro</button>
                 </div>
-                <button style={{ ...outlineBtn, color: 'var(--muted)', borderColor: 'var(--line)' }} onClick={reset}>
+                <button style={{ ...outlineBtn, color: 'rgba(255,255,255,.6)', borderColor: 'rgba(255,255,255,.2)' }} onClick={reset}>
                   <RotateCcw size={15} /> Nuova scansione
                 </button>
               </>
@@ -276,7 +315,7 @@ export default function ScanView({ onClose, onRequest }: { onClose?: () => void;
                   <PrimaryButton onClick={() => setPhase('result')}><Check size={16} /> Sì, è questo</PrimaryButton>
                   <button style={outlineBtn} onClick={() => setPhase('ai-generate')}><Sparkles size={16} /> No, altro pezzo</button>
                 </div>
-                <button style={{ ...outlineBtn, color: 'var(--muted)', borderColor: 'var(--line)' }} onClick={() => setPhase('confirm-object')}>
+                <button style={{ ...outlineBtn, color: 'rgba(255,255,255,.6)', borderColor: 'rgba(255,255,255,.2)' }} onClick={() => setPhase('confirm-object')}>
                   ← Indietro
                 </button>
               </>
@@ -310,7 +349,58 @@ export default function ScanView({ onClose, onRequest }: { onClose?: () => void;
                   <PrimaryButton onClick={() => setPhase('match')}><Radar size={16} /> Cerca nella rete</PrimaryButton>
                   <button style={outlineBtn} onClick={() => setPhase('ai-generate')}><Sparkles size={16} /> Genera con AI</button>
                 </div>
-                <button style={{ ...outlineBtn, color: 'var(--muted)', borderColor: 'var(--line)' }} onClick={reset}>
+                <button style={{ ...outlineBtn, color: 'rgba(255,255,255,.6)', borderColor: 'rgba(255,255,255,.2)' }} onClick={reset}>
+                  <RotateCcw size={15} /> Nuova scansione
+                </button>
+              </>
+            )}
+
+            {/* AI-REVIEW — mesh generata, serve un passaggio umano prima della stampa */}
+            {phase === 'ai-review' && (
+              <>
+                {/* avviso: banner scuro tratteggiato, NON una card come le azioni sotto */}
+                <div style={{ padding: 20, borderRadius: 'var(--radius)', border: '1.5px dashed rgba(178,235,118,.5)', background: 'rgba(178,235,118,.07)', display: 'flex', flexDirection: 'column', gap: 10 }}>
+                  <span style={{ fontFamily: 'var(--mono)', fontSize: 11, letterSpacing: '0.06em', color: 'var(--lemongrass)' }}>
+                    ⚠ MESH AI GENERATA · CONFIDENZA {Math.round(match.score * 100)}%
+                  </span>
+                  <h2 style={{ fontSize: 20, fontWeight: 600, color: '#fff', lineHeight: 1.2 }}>{match.entry.part}</h2>
+                  <p style={{ fontSize: 13, color: 'rgba(255,255,255,.75)', lineHeight: 1.55 }}>
+                    La geometria è ricostruita dalle scansioni e può contenere <span style={{ color: 'var(--lemongrass)' }}>imprecisioni non adatte alla stampa</span>.
+                    Prima di stampare la mesh va sistemata da una persona — scegli come:
+                  </p>
+                  {expertRequested && (
+                    <div style={{ display: 'flex', alignItems: 'center', gap: 8, paddingTop: 10, borderTop: '1px dashed rgba(178,235,118,.35)' }}>
+                      <Check size={15} style={{ color: 'var(--lemongrass)', flex: '0 0 auto' }} />
+                      <span style={{ fontSize: 12.5, color: 'rgba(255,255,255,.85)', lineHeight: 1.45 }}>
+                        Richiesta inviata · un esperto della community ti contatterà per sistemare la mesh. Puoi comunque inviarla già al FabLab.
+                      </span>
+                    </div>
+                  )}
+                </div>
+                {/* due strade distinte: aiuto umano vs invio diretto con verifica operatore */}
+                <div style={{ display: 'flex', gap: 12, flexWrap: 'wrap' }}>
+                  <button className="opt-card" onClick={() => setExpertRequested(true)} disabled={expertRequested}>
+                    <Users size={18} style={{ color: 'var(--cyan)' }} />
+                    <span style={{ fontSize: 14.5, fontWeight: 600, color: 'var(--ink)' }}>Chiedi aiuto a una persona</span>
+                    <span style={{ fontSize: 12.5, color: 'var(--muted)', lineHeight: 1.5 }}>
+                      Un esperto della community — anche di persona — corregge la mesh insieme a te prima dell'invio.
+                    </span>
+                    <span style={{ fontFamily: 'var(--mono)', fontSize: 11, letterSpacing: '0.08em', color: 'var(--cyan)', marginTop: 4 }}>
+                      {expertRequested ? 'RICHIESTA INVIATA ✓' : 'RICHIEDI →'}
+                    </span>
+                  </button>
+                  <button className="opt-card" onClick={() => setPhase('match')}>
+                    <Radar size={18} style={{ color: 'var(--cyan)' }} />
+                    <span style={{ fontSize: 14.5, fontWeight: 600, color: 'var(--ink)' }}>Invia subito al FabLab</span>
+                    <span style={{ fontSize: 12.5, color: 'var(--muted)', lineHeight: 1.5 }}>
+                      Procedi ora: sarà l'operatore del FabLab a verificare e sistemare la mesh prima della stampa.
+                    </span>
+                    <span style={{ fontFamily: 'var(--mono)', fontSize: 11, letterSpacing: '0.08em', color: 'var(--cyan)', marginTop: 4 }}>
+                      PROCEDI →
+                    </span>
+                  </button>
+                </div>
+                <button style={{ ...outlineBtn, color: 'rgba(255,255,255,.6)', borderColor: 'rgba(255,255,255,.2)' }} onClick={reset}>
                   <RotateCcw size={15} /> Nuova scansione
                 </button>
               </>
@@ -331,19 +421,25 @@ export default function ScanView({ onClose, onRequest }: { onClose?: () => void;
             </p>
             <div style={{ display: 'flex', gap: 8, alignItems: 'center', fontFamily: 'var(--mono)', fontSize: 11, color: 'var(--muted)' }}>
               {[1, 2, 3].map(n => (
-                <span key={n} style={{ width: 30, height: 30, borderRadius: 8, border: '1px dashed var(--line-2)', display: 'grid', placeItems: 'center' }}>{n}</span>
+                <span key={n} style={{ width: 30, height: 30, borderRadius: 8, display: 'grid', placeItems: 'center', transition: '0.3s',
+                  border: n <= aiScans ? '1px solid var(--cyan)' : '1px dashed var(--line-2)',
+                  color: n <= aiScans ? 'var(--cyan)' : 'inherit' }}>
+                  {n <= aiScans ? <Check size={14} /> : n}
+                </span>
               ))}
-              <span>scansione 0 / 3</span>
+              <span>{aiScans === 3 ? 'ricostruzione mesh…' : `scansione ${aiScans} / 3`}</span>
             </div>
             <p style={{ fontSize: 12, color: 'var(--muted)', fontStyle: 'italic', lineHeight: 1.5 }}>
-              Al termine il modello viene validato e messo in coda; puoi anche <span style={{ color: 'var(--cyan)' }}>chiedere aiuto a un esperto</span> della community.
+              La mesh generata è una prima ricostruzione: prima della stampa viene sempre <span style={{ color: 'var(--cyan)' }}>verificata da una persona</span> — un esperto della community o l'operatore del FabLab.
             </p>
-            <button style={{ ...outlineBtn, opacity: 0.55, cursor: 'not-allowed' }} disabled>
-              <Camera size={16} /> Avvia scansione componente
-            </button>
-            <span style={{ fontFamily: 'var(--mono)', fontSize: 10, color: 'var(--muted-2)' }}>modulo non attivo in questa demo</span>
+            {!aiRunning && (
+              // dentro la card bianca: torna ai token da fondo chiaro
+              <button style={{ ...outlineBtn, color: 'var(--cyan)', borderColor: 'var(--line-2)' }} onClick={runAiGeneration}>
+                <Camera size={16} /> Avvia scansione componente
+              </button>
+            )}
           </div>
-          <button style={{ ...outlineBtn, color: 'var(--muted)', borderColor: 'var(--line)' }} onClick={reset}>
+          <button style={{ ...outlineBtn, color: 'rgba(255,255,255,.6)', borderColor: 'rgba(255,255,255,.2)' }} onClick={reset}>
             <RotateCcw size={15} /> Nuova scansione
           </button>
         </div>
@@ -352,9 +448,17 @@ export default function ScanView({ onClose, onRequest }: { onClose?: () => void;
       {/* MATCH — compatible nodes / FabLabs */}
       {phase === 'match' && match && (
         <div style={{ flex: 1, display: 'flex', flexDirection: 'column', gap: 12, minHeight: 0 }}>
-          <span style={{ fontFamily: 'var(--mono)', fontSize: 11, letterSpacing: '0.06em', color: 'var(--muted)' }}>
+          <span style={{ fontFamily: 'var(--mono)', fontSize: 11, letterSpacing: '0.06em', color: 'rgba(255,255,255,.6)' }}>
             FABLAB COMPATIBILI · {match.entry.part} · {match.entry.material}
           </span>
+          {match.label === 'ai-mesh' && (
+            <div style={{ display: 'flex', alignItems: 'center', gap: 8, padding: '10px 14px', borderRadius: 'var(--radius-sm)', border: '1px dashed var(--line-2)', background: 'var(--glass)', flex: '0 0 auto' }}>
+              <Sparkles size={14} style={{ color: 'var(--cyan)', flex: '0 0 auto' }} />
+              <span style={{ fontSize: 12.5, color: 'var(--muted)' }}>
+                Mesh generata con AI: l'operatore del FabLab la verificherà e correggerà prima della stampa.
+              </span>
+            </div>
+          )}
           <div style={{ flex: 1, display: 'flex', flexDirection: 'column', gap: 11, overflow: 'auto' }}>
             {producers.map((p, i) => {
               const certified = i < 2
@@ -385,14 +489,16 @@ export default function ScanView({ onClose, onRequest }: { onClose?: () => void;
               )
             })}
           </div>
-          <p style={{ fontSize: 12, color: 'var(--muted)', fontStyle: 'italic', flex: '0 0 auto' }}>
-            Nessun FabLab copre il pezzo? Prova la <span style={{ color: 'var(--cyan)' }}>generazione AI</span> o chiedi a un esperto della community.
+          <p style={{ fontSize: 12, color: 'rgba(255,255,255,.55)', fontStyle: 'italic', flex: '0 0 auto' }}>
+            Nessun FabLab copre il pezzo? Prova la <span style={{ color: 'var(--lemongrass)' }}>generazione AI</span> o chiedi a un esperto della community.
           </p>
-          <button style={{ ...outlineBtn, alignSelf: 'flex-start', color: 'var(--muted)', borderColor: 'var(--line)' }} onClick={reset}>
+          <button style={{ ...outlineBtn, alignSelf: 'flex-start', color: 'rgba(255,255,255,.6)', borderColor: 'rgba(255,255,255,.2)' }} onClick={reset}>
             <RotateCcw size={15} /> Nuova scansione
           </button>
         </div>
       )}
+
+      </div>
     </div>
   )
 }

@@ -401,6 +401,29 @@ body::before {
   .btn-spade--light::before { background: rgba(9, 15, 5, 0.06); }
   .btn-spade--light:hover { color: var(--ink); }
   .btn-spade--light:hover::before { background: rgba(9, 15, 5, 0.10); }
+
+  /* Card-azione (opzioni cliccabili, es. ScanView): affordance da bottone */
+  .opt-card {
+    flex: 1 1 230px;
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 8px;
+    text-align: left;
+    padding: 16px;
+    border-radius: var(--radius);
+    background: var(--glass);
+    border: 1px solid var(--line-2);
+    font-family: inherit;
+    cursor: pointer;
+    transition: 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+  .opt-card:hover:not(:disabled) {
+    background: var(--glass-2);
+    border-color: var(--cyan);
+    transform: translateY(-1px);
+  }
+  .opt-card:disabled { opacity: 0.55; cursor: default; }
 }
 
 /* ===== ANIMATIONS ===== */

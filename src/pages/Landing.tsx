@@ -187,18 +187,6 @@ function ProblemBar() {
           </div>
         ))}
       </div>
-      <p
-        style={{
-          textAlign: 'center',
-          fontFamily: 'var(--mono)',
-          fontSize: 10.5,
-          color: 'var(--muted-2)',
-          letterSpacing: '0.04em',
-          padding: '18px 0 12px',
-        }}
-      >
-        INDAGINE TESEO 2026 &middot; 100 RISPOSTE &middot; MILANO, HINTERLAND E LOMBARDIA
-      </p>
     </div>
   )
 }
