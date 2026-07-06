@@ -170,9 +170,8 @@ export default function PrintBuildScroll() {
             Strato dopo strato
           </h2>
           <p style={{ fontSize: 15.5, color: 'rgba(244,250,237,.7)', lineHeight: 1.65, marginTop: 24, maxWidth: 400 }}>
-            Non buttiamo l'oggetto intero, stampiamo solo il pezzo che serve.
-            Il manico della moka si è rotto? La rete produce quello, in materiale
-            riciclato e la tua moka torna sul fuoco.
+            Non buttare l'oggetto intero, con Teseo stampi solo il pezzo che ti serve.
+            Il manico della moka si è rotto? Cerca il modello in rete e la tua moka torna sul fuoco.
           </p>
         </div>
 

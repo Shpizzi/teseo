@@ -28,8 +28,8 @@ const AI_ENTRY: LibraryEntry = {
   note: 'Mesh generata dall\'AI da 3 scansioni: geometria approssimata, da verificare prima della stampa.',
 }
 
-// Sotto questa confidenza consigliamo un passaggio umano prima della stampa.
-const CONF_THRESHOLD = 0.6
+// Soglia dura: sopra si può inviare al FabLab, sotto l'unica opzione è chiedere aiuto.
+const CONF_THRESHOLD = 0.7
 // "Come la stimiamo": confronto mesh↔originale su incastri/tenuta (Wizard of Oz,
 // coerente col resto della demo, spiegazione funzionale, non un numero magico).
 const CONF_WHY_HIGH = 'Confrontiamo la mesh con l\'originale sui punti di incastro: la parte combacia e si chiude. Il piccolo difetto residuo sul bordo non compromette la funzione, l\'operatore lo rifinisce prima di stampare.'
@@ -46,7 +46,7 @@ export default function ScanView({ onClose, onRequest }: { onClose?: () => void;
   const [phase, setPhase] = useState<Phase>('capture')
   const [progress, setProgress] = useState(0)
   const [cameraOn, setCameraOn] = useState(false)
-  const [demo, setDemo] = useState(false)
+  const [demo, setDemo] = useState(true) // Wizard-of-Oz: riconoscimento sempre forzato su DEMO_LABEL (uso in aula)
   const [modelReady, setModelReady] = useState(false)
   const [clipError, setClipError] = useState(false)
   const [uploadUrl, setUploadUrl] = useState<string>() // captured / uploaded frame
@@ -58,6 +58,7 @@ export default function ScanView({ onClose, onRequest }: { onClose?: () => void;
   const videoRef = useRef<HTMLVideoElement>(null)
   const streamRef = useRef<MediaStream>()
   const fileRef = useRef<HTMLInputElement>(null)
+  const aiRunRef = useRef(0) // alterna la confidenza a ogni generazione (vedi runAiGeneration)
 
   // Preload CLIP on mount; if it can't load, fall back to demo mode silently.
   useEffect(() => {
@@ -155,7 +156,11 @@ export default function ScanView({ onClose, onRequest }: { onClose?: () => void;
       if (n < 3) setTimeout(step, 1100)
       else setTimeout(() => {
         if (phaseRef.current !== 'ai-generate') return
-        setMatch({ label: 'ai-mesh', score: 0.68, entry: AI_ENTRY })
+        // ponytail: la confidenza AI alterna alta/bassa a ogni generazione così in aula
+        // si mostrano entrambi i rami (≥70% → FabLab, <70% → solo aiuto). Rigenera per invertire.
+        aiRunRef.current += 1
+        const score = aiRunRef.current % 2 === 1 ? 0.82 : 0.55
+        setMatch({ label: 'ai-mesh', score, entry: AI_ENTRY })
         setPhase('ai-review')
       }, 1500)
     }
@@ -206,6 +211,9 @@ export default function ScanView({ onClose, onRequest }: { onClose?: () => void;
         </span>
         {!modelReady && !clipError && (
           <span style={{ fontFamily: 'var(--mono)', fontSize: 11, color: 'rgba(255,255,255,.55)' }}>· inizializzazione CV…</span>
+        )}
+        {clipError && (
+          <span style={{ fontFamily: 'var(--mono)', fontSize: 11, color: 'rgba(255,255,255,.55)' }}>· CV offline · modalità demo</span>
         )}
         <div style={{ flex: 1 }} />
         {onClose && (
@@ -370,7 +378,7 @@ export default function ScanView({ onClose, onRequest }: { onClose?: () => void;
                   {lowConf && (
                     <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
                       <Users size={15} style={{ color: '#ff6b74', flex: '0 0 auto' }} />
-                      <span style={{ fontSize: 12.5, color: '#fff', fontWeight: 600 }}>Sotto il 60% ti consigliamo di chiedere aiuto a una persona.</span>
+                      <span style={{ fontSize: 12.5, color: '#fff', fontWeight: 600 }}>Sotto il 70% l'invio al FabLab è bloccato: l'unica opzione è chiedere aiuto a una persona.</span>
                     </div>
                   )}
                   {expertRequested && (
@@ -402,18 +410,21 @@ export default function ScanView({ onClose, onRequest }: { onClose?: () => void;
                       {expertRequested ? 'RICHIESTA INVIATA ✓' : 'RICHIEDI →'}
                     </span>
                   </button>
-                  <button className="opt-card" onClick={() => setPhase('match')}
-                    style={{ order: lowConf ? 1 : 0, ...(!lowConf ? recCard : {}) }}>
-                    {!lowConf && <span style={recTag}>CONSIGLIATO</span>}
-                    <Radar size={18} style={{ color: 'var(--cyan)' }} />
-                    <span style={{ fontSize: 14.5, fontWeight: 600, color: 'var(--ink)' }}>Invia subito al FabLab</span>
-                    <span style={{ fontSize: 12.5, color: 'var(--muted)', lineHeight: 1.5 }}>
-                      Procedi ora: sarà l'operatore del FabLab a verificare e sistemare la mesh prima della stampa.
-                    </span>
-                    <span style={{ fontFamily: 'var(--mono)', fontSize: 11, letterSpacing: '0.08em', color: 'var(--cyan)', marginTop: 4 }}>
-                      PROCEDI →
-                    </span>
-                  </button>
+                  {/* Sopra soglia: si può inviare al FabLab. Sotto: la card non compare, resta solo l'aiuto. */}
+                  {!lowConf && (
+                    <button className="opt-card" onClick={() => setPhase('match')}
+                      style={{ order: 0, ...recCard }}>
+                      <span style={recTag}>CONSIGLIATO</span>
+                      <Radar size={18} style={{ color: 'var(--cyan)' }} />
+                      <span style={{ fontSize: 14.5, fontWeight: 600, color: 'var(--ink)' }}>Invia subito al FabLab</span>
+                      <span style={{ fontSize: 12.5, color: 'var(--muted)', lineHeight: 1.5 }}>
+                        Procedi ora: sarà l'operatore del FabLab a verificare e sistemare la mesh prima della stampa.
+                      </span>
+                      <span style={{ fontFamily: 'var(--mono)', fontSize: 11, letterSpacing: '0.08em', color: 'var(--cyan)', marginTop: 4 }}>
+                        PROCEDI →
+                      </span>
+                    </button>
+                  )}
                 </div>
                 <button className="btn-outline-dark btn-outline-dark--muted" onClick={reset}>
                   <RotateCcw size={15} /> Nuova scansione

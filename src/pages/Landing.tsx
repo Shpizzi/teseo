@@ -219,26 +219,23 @@ function ProblemClaim() {
 
 /* ────────────────── PARTNER (marquee loghi) ────────────────── */
 function PartnerMarquee() {
-  // ponytail: nessun asset logo, wordmark testuali; sostituire con SVG quando esistono
-  const logos: { name: string; style: React.CSSProperties }[] = [
-    { name: 'Bialetti', style: { fontWeight: 800, fontStyle: 'italic' } },
-    { name: "De'Longhi", style: { fontWeight: 700, letterSpacing: '0.02em' } },
-    { name: 'SMEG', style: { fontWeight: 800, letterSpacing: '0.22em' } },
-    { name: 'Alessi', style: { fontWeight: 300, fontSize: 22, letterSpacing: '0.06em' } },
-    { name: 'Artemide', style: { fontWeight: 600, fontStyle: 'italic' } },
-    { name: 'Kartell', style: { fontWeight: 800, letterSpacing: '-0.02em' } },
-    { name: 'Imetec', style: { fontFamily: 'var(--mono)', fontWeight: 600 } },
-    { name: 'BTicino', style: { fontWeight: 500, letterSpacing: '0.12em', textTransform: 'uppercase', fontSize: 15 } },
-    { name: 'Chicco', style: { fontWeight: 700, fontStyle: 'italic' } },
-    { name: 'Foppapedretti', style: { fontWeight: 500, letterSpacing: '0.08em', fontSize: 15 } },
+  // Solo loghi reali in public/landing/logos/. Ripetuti per riempire il marquee.
+  const logos = [
+    { name: 'SMEG', logo: '/landing/logos/smeg.png' },
+    { name: 'Imetec', logo: '/landing/logos/imetec.png' },
+    { name: 'BTicino', logo: '/landing/logos/bticino.png' },
+    { name: 'Foppapedretti', logo: '/landing/logos/foppapedretti.png' },
   ]
 
   const row = (key: string) => (
     <div key={key} style={{ display: 'flex', alignItems: 'center', gap: 72, paddingRight: 72, flexShrink: 0 }}>
-      {logos.map(l => (
-        <span key={l.name} style={{ fontSize: 19, color: 'var(--ink)', opacity: 0.75, whiteSpace: 'nowrap', ...l.style }}>
-          {l.name}
-        </span>
+      {[...logos, ...logos, ...logos].map((l, i) => (
+        <img
+          key={`${l.name}-${i}`}
+          src={l.logo}
+          alt={l.name}
+          style={{ height: 26, width: 'auto', objectFit: 'contain', opacity: 0.7, flexShrink: 0 }}
+        />
       ))}
     </div>
   )
@@ -744,17 +741,7 @@ function CommunityNetworkSection() {
       <div style={{ position: 'relative', display: 'flex', gap: 60, alignItems: 'center', flexWrap: 'wrap' }}>
         {/* Left */}
         <div style={{ flex: '1 1 380px', display: 'flex', flexDirection: 'column', gap: 20, maxWidth: 480 }}>
-          <span
-            style={{
-              fontFamily: 'var(--mono)',
-              fontSize: 12,
-              letterSpacing: '0.08em',
-              color: '#b2eb76',
-              textTransform: 'uppercase',
-            }}
-          >
-            FabLab · Partner · Community
-          </span>
+         
           <h2
             style={{ fontSize: 'clamp(28px, 3.2vw, 40px)', fontWeight: 700, lineHeight: 1.15, letterSpacing: '-.01em', color: '#fff' }}
           >
@@ -762,7 +749,7 @@ function CommunityNetworkSection() {
             <span style={{ color: '#b2eb76' }}>Sei già un nodo della rete.</span>
           </h2>
           <p style={{ fontSize: 15, color: 'rgba(255,255,255,.6)', lineHeight: 1.7 }}>
-            Unisciti alla rete di FabLab e maker che stampano i ricambi per chi non può più trovarli. Ogni stampa ti dà reputazione, compenso e la soddisfazione di salvare un oggetto dalla discarica.
+            Unisciti alla rete di FabLab e produttori locali che stampano i ricambi per chi non può più trovarli. Ogni stampa ti dà reputazione, compenso e la soddisfazione di salvare un oggetto dalla discarica.
           </p>
 
           <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
@@ -884,7 +871,7 @@ function FinalCtaSection() {
         L&apos;82% dei ricambi non si trova.<br />Il tuo si stampa.
       </h2>
       <p style={{ fontSize: 16, color: 'var(--muted)', marginTop: 12, position: 'relative' }}>
-        Gratis per i primi 3 mesi. Nessuna carta di credito, nessuna stampante richiesta.
+        Nessuna carta di credito, nessuna stampante richiesta.
       </p>
 
       <div
@@ -899,7 +886,7 @@ function FinalCtaSection() {
       >
         <PrimaryButton style={{ height: 52, fontSize: 16, padding: '0 32px' }} onClick={() => navigate('/onboarding')}>
           <ScanLine size={20} />
-          Ripara il primo oggetto
+          Entra nella community
         </PrimaryButton>
       </div>
     </section>

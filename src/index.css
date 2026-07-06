@@ -566,7 +566,7 @@ body::before {
 /* Marquee, firma spade (loghi/testo che scorrono) */
 @keyframes marquee {
   from { transform: translateX(0); }
-  to   { transform: translateX(calc(-100% - 2rem)); }
+  to   { transform: translateX(-50%); } /* due copie identiche → -50% = loop senza salto */
 }
 .anim-marquee { animation: marquee 30s linear infinite; }
 

@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { Outlet } from 'react-router-dom'
 import {
   LayoutDashboard,
@@ -30,6 +30,13 @@ export default function FablabLayout() {
   const [open, setOpen] = useState(false)
   const [collapsed, setCollapsed] = useState(false)
   const [aiOpen, setAiOpen] = useState(false)
+
+  // La barra "Chiedi all'AI" della dashboard apre il drawer con la domanda
+  useEffect(() => {
+    const h = () => setAiOpen(true)
+    window.addEventListener('teseo:ask', h)
+    return () => window.removeEventListener('teseo:ask', h)
+  }, [])
 
   return (
     <div

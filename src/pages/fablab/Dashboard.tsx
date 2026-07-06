@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { Download, Clock, Activity, CheckCircle2, TrendingUp } from 'lucide-react'
+import { Download, Clock, Activity, CheckCircle2, TrendingUp, Sparkles, ArrowRight } from 'lucide-react'
 import { useNavigate } from 'react-router-dom'
 import PrimaryButton from '../../components/PrimaryButton'
 import KpiCard from '../../components/KpiCard'
@@ -9,6 +9,8 @@ import { printersFull } from '../../mock/fablab-pages'
 import { useLiveOrders, setOrderStatus, type LiveStatus, type LiveOrder } from '../../mock/orderStore'
 import { toast } from '../../components/Toast'
 
+const mono: React.CSSProperties = { fontFamily: 'var(--mono)' }
+
 // ── DeadlineChip ──────────────────────────────────────────────
 type DeadlineType = 'urgent' | 'today' | 'week'
 function DeadlineChip({ type, label }: { type: DeadlineType; label: string }) {
@@ -17,7 +19,7 @@ function DeadlineChip({ type, label }: { type: DeadlineType; label: string }) {
     <span
       className={cls}
       style={{
-        fontFamily: 'var(--mono)',
+        ...mono,
         fontSize: 10,
         padding: '3px 8px',
         borderRadius: 5,
@@ -32,13 +34,15 @@ function DeadlineChip({ type, label }: { type: DeadlineType; label: string }) {
 // ── OrderRow ──────────────────────────────────────────────────
 type OrderRowProps = {
   order: LiveOrder
+  first: boolean
   onNavigate: (id: string) => void
   rejecting: boolean
   onRejectStart: () => void
   onRejectCancel: () => void
 }
 
-function OrderRow({ order, onNavigate, rejecting, onRejectStart, onRejectCancel }: OrderRowProps) {
+/* Riga piatta con divisore, come i progetti della dashboard utente. */
+function OrderRow({ order, first, onNavigate, rejecting, onRejectStart, onRejectCancel }: OrderRowProps) {
   const navigate = useNavigate()
   return (
     <div
@@ -47,23 +51,13 @@ function OrderRow({ order, onNavigate, rejecting, onRejectStart, onRejectCancel 
         display: 'flex',
         alignItems: 'center',
         gap: 14,
-        padding: 14,
-        borderRadius: 'var(--radius-sm)',
-        background: 'var(--glass)',
-        border: '1px solid var(--line)',
+        padding: '16px 6px',
+        borderTop: first ? 'none' : '1px solid var(--line)',
         cursor: 'pointer',
-        transition: '0.2s',
+        transition: 'background 0.15s',
       }}
-      onMouseEnter={e => {
-        const el = e.currentTarget as HTMLDivElement
-        el.style.borderColor = 'var(--line-2)'
-        el.style.background = 'var(--glass-2)'
-      }}
-      onMouseLeave={e => {
-        const el = e.currentTarget as HTMLDivElement
-        el.style.borderColor = 'var(--line)'
-        el.style.background = 'var(--glass)'
-      }}
+      onMouseEnter={e => { e.currentTarget.style.background = 'var(--glass-2)' }}
+      onMouseLeave={e => { e.currentTarget.style.background = 'transparent' }}
     >
       {/* Thumbnail */}
       <div className="thumb-mini" />
@@ -72,7 +66,7 @@ function OrderRow({ order, onNavigate, rejecting, onRejectStart, onRejectCancel 
       <div style={{ flex: 1, minWidth: 0 }}>
         <div
           style={{
-            fontFamily: 'var(--mono)',
+            ...mono,
             fontSize: 10,
             color: 'var(--cyan)',
             letterSpacing: '0.05em',
@@ -96,7 +90,7 @@ function OrderRow({ order, onNavigate, rejecting, onRejectStart, onRejectCancel 
         </div>
         <div
           style={{
-            fontFamily: 'var(--mono)',
+            ...mono,
             color: 'var(--muted)',
             fontSize: 11.5,
             marginTop: 2,
@@ -278,10 +272,12 @@ const kpiIcons = [
   <TrendingUp size={17} />,
 ]
 
-// ── Dashboard ─────────────────────────────────────────────────
+/* Dashboard allineata alla versione utente: hero centrata con la barra
+   Chiedi all'AI, sezioni fadeUp, header di card in mono e liste piatte. */
 export default function FablabDashboard() {
   const [activeTab, setActiveTab] = useState<TabKey>('new')
   const [rejectingId, setRejectingId] = useState<string>()
+  const [aiQuery, setAiQuery] = useState('')
   const navigate = useNavigate()
   const orders = useLiveOrders()
 
@@ -297,59 +293,110 @@ export default function FablabDashboard() {
   const utilization = Math.round((activePrinters / printersFull.length) * 100)
   const countByStatus = (s: string) => printersFull.filter(p => p.status === s).length
 
+  // La barra AI della dashboard apre il drawer TeseoAssistant con la domanda
+  const ask = (q: string) => {
+    const t = q.trim()
+    if (!t) return
+    window.dispatchEvent(new CustomEvent('teseo:ask', { detail: t }))
+    setAiQuery('')
+  }
+
   return (
-    <>
-      {/* ── Topbar ── */}
-      <div style={{ display: 'flex', alignItems: 'center', gap: 14, flex: '0 0 auto' }}>
-        <div>
-          <h1
+    <div style={{ flex: 1, minHeight: 0, overflow: 'auto', display: 'flex', flexDirection: 'column', gap: 24 }}>
+      {/* ── Hero centrata ── */}
+      <div className="anim-fadeUp" style={{ position: 'relative', padding: '26px 0 6px', flex: '0 0 auto' }}>
+        <div style={{ position: 'absolute', right: 0, top: 10, display: 'flex', alignItems: 'center', gap: 10 }}>
+          <button
+            onClick={() => toast('Report di produzione esportato (PDF)')}
             style={{
-              fontWeight: 600,
-              fontSize: 25,
-              letterSpacing: '-0.01em',
-              color: 'var(--ink)',
+              display: 'flex', alignItems: 'center', gap: 8,
+              background: 'transparent', color: 'var(--muted)', border: '1px solid var(--line)',
+              fontFamily: 'inherit', fontWeight: 600, fontSize: 13, padding: '0 16px',
+              height: 40, borderRadius: 100, cursor: 'pointer', transition: '0.2s',
             }}
           >
-            Buongiorno, Lambrate
+            <Download size={15} />
+            Esporta report
+          </button>
+          {newCount > 0 && (
+            <PrimaryButton onClick={() => navigate('/fablab/ordini')}>
+              Valuta nuovi ordini ({newCount})
+            </PrimaryButton>
+          )}
+        </div>
+
+        <div style={{ maxWidth: 620, margin: '0 auto', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 18 }}>
+          <h1 style={{ fontWeight: 700, fontSize: 30, letterSpacing: '-0.01em', color: 'var(--ink)', textAlign: 'center' }}>
+            Ciao, Tillverka
           </h1>
-          <p
+
+          {/* Chiedi all'AI */}
+          <form
+            onSubmit={e => { e.preventDefault(); ask(aiQuery) }}
             style={{
-              color: 'var(--muted)',
-              fontSize: 12,
-              marginTop: 3,
-              fontWeight: 500,
-              fontFamily: 'var(--mono)',
-              letterSpacing: '0.02em',
+              display: 'flex',
+              alignItems: 'center',
+              gap: 10,
+              width: 'min(560px, 100%)',
+              height: 52,
+              padding: '0 8px 0 18px',
+              background: 'var(--glass)',
+              border: '1px solid var(--line-2)',
+              borderRadius: 100,
+              boxShadow: '0 8px 30px rgba(9,15,5,.07)',
             }}
           >
+            <Sparkles size={17} color="var(--cyan)" style={{ flexShrink: 0 }} />
+            <input
+              value={aiQuery}
+              onChange={e => setAiQuery(e.target.value)}
+              placeholder='Chiedi all’AI: «quale ordine è più urgente?»'
+              style={{
+                flex: 1,
+                minWidth: 0,
+                border: 'none',
+                outline: 'none',
+                background: 'transparent',
+                fontFamily: 'inherit',
+                fontSize: 14.5,
+                color: 'var(--ink)',
+              }}
+            />
+            <button
+              type="submit"
+              aria-label="Chiedi all'AI"
+              disabled={!aiQuery.trim()}
+              style={{
+                width: 38,
+                height: 38,
+                borderRadius: '50%',
+                border: 'none',
+                background: 'var(--forest)',
+                color: 'var(--lemongrass)',
+                display: 'grid',
+                placeItems: 'center',
+                cursor: aiQuery.trim() ? 'pointer' : 'default',
+                opacity: aiQuery.trim() ? 1 : 0.45,
+                flexShrink: 0,
+                transition: 'opacity .15s',
+              }}
+            >
+              <ArrowRight size={17} />
+            </button>
+          </form>
+
+          <p style={{ ...mono, color: 'var(--muted)', fontSize: 12, fontWeight: 500, letterSpacing: '0.04em' }}>
             {[
               newCount > 0 ? `${newCount} NUOV${newCount === 1 ? 'O ORDINE' : 'I ORDINI'} DA VALUTARE` : null,
               errorCount > 0 ? `${errorCount} ERROR${errorCount === 1 ? 'E' : 'I'} DA RISOLVERE` : null,
             ].filter(Boolean).join(' · ') || 'NESSUNA AZIONE URGENTE'}
           </p>
         </div>
-        <div style={{ flex: 1 }} />
-        <button
-          onClick={() => toast('Report di produzione esportato (PDF)')}
-          style={{
-            display: 'flex', alignItems: 'center', gap: 8,
-            background: 'transparent', color: 'var(--muted)', border: '1px solid var(--line)',
-            fontFamily: 'inherit', fontWeight: 600, fontSize: 13, padding: '0 16px',
-            height: 40, borderRadius: 100, cursor: 'pointer', transition: '0.2s',
-          }}
-        >
-          <Download size={15} />
-          Esporta report
-        </button>
-        {newCount > 0 && (
-          <PrimaryButton onClick={() => navigate('/fablab/ordini')}>
-            Valuta nuovi ordini ({newCount})
-          </PrimaryButton>
-        )}
       </div>
 
       {/* ── KPI strip ── */}
       <div
+        className="anim-fadeUp"
         style={{
           display: 'grid',
           gridTemplateColumns: 'repeat(4,1fr)',
@@ -372,7 +419,7 @@ export default function FablabDashboard() {
                   position: 'absolute',
                   bottom: 28,
                   left: 17,
-                  fontFamily: 'var(--mono)',
+                  ...mono,
                   fontSize: 11,
                   color: 'var(--muted)',
                   pointerEvents: 'none',
@@ -387,25 +434,18 @@ export default function FablabDashboard() {
 
       {/* ── Main grid ── */}
       <div
+        className="anim-fadeUp"
         style={{
-          flex: 1,
           display: 'grid',
           gridTemplateColumns: '1.55fr 1fr',
           gap: 16,
-          minHeight: 0,
+          flex: '0 0 auto',
+          alignItems: 'start',
+          paddingBottom: 8,
         }}
       >
         {/* Left: Orders hero card */}
-        <GlassCard
-          hero
-          style={{
-            padding: 22,
-            display: 'flex',
-            flexDirection: 'column',
-            minHeight: 0,
-            overflow: 'hidden',
-          }}
-        >
+        <GlassCard hero style={{ padding: 22, display: 'flex', flexDirection: 'column' }}>
           {/* Card header */}
           <div
             style={{
@@ -413,37 +453,27 @@ export default function FablabDashboard() {
               alignItems: 'center',
               justifyContent: 'space-between',
               marginBottom: 14,
-              flex: '0 0 auto',
               position: 'relative',
             }}
           >
             <h3
               style={{
+                ...mono,
                 fontWeight: 600,
-                fontSize: 15,
-                letterSpacing: '0.04em',
+                fontSize: 13,
+                letterSpacing: '0.08em',
                 textTransform: 'uppercase',
-                color: 'var(--ink)',
+                color: 'var(--muted)',
               }}
             >
               Ordini
             </h3>
-            <button
+            <span
               onClick={() => navigate('/fablab/coda')}
-              style={{
-                background: 'none',
-                border: 'none',
-                padding: 0,
-                color: 'var(--cyan)',
-                fontSize: 11,
-                fontWeight: 600,
-                cursor: 'pointer',
-                fontFamily: 'var(--mono)',
-                letterSpacing: '0.04em',
-              }}
+              style={{ ...mono, color: 'var(--cyan)', fontSize: 12, fontWeight: 600, cursor: 'pointer', letterSpacing: '0.04em' }}
             >
               VISTA CODA ›
-            </button>
+            </span>
           </div>
 
           {/* Tabs */}
@@ -451,8 +481,7 @@ export default function FablabDashboard() {
             style={{
               display: 'flex',
               gap: 6,
-              marginBottom: 14,
-              flex: '0 0 auto',
+              marginBottom: 6,
             }}
           >
             {tabs.map(tab => {
@@ -484,7 +513,7 @@ export default function FablabDashboard() {
                       style={{
                         background: isActive ? 'var(--cyan)' : 'var(--glass-2)',
                         color: isActive ? '#f4faed' : 'var(--muted)',
-                        fontFamily: 'var(--mono)',
+                        ...mono,
                         fontSize: 10,
                         fontWeight: 700,
                         padding: '1px 6px',
@@ -500,24 +529,17 @@ export default function FablabDashboard() {
           </div>
 
           {/* Orders list */}
-          <div
-            style={{
-              display: 'flex',
-              flexDirection: 'column',
-              gap: 9,
-              overflow: 'auto',
-              flex: 1,
-            }}
-          >
+          <div style={{ display: 'flex', flexDirection: 'column', position: 'relative' }}>
             {filteredOrders.length === 0 && (
               <div style={{ padding: 28, textAlign: 'center', color: 'var(--muted)', fontSize: 13 }}>
                 {activeTab === 'new' ? 'Nessun nuovo ordine da valutare, tutto smaltito.' : 'Nessun ordine in questo stato.'}
               </div>
             )}
-            {filteredOrders.map(order => (
+            {filteredOrders.map((order, i) => (
               <OrderRow
                 key={order.id}
                 order={order}
+                first={i === 0}
                 onNavigate={id => navigate('/fablab/ordini/' + id)}
                 rejecting={rejectingId === order.id}
                 onRejectStart={() => setRejectingId(order.id)}
@@ -528,15 +550,7 @@ export default function FablabDashboard() {
         </GlassCard>
 
         {/* Right: Printers card */}
-        <GlassCard
-          style={{
-            padding: 22,
-            display: 'flex',
-            flexDirection: 'column',
-            minHeight: 0,
-            overflow: 'hidden',
-          }}
-        >
+        <GlassCard style={{ padding: 22, display: 'flex', flexDirection: 'column' }}>
           {/* Card header */}
           <div
             style={{
@@ -544,36 +558,26 @@ export default function FablabDashboard() {
               alignItems: 'center',
               justifyContent: 'space-between',
               marginBottom: 16,
-              flex: '0 0 auto',
             }}
           >
             <h3
               style={{
+                ...mono,
                 fontWeight: 600,
-                fontSize: 15,
-                letterSpacing: '0.04em',
+                fontSize: 13,
+                letterSpacing: '0.08em',
                 textTransform: 'uppercase',
-                color: 'var(--ink)',
+                color: 'var(--muted)',
               }}
             >
               Stampanti
             </h3>
-            <button
+            <span
               onClick={() => navigate('/fablab/coda')}
-              style={{
-                background: 'none',
-                border: 'none',
-                padding: 0,
-                color: 'var(--cyan)',
-                fontSize: 11,
-                fontWeight: 600,
-                cursor: 'pointer',
-                fontFamily: 'var(--mono)',
-                letterSpacing: '0.04em',
-              }}
+              style={{ ...mono, color: 'var(--cyan)', fontSize: 12, fontWeight: 600, cursor: 'pointer', letterSpacing: '0.04em' }}
             >
               GESTISCI ›
-            </button>
+            </span>
           </div>
 
           {/* Utilization bar */}
@@ -586,8 +590,7 @@ export default function FablabDashboard() {
               background: 'var(--glass-2)',
               border: '1px solid var(--line)',
               borderRadius: 13,
-              marginBottom: 16,
-              flex: '0 0 auto',
+              marginBottom: 8,
             }}
           >
             {/* Conic ring */}
@@ -600,7 +603,7 @@ export default function FablabDashboard() {
                   background: 'var(--bg-2)',
                   display: 'grid',
                   placeItems: 'center',
-                  fontFamily: 'var(--mono)',
+                  ...mono,
                   fontWeight: 700,
                   fontSize: 13,
                   color: 'var(--ink)',
@@ -621,7 +624,7 @@ export default function FablabDashboard() {
               </div>
               <div
                 style={{
-                  fontFamily: 'var(--mono)',
+                  ...mono,
                   fontSize: 10.5,
                   color: 'var(--muted)',
                   marginTop: 3,
@@ -633,26 +636,16 @@ export default function FablabDashboard() {
           </div>
 
           {/* Printer list */}
-          <div
-            style={{
-              display: 'flex',
-              flexDirection: 'column',
-              gap: 9,
-              overflow: 'auto',
-              flex: 1,
-            }}
-          >
-            {printersFull.map(printer => (
+          <div style={{ display: 'flex', flexDirection: 'column', position: 'relative' }}>
+            {printersFull.map((printer, i) => (
               <div
                 key={printer.id}
                 style={{
                   display: 'flex',
                   alignItems: 'center',
                   gap: 12,
-                  padding: '12px 14px',
-                  borderRadius: 11,
-                  background: 'var(--glass)',
-                  border: '1px solid var(--line)',
+                  padding: '13px 6px',
+                  borderTop: i === 0 ? 'none' : '1px solid var(--line)',
                 }}
               >
                 {/* Status dot */}
@@ -680,7 +673,7 @@ export default function FablabDashboard() {
                   </div>
                   <div
                     style={{
-                      fontFamily: 'var(--mono)',
+                      ...mono,
                       fontSize: 10.5,
                       color: 'var(--muted)',
                       marginTop: 2,
@@ -699,7 +692,7 @@ export default function FablabDashboard() {
                 {/* Progress / state indicator */}
                 <span
                   style={{
-                    fontFamily: 'var(--mono)',
+                    ...mono,
                     fontSize: 12,
                     fontWeight: 700,
                     color: printer.status === 'active' ? 'var(--cyan)' : 'var(--muted)',
@@ -718,6 +711,6 @@ export default function FablabDashboard() {
           </div>
         </GlassCard>
       </div>
-    </>
+    </div>
   )
 }
