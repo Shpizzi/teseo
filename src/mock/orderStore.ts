@@ -1,7 +1,7 @@
 import { useSyncExternalStore } from 'react'
 import { fablabOrders, type Order, type OrderStatus } from './index'
 
-// ponytail: store in-memory a livello di modulo — niente context/redux, si azzera al reload.
+// ponytail: store in-memory a livello di modulo, niente context/redux, si azzera al reload.
 // Serve solo a far sì che accetta/rifiuta abbiano effetto coerente su tutte le pagine fablab.
 
 export type LiveStatus = OrderStatus | 'accepted'

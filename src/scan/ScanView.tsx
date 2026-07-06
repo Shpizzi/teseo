@@ -1,5 +1,7 @@
 import { useEffect, useRef, useState } from 'react'
-import { Camera, Upload, Check, Sparkles, Radar, RotateCcw, X, Users } from 'lucide-react'
+import { useNavigate } from 'react-router-dom'
+import { Camera, Upload, Check, Sparkles, Radar, RotateCcw, X, Users, MessageSquare } from 'lucide-react'
+import { openSupportChat, SUPPORT_ID } from '../mock/messagesStore'
 import GlassCard from '../components/GlassCard'
 import PrimaryButton from '../components/PrimaryButton'
 import PrintViewer3D from '../components/PrintViewer3D'
@@ -8,7 +10,7 @@ import { recognize, getRecognizer } from './useRecognizer'
 import { LIBRARY, ALL_LABELS, type LibraryEntry } from './library'
 import { producers } from '../mock/user-pages'
 
-// ponytail: score threshold is a calibration knob — softmax over a tiny label
+// ponytail: score threshold is a calibration knob, softmax over a tiny label
 // set is noisy, so tune against real objects. Distractor labels in the library
 // keep out-of-set objects below this.
 const THRESHOLD = 0.2
@@ -26,18 +28,21 @@ const AI_ENTRY: LibraryEntry = {
   note: 'Mesh generata dall\'AI da 3 scansioni: geometria approssimata, da verificare prima della stampa.',
 }
 
-// ponytail: la ScanView vive su fondo forest — i token ink/muted/line sono
-// pensati per fondo chiaro, qui servono le controparti chiare.
-const outlineBtn: React.CSSProperties = {
-  display: 'flex', alignItems: 'center', gap: 8, background: 'transparent',
-  color: 'var(--lemongrass)', border: '1px solid rgba(255,255,255,.28)', fontFamily: 'inherit',
-  fontWeight: 600, fontSize: 13.5, padding: '0 20px', height: 44,
-  borderRadius: 100, cursor: 'pointer', transition: '0.2s', flex: '0 0 auto',
-}
+// Sotto questa confidenza consigliamo un passaggio umano prima della stampa.
+const CONF_THRESHOLD = 0.6
+// "Come la stimiamo": confronto mesh↔originale su incastri/tenuta (Wizard of Oz,
+// coerente col resto della demo, spiegazione funzionale, non un numero magico).
+const CONF_WHY_HIGH = 'Confrontiamo la mesh con l\'originale sui punti di incastro: la parte combacia e si chiude. Il piccolo difetto residuo sul bordo non compromette la funzione, l\'operatore lo rifinisce prima di stampare.'
+const CONF_WHY_LOW = 'Su alcuni incastri la ricostruzione è incerta e la parte potrebbe non chiudersi bene. Meglio farla correggere da una persona prima di stampare.'
+
+// Evidenzia l'azione consigliata tra le due card della review AI.
+const recCard: React.CSSProperties = { position: 'relative', border: '1.5px solid var(--cyan)', background: 'var(--glass-2)', boxShadow: '0 0 0 3px rgba(63,115,8,.10)' }
+const recTag: React.CSSProperties = { position: 'absolute', top: 10, right: 10, fontFamily: 'var(--mono)', fontSize: 9, letterSpacing: '0.08em', color: 'var(--cyan)', border: '1px solid var(--cyan)', borderRadius: 5, padding: '2px 6px', background: 'var(--glass)' }
 
 type ScanRequest = { fileName: string; producerId: string; material: string }
 
 export default function ScanView({ onClose, onRequest }: { onClose?: () => void; onRequest?: (req: ScanRequest) => void }) {
+  const navigate = useNavigate()
   const [phase, setPhase] = useState<Phase>('capture')
   const [progress, setProgress] = useState(0)
   const [cameraOn, setCameraOn] = useState(false)
@@ -76,7 +81,7 @@ export default function ScanView({ onClose, onRequest }: { onClose?: () => void;
   }, [])
 
   // Attach the stream only once the <video> element actually exists in the DOM.
-  // (videoRef is null inside the getUserMedia callback — the video mounts later.)
+  // (videoRef is null inside the getUserMedia callback, the video mounts later.)
   useEffect(() => {
     const v = videoRef.current
     if (cameraOn && v && streamRef.current) {
@@ -138,7 +143,7 @@ export default function ScanView({ onClose, onRequest }: { onClose?: () => void;
     setAiScans(0); setAiRunning(false); setExpertRequested(false)
   }
 
-  // ponytail: mock timed sequence — 3 "scansioni" poi ricostruzione mesh.
+  // ponytail: mock timed sequence, 3 "scansioni" poi ricostruzione mesh.
   // La generazione vera (image-to-3D) è server-side e fuori scope demo.
   function runAiGeneration() {
     setAiRunning(true); setAiScans(0)
@@ -170,10 +175,13 @@ export default function ScanView({ onClose, onRequest }: { onClose?: () => void;
     background: 'var(--bg-2)',
   }
 
+  const conf = match ? Math.round(match.score * 100) : 0
+  const lowConf = !!match && match.score < CONF_THRESHOLD
+
   return (
     <div
       style={{
-        // full-screen overlay — lifts the scan out of the 212px sidebar layout so
+        // full-screen overlay, lifts the scan out of the 212px sidebar layout so
         // it fills the whole viewport (essential on mobile), above the sidebar (z:2).
         position: 'fixed',
         inset: 0,
@@ -199,27 +207,15 @@ export default function ScanView({ onClose, onRequest }: { onClose?: () => void;
         {!modelReady && !clipError && (
           <span style={{ fontFamily: 'var(--mono)', fontSize: 11, color: 'rgba(255,255,255,.55)' }}>· inizializzazione CV…</span>
         )}
-        {clipError && (
-          <span style={{ fontFamily: 'var(--mono)', fontSize: 11, color: 'rgba(255,255,255,.55)' }}>· CV offline · modalità demo</span>
-        )}
         <div style={{ flex: 1 }} />
-        {/* demo toggle */}
-        <button
-          onClick={() => setDemo(d => !d)}
-          style={{ ...outlineBtn, height: 34, fontSize: 12,
-            borderColor: demo ? 'var(--lemongrass)' : 'rgba(255,255,255,.2)', color: demo ? 'var(--lemongrass)' : 'rgba(255,255,255,.6)' }}
-        >
-          <span style={{ width: 7, height: 7, borderRadius: '50%', background: demo ? 'var(--lemongrass)' : 'transparent', boxShadow: demo ? 'none' : 'inset 0 0 0 1.5px rgba(255,255,255,.4)' }} />
-          Demo
-        </button>
         {onClose && (
-          <button onClick={onClose} style={{ ...outlineBtn, height: 34, width: 34, padding: 0, justifyContent: 'center' }}>
+          <button onClick={onClose} className="btn-outline-dark" style={{ height: 34, width: 34, padding: 0, justifyContent: 'center' }}>
             <X size={16} />
           </button>
         )}
       </div>
 
-      {/* CAPTURE / SCANNING — camera or upload frame */}
+      {/* CAPTURE / SCANNING, camera or upload frame */}
       {(phase === 'capture' || phase === 'scanning') && (
         <div style={{ flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: 20, minHeight: 0 }}>
           <div style={framePanel}>
@@ -251,7 +247,7 @@ export default function ScanView({ onClose, onRequest }: { onClose?: () => void;
 
           {phase === 'capture' && (
             <div style={{ display: 'flex', gap: 10, alignItems: 'center' }}>
-              <button style={outlineBtn} onClick={() => fileRef.current?.click()}>
+              <button className="btn-outline-dark" onClick={() => fileRef.current?.click()}>
                 <Camera size={16} /> Carica foto
               </button>
               <PrimaryButton onClick={runScan}>
@@ -262,22 +258,22 @@ export default function ScanView({ onClose, onRequest }: { onClose?: () => void;
         </div>
       )}
 
-      {/* CONFIRM (obj → part) → RESULT — shared viewer, phase-specific right panel */}
+      {/* CONFIRM (obj → part) → RESULT, shared viewer, phase-specific right panel */}
       {(phase === 'confirm-object' || phase === 'confirm-part' || phase === 'result' || phase === 'ai-review') && match && (
         <div style={{ flex: 1, display: 'flex', flexWrap: 'wrap', alignItems: 'center', gap: 16, minHeight: 0 }}>
-          {/* viewer — stays mounted across the confirmation steps.
+          {/* viewer, stays mounted across the confirmation steps.
               Superficie scura: le wireframe lemongrass/white del viewer sono pensate per fondo forest. */}
           <div style={{ flex: '1 1 340px', position: 'relative', borderRadius: 18, overflow: 'hidden', border: '1px solid rgba(255,255,255,.14)', background: 'linear-gradient(160deg, #18280e, #122006)', height: 'min(68vh, 600px)', minHeight: 300 }}>
             <PrintViewer3D modelUrl={match.entry.glb} />
           </div>
 
           <div style={{ flex: '1 1 300px', display: 'flex', flexDirection: 'column', gap: 14, minWidth: 0 }}>
-            {/* STEP 1 — confirm the recognized object */}
+            {/* STEP 1, confirm the recognized object */}
             {phase === 'confirm-object' && (
               <>
                 <GlassCard hero style={{ padding: 22, display: 'flex', flexDirection: 'column', gap: 12 }}>
                   <span style={{ fontFamily: 'var(--mono)', fontSize: 11, letterSpacing: '0.06em', color: 'var(--muted)' }}>
-                    OGGETTO RILEVATO · {Math.round(match.score * 100)}%
+                    OGGETTO RILEVATO · <span style={{ color: 'var(--cyan)', fontWeight: 700 }}>{Math.round(match.score * 100)}% match</span>
                   </span>
                   <h2 style={{ fontSize: 21, fontWeight: 600, color: 'var(--ink)', lineHeight: 1.2 }}>{match.entry.name}</h2>
                   <p style={{ fontSize: 13, color: 'var(--muted)', lineHeight: 1.55 }}>
@@ -287,15 +283,15 @@ export default function ScanView({ onClose, onRequest }: { onClose?: () => void;
                 </GlassCard>
                 <div style={{ display: 'flex', gap: 10, flexWrap: 'wrap' }}>
                   <PrimaryButton onClick={() => setPhase('confirm-part')}><Check size={16} /> Sì, è questo</PrimaryButton>
-                  <button style={outlineBtn} onClick={() => setPhase('ai-generate')}>No, è un altro</button>
+                  <button className="btn-outline-dark" onClick={() => setPhase('ai-generate')}>No, è un altro</button>
                 </div>
-                <button style={{ ...outlineBtn, color: 'rgba(255,255,255,.6)', borderColor: 'rgba(255,255,255,.2)' }} onClick={reset}>
+                <button className="btn-outline-dark btn-outline-dark--muted" onClick={reset}>
                   <RotateCcw size={15} /> Nuova scansione
                 </button>
               </>
             )}
 
-            {/* STEP 2 — confirm the available part */}
+            {/* STEP 2, confirm the available part */}
             {phase === 'confirm-part' && (
               <>
                 <GlassCard hero style={{ padding: 22, display: 'flex', flexDirection: 'column', gap: 12 }}>
@@ -313,15 +309,15 @@ export default function ScanView({ onClose, onRequest }: { onClose?: () => void;
                 </GlassCard>
                 <div style={{ display: 'flex', gap: 10, flexWrap: 'wrap' }}>
                   <PrimaryButton onClick={() => setPhase('result')}><Check size={16} /> Sì, è questo</PrimaryButton>
-                  <button style={outlineBtn} onClick={() => setPhase('ai-generate')}><Sparkles size={16} /> No, altro pezzo</button>
+                  <button className="btn-outline-dark" onClick={() => setPhase('ai-generate')}><Sparkles size={16} /> No, altro pezzo</button>
                 </div>
-                <button style={{ ...outlineBtn, color: 'rgba(255,255,255,.6)', borderColor: 'rgba(255,255,255,.2)' }} onClick={() => setPhase('confirm-object')}>
+                <button className="btn-outline-dark btn-outline-dark--muted" onClick={() => setPhase('confirm-object')}>
                   ← Indietro
                 </button>
               </>
             )}
 
-            {/* STEP 3 — result */}
+            {/* STEP 3, result */}
             {phase === 'result' && (
               <>
                 <GlassCard hero style={{ padding: 22, display: 'flex', flexDirection: 'column', gap: 14 }}>
@@ -347,49 +343,68 @@ export default function ScanView({ onClose, onRequest }: { onClose?: () => void;
                 </GlassCard>
                 <div style={{ display: 'flex', gap: 10, flexWrap: 'wrap' }}>
                   <PrimaryButton onClick={() => setPhase('match')}><Radar size={16} /> Cerca nella rete</PrimaryButton>
-                  <button style={outlineBtn} onClick={() => setPhase('ai-generate')}><Sparkles size={16} /> Genera con AI</button>
                 </div>
-                <button style={{ ...outlineBtn, color: 'rgba(255,255,255,.6)', borderColor: 'rgba(255,255,255,.2)' }} onClick={reset}>
+                <button className="btn-outline-dark btn-outline-dark--muted" onClick={reset}>
                   <RotateCcw size={15} /> Nuova scansione
                 </button>
               </>
             )}
 
-            {/* AI-REVIEW — mesh generata, serve un passaggio umano prima della stampa */}
+            {/* AI-REVIEW, mesh generata: confidenza in evidenza + azione consigliata in base alla soglia */}
             {phase === 'ai-review' && (
               <>
-                {/* avviso: banner scuro tratteggiato, NON una card come le azioni sotto */}
-                <div style={{ padding: 20, borderRadius: 'var(--radius)', border: '1.5px dashed rgba(178,235,118,.5)', background: 'rgba(178,235,118,.07)', display: 'flex', flexDirection: 'column', gap: 10 }}>
-                  <span style={{ fontFamily: 'var(--mono)', fontSize: 11, letterSpacing: '0.06em', color: 'var(--lemongrass)' }}>
-                    ⚠ MESH AI GENERATA · CONFIDENZA {Math.round(match.score * 100)}%
-                  </span>
-                  <h2 style={{ fontSize: 20, fontWeight: 600, color: '#fff', lineHeight: 1.2 }}>{match.entry.part}</h2>
-                  <p style={{ fontSize: 13, color: 'rgba(255,255,255,.75)', lineHeight: 1.55 }}>
-                    La geometria è ricostruita dalle scansioni e può contenere <span style={{ color: 'var(--lemongrass)' }}>imprecisioni non adatte alla stampa</span>.
-                    Prima di stampare la mesh va sistemata da una persona — scegli come:
+                {/* banner: numero di confidenza grande + spiegazione di come la stimiamo */}
+                <div style={{ padding: 20, borderRadius: 'var(--radius)', border: `1.5px dashed ${lowConf ? 'rgba(228,0,20,.5)' : 'rgba(178,235,118,.5)'}`, background: lowConf ? 'rgba(228,0,20,.06)' : 'rgba(178,235,118,.07)', display: 'flex', flexDirection: 'column', gap: 14 }}>
+                  <div style={{ display: 'flex', alignItems: 'baseline', gap: 12, flexWrap: 'wrap' }}>
+                    <span style={{ fontFamily: 'var(--mono)', fontSize: 46, fontWeight: 700, lineHeight: 0.9, color: lowConf ? '#ff6b74' : 'var(--lemongrass)' }}>{conf}%</span>
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: 3 }}>
+                      <span style={{ fontFamily: 'var(--mono)', fontSize: 10, letterSpacing: '0.08em', color: 'rgba(255,255,255,.55)' }}>CONFIDENZA AI</span>
+                      <span style={{ fontSize: 16, fontWeight: 600, color: '#fff' }}>{lowConf ? 'Bassa, meglio una persona' : 'Buona, con verifica finale'}</span>
+                    </div>
+                  </div>
+                  <h2 style={{ fontSize: 18, fontWeight: 600, color: '#fff', lineHeight: 1.2 }}>{match.entry.part}</h2>
+                  <p style={{ fontSize: 12.5, color: 'rgba(255,255,255,.72)', lineHeight: 1.55, borderTop: '1px solid rgba(255,255,255,.12)', paddingTop: 12 }}>
+                    <span style={{ fontFamily: 'var(--mono)', fontSize: 10, letterSpacing: '0.06em', color: 'var(--lemongrass)' }}>COME LA STIMIAMO · </span>
+                    {lowConf ? CONF_WHY_LOW : CONF_WHY_HIGH}
                   </p>
+                  {lowConf && (
+                    <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                      <Users size={15} style={{ color: '#ff6b74', flex: '0 0 auto' }} />
+                      <span style={{ fontSize: 12.5, color: '#fff', fontWeight: 600 }}>Sotto il 60% ti consigliamo di chiedere aiuto a una persona.</span>
+                    </div>
+                  )}
                   {expertRequested && (
-                    <div style={{ display: 'flex', alignItems: 'center', gap: 8, paddingTop: 10, borderTop: '1px dashed rgba(178,235,118,.35)' }}>
-                      <Check size={15} style={{ color: 'var(--lemongrass)', flex: '0 0 auto' }} />
-                      <span style={{ fontSize: 12.5, color: 'rgba(255,255,255,.85)', lineHeight: 1.45 }}>
-                        Richiesta inviata · un esperto della community ti contatterà per sistemare la mesh. Puoi comunque inviarla già al FabLab.
-                      </span>
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: 10, paddingTop: 10, borderTop: '1px dashed rgba(178,235,118,.35)' }}>
+                      <div style={{ display: 'flex', alignItems: 'flex-start', gap: 8 }}>
+                        <Check size={15} style={{ color: 'var(--lemongrass)', flex: '0 0 auto', marginTop: 2 }} />
+                        <span style={{ fontSize: 12.5, color: 'rgba(255,255,255,.85)', lineHeight: 1.45 }}>
+                          Richiesta inviata. Un esperto del supporto controllerà e sistemerà il tuo pezzo, poi ti scrive in chat. Puoi comunque inviarlo già al FabLab.
+                        </span>
+                      </div>
+                      <button className="btn-outline-dark" style={{ alignSelf: 'flex-start', color: 'var(--lemongrass)' }}
+                        onClick={() => navigate('/app/messages', { state: { conversationId: SUPPORT_ID } })}>
+                        <MessageSquare size={15} /> Apri la chat di supporto
+                      </button>
                     </div>
                   )}
                 </div>
-                {/* due strade distinte: aiuto umano vs invio diretto con verifica operatore */}
+                {/* due azioni differenziate: la consigliata (in base alla confidenza) è primaria e marcata */}
                 <div style={{ display: 'flex', gap: 12, flexWrap: 'wrap' }}>
-                  <button className="opt-card" onClick={() => setExpertRequested(true)} disabled={expertRequested}>
+                  <button className="opt-card" onClick={() => { openSupportChat(match.entry.part); setExpertRequested(true) }} disabled={expertRequested}
+                    style={{ order: lowConf ? 0 : 1, ...(lowConf ? recCard : {}) }}>
+                    {lowConf && <span style={recTag}>CONSIGLIATO</span>}
                     <Users size={18} style={{ color: 'var(--cyan)' }} />
                     <span style={{ fontSize: 14.5, fontWeight: 600, color: 'var(--ink)' }}>Chiedi aiuto a una persona</span>
                     <span style={{ fontSize: 12.5, color: 'var(--muted)', lineHeight: 1.5 }}>
-                      Un esperto della community — anche di persona — corregge la mesh insieme a te prima dell'invio.
+                      Un esperto della community, anche di persona, corregge la mesh insieme a te prima dell'invio.
                     </span>
                     <span style={{ fontFamily: 'var(--mono)', fontSize: 11, letterSpacing: '0.08em', color: 'var(--cyan)', marginTop: 4 }}>
                       {expertRequested ? 'RICHIESTA INVIATA ✓' : 'RICHIEDI →'}
                     </span>
                   </button>
-                  <button className="opt-card" onClick={() => setPhase('match')}>
+                  <button className="opt-card" onClick={() => setPhase('match')}
+                    style={{ order: lowConf ? 1 : 0, ...(!lowConf ? recCard : {}) }}>
+                    {!lowConf && <span style={recTag}>CONSIGLIATO</span>}
                     <Radar size={18} style={{ color: 'var(--cyan)' }} />
                     <span style={{ fontSize: 14.5, fontWeight: 600, color: 'var(--ink)' }}>Invia subito al FabLab</span>
                     <span style={{ fontSize: 12.5, color: 'var(--muted)', lineHeight: 1.5 }}>
@@ -400,7 +415,7 @@ export default function ScanView({ onClose, onRequest }: { onClose?: () => void;
                     </span>
                   </button>
                 </div>
-                <button style={{ ...outlineBtn, color: 'rgba(255,255,255,.6)', borderColor: 'rgba(255,255,255,.2)' }} onClick={reset}>
+                <button className="btn-outline-dark btn-outline-dark--muted" onClick={reset}>
                   <RotateCcw size={15} /> Nuova scansione
                 </button>
               </>
@@ -409,7 +424,7 @@ export default function ScanView({ onClose, onRequest }: { onClose?: () => void;
         </div>
       )}
 
-      {/* AI-GENERATE — part not in archive → AI reconstruction + extra scans (mock) */}
+      {/* AI-GENERATE, part not in archive → AI reconstruction + extra scans (mock) */}
       {phase === 'ai-generate' && (
         <div style={{ flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: 18 }}>
           <div style={{ maxWidth: 520, textAlign: 'center', padding: 28, borderRadius: 18, border: '1.5px dashed var(--line-2)', background: 'var(--glass)', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 12 }}>
@@ -430,22 +445,22 @@ export default function ScanView({ onClose, onRequest }: { onClose?: () => void;
               <span>{aiScans === 3 ? 'ricostruzione mesh…' : `scansione ${aiScans} / 3`}</span>
             </div>
             <p style={{ fontSize: 12, color: 'var(--muted)', fontStyle: 'italic', lineHeight: 1.5 }}>
-              La mesh generata è una prima ricostruzione: prima della stampa viene sempre <span style={{ color: 'var(--cyan)' }}>verificata da una persona</span> — un esperto della community o l'operatore del FabLab.
+              La mesh generata è una prima ricostruzione: prima della stampa viene sempre <span style={{ color: 'var(--cyan)' }}>verificata da una persona</span>, un esperto della community o l'operatore del FabLab.
             </p>
             {!aiRunning && (
               // dentro la card bianca: torna ai token da fondo chiaro
-              <button style={{ ...outlineBtn, color: 'var(--cyan)', borderColor: 'var(--line-2)' }} onClick={runAiGeneration}>
+              <button className="btn-outline-dark" style={{ color: 'var(--cyan)', borderColor: 'var(--line-2)' }} onClick={runAiGeneration}>
                 <Camera size={16} /> Avvia scansione componente
               </button>
             )}
           </div>
-          <button style={{ ...outlineBtn, color: 'rgba(255,255,255,.6)', borderColor: 'rgba(255,255,255,.2)' }} onClick={reset}>
+          <button className="btn-outline-dark btn-outline-dark--muted" onClick={reset}>
             <RotateCcw size={15} /> Nuova scansione
           </button>
         </div>
       )}
 
-      {/* MATCH — compatible nodes / FabLabs */}
+      {/* MATCH, compatible nodes / FabLabs */}
       {phase === 'match' && match && (
         <div style={{ flex: 1, display: 'flex', flexDirection: 'column', gap: 12, minHeight: 0 }}>
           <span style={{ fontFamily: 'var(--mono)', fontSize: 11, letterSpacing: '0.06em', color: 'rgba(255,255,255,.6)' }}>
@@ -492,7 +507,7 @@ export default function ScanView({ onClose, onRequest }: { onClose?: () => void;
           <p style={{ fontSize: 12, color: 'rgba(255,255,255,.55)', fontStyle: 'italic', flex: '0 0 auto' }}>
             Nessun FabLab copre il pezzo? Prova la <span style={{ color: 'var(--lemongrass)' }}>generazione AI</span> o chiedi a un esperto della community.
           </p>
-          <button style={{ ...outlineBtn, alignSelf: 'flex-start', color: 'rgba(255,255,255,.6)', borderColor: 'rgba(255,255,255,.2)' }} onClick={reset}>
+          <button className="btn-outline-dark btn-outline-dark--muted" style={{ alignSelf: 'flex-start' }} onClick={reset}>
             <RotateCcw size={15} /> Nuova scansione
           </button>
         </div>

@@ -9,7 +9,7 @@ export type MapPin = {
   lng: number
   lat: number
   you?: boolean
-  compact?: boolean // solo puntina, nome nel tooltip — per reti fitte di pin
+  compact?: boolean // solo puntina, nome nel tooltip, per reti fitte di pin
 }
 
 type FablabMapProps = {
@@ -21,7 +21,7 @@ type FablabMapProps = {
 }
 
 /* Mappa reale open-source: MapLibre GL + tile vettoriali OpenFreeMap (nessuna
-   API key). mapcdn.dev citato nel brief non esiste — OpenFreeMap è l'equivalente. */
+   API key). mapcdn.dev citato nel brief non esiste, OpenFreeMap è l'equivalente. */
 export default function FablabMap({ pins, center = [9.19, 45.468], zoom = 11.4, onPinClick, style }: FablabMapProps) {
   const ref = useRef<HTMLDivElement>(null)
   const pinsRef = useRef(pins)
@@ -53,7 +53,7 @@ export default function FablabMap({ pins, center = [9.19, 45.468], zoom = 11.4, 
     })
 
     return () => { map.remove() }
-    // ponytail: pins statici da mock — niente sync marker su re-render
+    // ponytail: pins statici da mock, niente sync marker su re-render
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
 

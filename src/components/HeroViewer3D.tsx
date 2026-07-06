@@ -38,15 +38,15 @@ function HeroMesh() {
 
   return (
     <group ref={groupRef}>
-      {/* Outer wireframe — faint cyan */}
+      {/* Outer wireframe, faint cyan */}
       <mesh geometry={geo}>
         <meshBasicMaterial color={0x3f7308} wireframe transparent opacity={0.18} />
       </mesh>
-      {/* Inner solid — cyan fill very subtle */}
+      {/* Inner solid, cyan fill very subtle */}
       <mesh geometry={geo}>
         <meshBasicMaterial color={0x3f7308} transparent opacity={0.06} side={THREE.DoubleSide} />
       </mesh>
-      {/* Inner wireframe — white, denser */}
+      {/* Inner wireframe, white, denser */}
       <mesh geometry={geo} scale={0.97}>
         <meshBasicMaterial color={0x18280e} wireframe transparent opacity={0.30} />
       </mesh>

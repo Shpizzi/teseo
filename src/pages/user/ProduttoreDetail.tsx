@@ -22,11 +22,6 @@ function Lightbox({ state, onChange, onClose }: { state: LightboxState; onChange
     return () => window.removeEventListener('keydown', onKey)
   })
 
-  const navBtn: React.CSSProperties = {
-    background: 'rgba(255,255,255,.1)', border: '1px solid rgba(255,255,255,.25)', borderRadius: '50%',
-    width: 42, height: 42, display: 'grid', placeItems: 'center', cursor: 'pointer', color: '#fff', flex: '0 0 auto',
-  }
-
   return (
     <div
       onClick={onClose}
@@ -35,11 +30,11 @@ function Lightbox({ state, onChange, onClose }: { state: LightboxState; onChange
         display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 18, padding: 32,
       }}
     >
-      <button aria-label="Chiudi" onClick={onClose} style={{ ...navBtn, position: 'absolute', top: 20, right: 20 }}>
+      <button aria-label="Chiudi" onClick={onClose} className="btn-nav-dark" style={{ position: 'absolute', top: 20, right: 20 }}>
         <X size={18} />
       </button>
       {photos.length > 1 && (
-        <button aria-label="Precedente" onClick={e => { e.stopPropagation(); prev() }} style={navBtn}>
+        <button aria-label="Precedente" onClick={e => { e.stopPropagation(); prev() }} className="btn-nav-dark">
           <ChevronLeft size={20} />
         </button>
       )}
@@ -54,7 +49,7 @@ function Lightbox({ state, onChange, onClose }: { state: LightboxState; onChange
         </figcaption>
       </figure>
       {photos.length > 1 && (
-        <button aria-label="Successiva" onClick={e => { e.stopPropagation(); next() }} style={navBtn}>
+        <button aria-label="Successiva" onClick={e => { e.stopPropagation(); next() }} className="btn-nav-dark">
           <ChevronRight size={20} />
         </button>
       )}

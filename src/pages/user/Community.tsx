@@ -71,7 +71,7 @@ export default function Community() {
       >
         {filtered.length === 0 && (
           <div style={{ gridColumn: '1 / -1', padding: 32, textAlign: 'center', color: 'var(--muted)', fontSize: 13 }}>
-            Nessun modello {query ? <>per «{query}»</> : <>nella categoria {activeCategory}</>} — per ora.{' '}
+            Nessun modello {query ? <>per «{query}»</> : <>nella categoria {activeCategory}</>}, per ora.{' '}
             <button
               onClick={() => { setActiveCategory('Tutti'); setQuery('') }}
               style={{ background: 'none', border: 'none', color: 'var(--cyan)', cursor: 'pointer', fontFamily: 'inherit', fontSize: 13, fontWeight: 600, padding: 0 }}

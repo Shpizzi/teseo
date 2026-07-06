@@ -4,7 +4,7 @@ import { useNavigate } from 'react-router-dom'
 import PrimaryButton from '../components/PrimaryButton'
 import { LandingNav, LandingFooter, PageHero } from '../components/LandingChrome'
 
-/* Versione light della community pubblica: il flusso è uno solo —
+/* Versione light della community pubblica: il flusso è uno solo -
    cerchi il pezzo → lo trovi in archivio → ti iscrivi e lo stampi. */
 
 type PublicPart = {

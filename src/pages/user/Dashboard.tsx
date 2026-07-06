@@ -1,11 +1,12 @@
 import { useState } from 'react'
-import { Plus, Clock, CheckCircle2, Box, HelpCircle, Leaf, Sparkles, ArrowRight, CalendarDays } from 'lucide-react'
+import { Plus, Clock, CheckCircle2, Box, HelpCircle, Leaf, Sparkles, ArrowRight, CalendarDays, Bell, MessageSquare } from 'lucide-react'
 import { useNavigate } from 'react-router-dom'
 import PrimaryButton from '../../components/PrimaryButton'
 import GlassCard from '../../components/GlassCard'
 import StatusPill from '../../components/StatusPill'
 import ProgressBar from '../../components/ProgressBar'
 import { userProjects, userImpactRows } from '../../mock'
+import { conversations } from '../../mock/user-pages'
 import type { ReactNode } from 'react'
 import type { ProjectStatus } from '../../mock'
 
@@ -33,6 +34,22 @@ export default function Dashboard() {
   const readyProject = userProjects.find(p => p.status === 'ready')
   const co2 = userImpactRows.reduce((s, r) => s + r.co2Kg, 0)
   const euro = userImpactRows.reduce((s, r) => s + r.euro, 0)
+
+  // Colonna destra come feed di notifiche derivate dai dati reali, non 2 card statiche.
+  const notifications = [
+    ...(readyProject
+      ? [{ icon: <CheckCircle2 size={16} />, title: `${readyProject.name} pronto al ritiro`, meta: `${readyProject.fablab} · ritiro entro ven 18:00`, onClick: () => navigate('/app/progetti/' + readyProject.id) }]
+      : []),
+    ...conversations.filter(c => c.unread > 0).map(c => ({
+      icon: <MessageSquare size={16} />, title: `Nuovo messaggio da ${c.fablab}`, meta: c.lastMessage,
+      onClick: () => navigate('/app/messages', { state: { conversationId: c.id } }),
+    })),
+    ...userProjects.filter(p => p.status === 'printing').map(p => ({
+      icon: <Box size={16} />, title: `${p.name} in stampa · ${p.progress}%`, meta: `${p.fablab} · ${p.eta}`,
+      onClick: () => navigate('/app/progetti/' + p.id),
+    })),
+    { icon: <Leaf size={16} />, title: `Hai già evitato ${co2.toFixed(1)} kg di CO₂`, meta: `€ ${euro.toFixed(0)} risparmiati · ${userImpactRows.length} oggetti salvati`, onClick: () => navigate('/app/impatto') },
+  ]
 
   // La barra AI della dashboard apre il drawer TeseoAssistant con la domanda
   const ask = (q: string) => {
@@ -232,92 +249,43 @@ export default function Dashboard() {
           </div>
         </GlassCard>
 
-        {/* Right column */}
+        {/* Right column: feed notifiche */}
         <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
-          {/* Pronto al ritiro */}
-          {readyProject && (
-            <div
-              style={{
-                background: 'var(--glass)',
-                border: '1px solid var(--line-2)',
-                borderRadius: 'var(--radius)',
-                padding: 20,
-                position: 'relative',
-              }}
-            >
-              <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 13, position: 'relative' }}>
-                <span
-                  style={{
-                    width: 32,
-                    height: 32,
-                    borderRadius: 9,
-                    background: 'var(--bg-2)',
-                    border: '1px solid var(--line)',
-                    display: 'grid',
-                    placeItems: 'center',
-                    color: 'var(--cyan)',
-                  }}
-                >
-                  <CheckCircle2 size={17} />
-                </span>
-                <h4 style={{ ...mono, fontSize: 12, fontWeight: 600, letterSpacing: '0.08em', textTransform: 'uppercase', color: 'var(--ink)' }}>
-                  Pronto al ritiro
-                </h4>
-              </div>
-
-              <p style={{ fontSize: 13, color: 'var(--muted)', lineHeight: 1.5, marginBottom: 15, position: 'relative' }}>
-                <b style={{ color: 'var(--ink)', fontWeight: 600 }}>{readyProject.name}</b>{' '}
-                completato da{' '}
-                <b style={{ color: 'var(--ink)', fontWeight: 600 }}>{readyProject.fablab}</b>.
-                Ritiro disponibile fino a venerdì 18:00.
-              </p>
-
-              <button
-                className="btn-spade"
-                style={{ fontSize: 13, height: 38, padding: '0 18px' }}
-                onClick={() => navigate('/app/progetti/' + readyProject.id)}
-              >
-                Vedi dettagli ritiro
-              </button>
-            </div>
-          )}
-
-          {/* Impatto — versione short */}
-          <GlassCard style={{ padding: 20, cursor: 'pointer' }} onClick={() => navigate('/app/impatto')}>
-            <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 14 }}>
+          <GlassCard style={{ padding: 20, display: 'flex', flexDirection: 'column', gap: 2 }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 10 }}>
               <span
                 style={{
-                  width: 32,
-                  height: 32,
-                  borderRadius: 9,
-                  background: 'var(--bg-2)',
-                  border: '1px solid var(--line)',
-                  display: 'grid',
-                  placeItems: 'center',
-                  color: 'var(--cyan)',
+                  width: 32, height: 32, borderRadius: 9, background: 'var(--bg-2)',
+                  border: '1px solid var(--line)', display: 'grid', placeItems: 'center', color: 'var(--cyan)',
                 }}
               >
-                <Leaf size={16} />
+                <Bell size={16} />
               </span>
               <h4 style={{ ...mono, fontSize: 12, fontWeight: 600, letterSpacing: '0.08em', textTransform: 'uppercase', color: 'var(--ink)', flex: 1 }}>
-                Il tuo impatto
+                Notifiche
               </h4>
-              <span style={{ ...mono, fontSize: 11, color: 'var(--cyan)', letterSpacing: '0.04em' }}>
-                TUTTO ›
-              </span>
+              <span style={{ ...mono, fontSize: 11, color: 'var(--muted)' }}>{notifications.length}</span>
             </div>
-            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: 10 }}>
-              {[
-                { v: `${co2.toFixed(1)} kg`, l: 'CO₂ evitata' },
-                { v: `€ ${euro.toFixed(0)}`, l: 'risparmiati' },
-                { v: String(userImpactRows.length), l: 'oggetti salvati' },
-              ].map(s => (
-                <div key={s.l}>
-                  <div style={{ ...mono, fontSize: 19, fontWeight: 700, color: 'var(--ink)' }}>{s.v}</div>
-                  <div style={{ fontSize: 11, color: 'var(--muted)', marginTop: 2 }}>{s.l}</div>
-                </div>
-              ))}
-            </div>
+            {notifications.map((n, i) => (
+              <button
+                key={i}
+                onClick={n.onClick}
+                style={{
+                  display: 'flex', alignItems: 'flex-start', gap: 10, textAlign: 'left', width: '100%',
+                  background: 'transparent', border: 'none', borderTop: i > 0 ? '1px solid var(--line)' : 'none',
+                  padding: '11px 4px', cursor: 'pointer', fontFamily: 'inherit', transition: '0.15s', borderRadius: 8,
+                }}
+                onMouseEnter={e => { (e.currentTarget as HTMLButtonElement).style.background = 'var(--glass-2)' }}
+                onMouseLeave={e => { (e.currentTarget as HTMLButtonElement).style.background = 'transparent' }}
+              >
+                <span style={{ color: 'var(--cyan)', flex: '0 0 auto', marginTop: 1 }}>{n.icon}</span>
+                <span style={{ flex: 1, minWidth: 0 }}>
+                  <span style={{ display: 'block', fontSize: 13, fontWeight: 600, color: 'var(--ink)' }}>{n.title}</span>
+                  <span style={{ display: 'block', fontFamily: 'var(--mono)', fontSize: 10.5, color: 'var(--muted)', marginTop: 2, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{n.meta}</span>
+                </span>
+                <ArrowRight size={14} style={{ color: 'var(--muted-2)', flex: '0 0 auto', marginTop: 2 }} />
+              </button>
+            ))}
           </GlassCard>
         </div>
       </div>

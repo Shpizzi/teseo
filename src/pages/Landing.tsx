@@ -96,7 +96,7 @@ function HeroSection() {
           gap: 28,
         }}
       >
-        {/* Headline — il payoff del progetto */}
+        {/* Headline, il payoff del progetto */}
         <h1
           className="anim-fadeUp-d1"
           style={{
@@ -219,7 +219,7 @@ function ProblemClaim() {
 
 /* ────────────────── PARTNER (marquee loghi) ────────────────── */
 function PartnerMarquee() {
-  // ponytail: nessun asset logo — wordmark testuali; sostituire con SVG quando esistono
+  // ponytail: nessun asset logo, wordmark testuali; sostituire con SVG quando esistono
   const logos: { name: string; style: React.CSSProperties }[] = [
     { name: 'Bialetti', style: { fontWeight: 800, fontStyle: 'italic' } },
     { name: "De'Longhi", style: { fontWeight: 700, letterSpacing: '0.02em' } },
@@ -353,7 +353,7 @@ function HowItWorksSection() {
           </p>
         </div>
 
-        {/* Track orizzontale — card foto + titolo + sottotitolo */}
+        {/* Track orizzontale, card foto + titolo + sottotitolo */}
         <div
           ref={trackRef}
           style={{
@@ -449,7 +449,7 @@ const AIP_MONO: React.CSSProperties = { fontFamily: 'var(--mono)' }
 const AIP_SCRIPT = {
   user: 'Si è rotto il gancio dell’appendiabiti in ingresso. Si può rifare?',
   think1: 'Cerco nell’archivio della community…',
-  m2: 'Trovato: «Gancio modulare da parete» v2.3 — validato dai maker, ★ 4.9.',
+  m2: 'Trovato: «Gancio modulare da parete» v2.3, validato dai maker, ★ 4.9.',
   think2: 'Confronto i produttori vicino a te…',
   m3: 'FabLab Milano, 4,1 km: in PLA costa ~€ 4, pronto domani. Preparo l’ordine?',
 }
@@ -613,7 +613,10 @@ function ImpactBentoSection() {
                   {p.icon}
                   <span style={{ ...mono, fontSize: 11, letterSpacing: '0.08em', color: p.accent ? 'var(--cyan)' : 'var(--muted)' }}>{p.tag}</span>
                   <span style={{ flex: 1 }} />
-                  <span style={{ ...mono, fontSize: 22, fontWeight: 700, color: p.accent ? 'var(--cyan)' : 'var(--ink)' }}>{p.cost}</span>
+                  <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end', lineHeight: 1 }}>
+                    <span style={{ ...mono, fontSize: 9, letterSpacing: '0.1em', color: 'var(--muted-2)', marginBottom: 3 }}>PREZZO</span>
+                    <span style={{ ...mono, fontSize: 22, fontWeight: 700, color: p.accent ? 'var(--cyan)' : 'var(--ink)' }}>{p.cost}</span>
+                  </div>
                 </div>
                 <div style={{ height: 8, background: 'rgba(9,15,5,.07)', borderRadius: 4, marginTop: 8, overflow: 'hidden' }}>
                   <div style={{ width: `${p.bar}%`, height: '100%', borderRadius: 4, background: p.accent ? 'var(--cyan)' : 'var(--line-2)' }} />
@@ -622,10 +625,12 @@ function ImpactBentoSection() {
               </div>
             ))}
           </div>
-          <div style={{ display: 'flex', gap: 18, paddingTop: 14, borderTop: '1px solid var(--line)' }}>
-            <span style={{ ...mono, fontSize: 15, fontWeight: 700, color: 'var(--cyan)' }}>−70 €</span>
-            <span style={{ ...mono, fontSize: 15, fontWeight: 700, color: 'var(--cyan)' }}>−95% CO₂</span>
-            <span style={{ fontSize: 12.5, color: 'var(--muted)', alignSelf: 'center' }}>per ogni pezzo riparato invece che ricomprato</span>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 12, flexWrap: 'wrap', paddingTop: 14, borderTop: '1px solid var(--line)' }}>
+            <span style={{ ...mono, fontSize: 10, letterSpacing: '0.08em', textTransform: 'uppercase', color: 'var(--cyan)', border: '1px solid var(--cyan)', borderRadius: 5, padding: '3px 8px', flex: '0 0 auto' }}>Risparmio</span>
+            <span style={{ ...mono, fontSize: 18, fontWeight: 700, color: 'var(--cyan)' }}>−70 €</span>
+            <span style={{ ...mono, fontSize: 18, fontWeight: 700, color: 'var(--cyan)' }}>−95% CO₂</span>
+            <span style={{ flex: 1 }} />
+            <span style={{ fontSize: 12, color: 'var(--muted)' }}>per ogni pezzo riparato</span>
           </div>
         </div>
 
@@ -793,7 +798,7 @@ function CommunityNetworkSection() {
           </button>
         </div>
 
-        {/* Right — mappa reale dei punti FabLab + numeri della rete */}
+        {/* Right, mappa reale dei punti FabLab + numeri della rete */}
         <div style={{ flex: '1 1 420px', display: 'flex', flexDirection: 'column', gap: 14 }}>
           <div
             style={{

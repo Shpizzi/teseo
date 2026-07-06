@@ -26,7 +26,7 @@ export default function Impatto() {
       </div>
 
       <div style={{ flex: 1, overflow: 'auto', minHeight: 0, display: 'flex', flexDirection: 'column', gap: 14 }}>
-        {/* Hero — superficie scura forest, numero gigante lemongrass */}
+        {/* Hero, superficie scura forest, numero gigante lemongrass */}
         <div
           style={{
             position: 'relative',

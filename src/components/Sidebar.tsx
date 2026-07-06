@@ -1,6 +1,6 @@
 import type { ReactNode } from 'react'
 import { Link, useLocation } from 'react-router-dom'
-import { X } from 'lucide-react'
+import { X, PanelLeftClose, PanelLeftOpen } from 'lucide-react'
 import { TeseoLogo } from './LandingChrome'
 
 export type NavItem = {
@@ -22,9 +22,13 @@ type SidebarProps = {
   // controlled by `open`. Omit both for the static desktop column.
   open?: boolean
   onClose?: () => void
+  // Desktop: collassa la colonna a un rail di sole icone. Il toggle compare
+  // solo se il layout passa onToggleCollapse.
+  collapsed?: boolean
+  onToggleCollapse?: () => void
 }
 
-export default function Sidebar({ items, brand, dark, open, onClose }: SidebarProps) {
+export default function Sidebar({ items, brand, dark, open, onClose, collapsed, onToggleCollapse }: SidebarProps) {
   const location = useLocation()
   const isDrawer = onClose !== undefined
 
@@ -54,7 +58,7 @@ export default function Sidebar({ items, brand, dark, open, onClose }: SidebarPr
 
   const inner = (
     <>
-      {/* Brand block — solo nel drawer mobile: sul desktop il logo vive
+      {/* Brand block, solo nel drawer mobile: sul desktop il logo vive
           nella topbar stile Shopify */}
       {isDrawer && (
       <div
@@ -131,11 +135,13 @@ export default function Sidebar({ items, brand, dark, open, onClose }: SidebarPr
             key={item.href}
             to={item.href}
             onClick={onClose}
+            title={collapsed ? item.label : undefined}
             style={{
               display: 'flex',
               alignItems: 'center',
-              gap: 13,
-              padding: '11px 13px',
+              justifyContent: collapsed ? 'center' : 'flex-start',
+              gap: collapsed ? 0 : 13,
+              padding: collapsed ? '11px 0' : '11px 13px',
               borderRadius: 11,
               color: isActive ? c.activeInk : c.muted,
               background: isActive ? c.activeBg : 'transparent',
@@ -158,11 +164,15 @@ export default function Sidebar({ items, brand, dark, open, onClose }: SidebarPr
               }
             }}
           >
-            <span style={{ width: 20, height: 20, flex: '0 0 auto', display: 'flex', alignItems: 'center' }}>
+            <span style={{ position: 'relative', width: 20, height: 20, flex: '0 0 auto', display: 'flex', alignItems: 'center' }}>
               {item.icon}
+              {/* Collassata: la label sparisce, il badge diventa un pallino sull'icona */}
+              {collapsed && item.badge !== undefined && item.badge > 0 && (
+                <span style={{ position: 'absolute', top: -3, right: -4, width: 8, height: 8, borderRadius: '50%', background: c.accent, border: `1.5px solid ${c.aside}` }} />
+              )}
             </span>
-            {item.label}
-            {item.badge !== undefined && item.badge > 0 && (
+            {!collapsed && item.label}
+            {!collapsed && item.badge !== undefined && item.badge > 0 && (
               <span
                 style={{
                   marginLeft: 'auto',
@@ -197,11 +207,54 @@ export default function Sidebar({ items, brand, dark, open, onClose }: SidebarPr
     gap: 3,
   }
 
-  // Desktop: static column, unchanged.
+  // Desktop: colonna statica, collassabile a rail di sole icone.
   if (!isDrawer) {
+    const width = collapsed ? 68 : 212
     return (
-      <aside style={{ ...asideBase, width: 212, flex: '0 0 212px', position: 'relative', zIndex: 2 }}>
+      <aside
+        style={{
+          ...asideBase,
+          width,
+          flex: `0 0 ${width}px`,
+          padding: collapsed ? '20px 12px' : '20px 14px',
+          position: 'relative',
+          zIndex: 2,
+          transition: 'width 0.2s ease, flex-basis 0.2s ease, padding 0.2s ease',
+        }}
+      >
         {inner}
+        {onToggleCollapse && (
+          <button
+            onClick={onToggleCollapse}
+            aria-label={collapsed ? 'Espandi menu' : 'Riduci menu'}
+            title={collapsed ? 'Espandi menu' : 'Riduci menu'}
+            style={{
+              marginTop: 'auto',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: collapsed ? 'center' : 'flex-start',
+              gap: collapsed ? 0 : 13,
+              padding: collapsed ? '11px 0' : '11px 13px',
+              width: '100%',
+              borderRadius: 11,
+              border: 'none',
+              background: 'transparent',
+              color: c.muted,
+              cursor: 'pointer',
+              fontFamily: 'inherit',
+              fontWeight: 600,
+              fontSize: 13,
+              transition: '0.18s',
+            }}
+            onMouseEnter={e => { e.currentTarget.style.background = c.hoverBg; e.currentTarget.style.color = c.ink }}
+            onMouseLeave={e => { e.currentTarget.style.background = 'transparent'; e.currentTarget.style.color = c.muted }}
+          >
+            <span style={{ width: 20, height: 20, flex: '0 0 auto', display: 'flex', alignItems: 'center' }}>
+              {collapsed ? <PanelLeftOpen size={20} /> : <PanelLeftClose size={20} />}
+            </span>
+            {!collapsed && 'Riduci menu'}
+          </button>
+        )}
       </aside>
     )
   }

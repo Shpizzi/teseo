@@ -8,7 +8,7 @@ import SearchBar from '../components/SearchBar'
 import Sidebar from '../components/Sidebar'
 import StatusPill from '../components/StatusPill'
 
-// ponytail: pagina vetrina statica per export Figma — solo componenti 2D, i viewer
+// ponytail: pagina vetrina statica per export Figma, solo componenti 2D, i viewer
 // three.js (HeroViewer3D, PrintViewer3D, PrintBuildScroll) non si esportano su Figma.
 
 const COLORS = [
@@ -45,7 +45,7 @@ export default function Componenti() {
   return (
     <div style={{ height: '100vh', overflow: 'auto', position: 'relative', zIndex: 1 }}>
       <div style={{ maxWidth: 1100, margin: '0 auto', padding: '48px 28px 96px' }}>
-        <h1 style={{ fontSize: 34, fontWeight: 800, letterSpacing: '0.06em', marginBottom: 6 }}>TESEO — DESIGN SYSTEM</h1>
+        <h1 style={{ fontSize: 34, fontWeight: 800, letterSpacing: '0.06em', marginBottom: 6 }}>TESEO, DESIGN SYSTEM</h1>
         <p style={{ color: 'var(--muted)', marginBottom: 40, fontSize: 14 }}>
           Tutti i token e i componenti condivisi della piattaforma, in un'unica pagina pronta per l'import in Figma.
         </p>
@@ -67,11 +67,11 @@ export default function Componenti() {
 
         <Section label="02 · Tipografia">
           <GlassCard className="p-6" style={{ padding: 24 }}>
-            <div style={{ fontSize: 34, fontWeight: 800, letterSpacing: '-0.01em' }}>Urbanist 800 — Titoli</div>
-            <div style={{ fontSize: 22, fontWeight: 600, marginTop: 8 }}>Urbanist 600 — Sottotitoli e card</div>
-            <div style={{ fontSize: 14, marginTop: 8 }}>Urbanist 400/500 — Corpo del testo, descrizioni e paragrafi lunghi.</div>
-            <div style={{ fontSize: 13, color: 'var(--muted)', marginTop: 8 }}>Urbanist muted — testo secondario</div>
-            <div style={{ fontFamily: 'var(--mono)', fontSize: 24, fontWeight: 600, marginTop: 20 }}>IBM Plex Mono — 12h 40m · 87% · #ORD-2214</div>
+            <div style={{ fontSize: 34, fontWeight: 800, letterSpacing: '-0.01em' }}>Urbanist 800, Titoli</div>
+            <div style={{ fontSize: 22, fontWeight: 600, marginTop: 8 }}>Urbanist 600, Sottotitoli e card</div>
+            <div style={{ fontSize: 14, marginTop: 8 }}>Urbanist 400/500, Corpo del testo, descrizioni e paragrafi lunghi.</div>
+            <div style={{ fontSize: 13, color: 'var(--muted)', marginTop: 8 }}>Urbanist muted, testo secondario</div>
+            <div style={{ fontFamily: 'var(--mono)', fontSize: 24, fontWeight: 600, marginTop: 20 }}>IBM Plex Mono, 12h 40m · 87% · #ORD-2214</div>
             <div style={{ fontFamily: 'var(--mono)', fontSize: 12, letterSpacing: '0.08em', textTransform: 'uppercase', color: 'var(--muted)', marginTop: 8 }}>
               Label di sezione · mono · uppercase · 0.08em
             </div>
@@ -130,11 +130,11 @@ export default function Componenti() {
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(240px, 1fr))', gap: 16 }}>
             <GlassCard style={{ padding: 20 }}>
               <div style={{ fontWeight: 600, marginBottom: 4 }}>GlassCard</div>
-              <div style={{ fontSize: 12.5, color: 'var(--muted)' }}>.glass-panel — card bianca, bordo sage-3, radius 12.</div>
+              <div style={{ fontSize: 12.5, color: 'var(--muted)' }}>.glass-panel, card bianca, bordo sage-3, radius 12.</div>
             </GlassCard>
             <div className="glass-panel-2" style={{ padding: 20, borderRadius: 'var(--radius)' }}>
               <div style={{ fontWeight: 600, marginBottom: 4 }}>Panel 2</div>
-              <div style={{ fontSize: 12.5, color: 'var(--muted)' }}>.glass-panel-2 — variante attiva/hover.</div>
+              <div style={{ fontSize: 12.5, color: 'var(--muted)' }}>.glass-panel-2, variante attiva/hover.</div>
             </div>
             <GlassCard hero className="reg-marks" style={{ padding: 20 }}>
               <i className="reg-tl" /><i className="reg-tr" /><i className="reg-bl" /><i className="reg-br" />
@@ -180,17 +180,17 @@ export default function Componenti() {
         </Section>
 
         {/* ============================================================== */}
-        {/* CANDIDATI — pattern ripetuti inline nelle pagine, non ancora   */}
+        {/* CANDIDATI, pattern ripetuti inline nelle pagine, non ancora   */}
         {/* estratti come componenti. Esempi statici fedeli agli originali.*/}
         {/* ============================================================== */}
         <div style={{ borderTop: '1px dashed var(--line-2)', margin: '8px 0 40px', paddingTop: 32 }}>
-          <h2 style={{ fontSize: 22, fontWeight: 700, marginBottom: 4 }}>Candidati — non ancora componenti</h2>
+          <h2 style={{ fontSize: 22, fontWeight: 700, marginBottom: 4 }}>Candidati, non ancora componenti</h2>
           <p style={{ color: 'var(--muted)', fontSize: 13, marginBottom: 36 }}>
             Pattern ripetuti inline in 2+ pagine, pronti per l'estrazione. Accanto a ciascuno i file dove compaiono.
           </p>
         </div>
 
-        <Section label="C1 · PageHeader — titolo + sottotitolo mono + azioni · ~15 pagine">
+        <Section label="C1 · PageHeader, titolo + sottotitolo mono + azioni · ~15 pagine">
           <GlassCard style={{ padding: 20 }}>
             <div style={{ display: 'flex', alignItems: 'center', gap: 14 }}>
               <div>
@@ -204,13 +204,13 @@ export default function Componenti() {
           </GlassCard>
         </Section>
 
-        <Section label="C2 · SectionLabel — field label + card title · 10+ pagine">
+        <Section label="C2 · SectionLabel, field label + card title · 10+ pagine">
           <GlassCard style={{ padding: 20, display: 'grid', gap: 14 }}>
             <div>
-              <div style={{ fontSize: 10, fontFamily: 'var(--mono)', color: 'var(--muted)', textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: 5 }}>Stato — variante A (field label)</div>
+              <div style={{ fontSize: 10, fontFamily: 'var(--mono)', color: 'var(--muted)', textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: 5 }}>Stato, variante A (field label)</div>
               <div style={{ fontSize: 14, fontWeight: 600 }}>In stampa</div>
             </div>
-            <h3 style={{ fontSize: 12, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.08em', color: 'var(--ink)' }}>Dettagli progetto — variante B (card title)</h3>
+            <h3 style={{ fontSize: 12, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.08em', color: 'var(--ink)' }}>Dettagli progetto, variante B (card title)</h3>
           </GlassCard>
         </Section>
 
@@ -225,7 +225,7 @@ export default function Componenti() {
           </Row>
         </Section>
 
-        <Section label="C4 · DeadlineChip — duplicato in 3 file fablab">
+        <Section label="C4 · DeadlineChip, duplicato in 3 file fablab">
           <Row>
             {[['dl-urgent', 'OGGI 18:00'], ['dl-today', 'DOMANI'], ['dl-week', 'VEN 12/07']].map(([cls, label]) => (
               <span key={cls} className={cls} style={{ fontFamily: 'var(--mono)', fontSize: 10, padding: '3px 8px', borderRadius: 5, display: 'inline-block', whiteSpace: 'nowrap' }}>{label}</span>
@@ -332,7 +332,7 @@ export default function Componenti() {
             <div style={{ textAlign: 'center' }}>
               <UploadCloud size={28} style={{ color: 'var(--cyan)', margin: '0 auto 8px' }} />
               <div style={{ fontWeight: 600, fontSize: 14, color: 'var(--ink)' }}>Trascina qui il tuo file STL</div>
-              <div style={{ fontFamily: 'var(--mono)', fontSize: 11, marginTop: 4 }}>.STL · .OBJ · .3MF — MAX 100MB</div>
+              <div style={{ fontFamily: 'var(--mono)', fontSize: 11, marginTop: 4 }}>.STL · .OBJ · .3MF, MAX 100MB</div>
             </div>
           </div>
         </Section>

@@ -36,7 +36,7 @@ export default function Impatto() {
       </div>
 
       <div style={{ flex: 1, overflow: 'auto', minHeight: 0, display: 'flex', flexDirection: 'column', gap: 14 }}>
-        {/* Hero — superficie scura forest, numero gigante lemongrass */}
+        {/* Hero, superficie scura forest, numero gigante lemongrass */}
         <div
           style={{
             position: 'relative',
@@ -89,7 +89,7 @@ export default function Impatto() {
           </div>
         </div>
 
-        {/* Equivalenze — numeri relatabili, uno per tile */}
+        {/* Equivalenze, numeri relatabili, uno per tile */}
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 14, flex: '0 0 auto' }}>
           {equivalences.map(eq => (
             <GlassCard key={eq.label} style={{ padding: 20, display: 'flex', flexDirection: 'column', gap: 10 }}>
@@ -115,7 +115,7 @@ export default function Impatto() {
           ))}
         </div>
 
-        {/* Traguardo — progressione verso il prossimo milestone */}
+        {/* Traguardo, progressione verso il prossimo milestone */}
         <GlassCard style={{ padding: 20, display: 'flex', alignItems: 'center', gap: 18, flex: '0 0 auto' }}>
           <span
             style={{
@@ -137,7 +137,7 @@ export default function Impatto() {
               <span className="progress-track-fill" style={{ width: `${Math.min(100, (totCo2 / MILESTONE_KG) * 100)}%` }} />
             </div>
             <div style={{ fontFamily: 'var(--mono)', fontSize: 10.5, color: 'var(--muted)', marginTop: 7, letterSpacing: '0.04em' }}>
-              ANCORA {(MILESTONE_KG - totCo2).toFixed(1).replace('.', ',')} KG — CIRCA 2 RIPARAZIONI
+              ANCORA {(MILESTONE_KG - totCo2).toFixed(1).replace('.', ',')} KG, CIRCA 2 RIPARAZIONI
             </div>
           </div>
         </GlassCard>

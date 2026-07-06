@@ -12,7 +12,7 @@ const mono: React.CSSProperties = { fontFamily: 'var(--mono)' }
 type DiffLine = { from: string; to: string; label: string }
 type PendingVersion = { note: string; diff: DiffLine[]; source: 'upload' | 'ai' }
 
-// ponytail: diff finto ma coerente — Wizard of Oz come lo scan. Upgrade path:
+// ponytail: diff finto ma coerente, Wizard of Oz come lo scan. Upgrade path:
 // confronto reale delle mesh quando esisteranno file veri.
 const UPLOAD_DIFF: DiffLine[] = [
   { label: 'Spessore parete', from: '2.0 mm', to: '2.4 mm' },
@@ -49,6 +49,8 @@ export default function CommunityDetail() {
   const [aiRequest, setAiRequest] = useState('')
   const [aiThinking, setAiThinking] = useState(false)
   const [aiAttempts, setAiAttempts] = useState(0)
+  // Per caricare una tua versione devi partire dal file originale → scaricalo prima.
+  const [hasDownloaded, setHasDownloaded] = useState(false)
 
   useEffect(() => {
     setVersions(model?.versions ?? [])
@@ -99,7 +101,7 @@ export default function CommunityDetail() {
     setPending(null)
     setAiRequest('')
     setAiAttempts(0)
-    toast(`v${v} pubblicata — in attesa di validazione della community`)
+    toast(`v${v} pubblicata, in attesa di validazione della community`)
   }
 
   const resetFork = () => {
@@ -107,13 +109,7 @@ export default function CommunityDetail() {
     setPending(null)
     setAiRequest('')
     setAiAttempts(0)
-  }
-
-  const ghostBtn: React.CSSProperties = {
-    display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8,
-    background: 'transparent', color: 'var(--cyan)', border: '1px solid var(--line-2)',
-    fontFamily: 'inherit', fontWeight: 600, fontSize: 13, padding: '9px 16px',
-    borderRadius: 100, cursor: 'pointer', transition: '0.2s',
+    setHasDownloaded(false)
   }
 
   /* Riga di diff stile git: - vecchio / + nuovo */
@@ -160,7 +156,7 @@ export default function CommunityDetail() {
             padding: '9px 14px', cursor: 'pointer',
           }}
         >
-          ← Archivio
+          ← Community
         </button>
         <div>
           <h1 style={{ fontWeight: 600, fontSize: 22, letterSpacing: '-0.01em', color: 'var(--ink)' }}>
@@ -168,10 +164,6 @@ export default function CommunityDetail() {
           </h1>
         </div>
         <div style={{ flex: 1 }} />
-        <button style={ghostBtn} onClick={() => setForkMode('choose')}>
-          <GitFork size={15} />
-          Forka e proponi versione
-        </button>
       </div>
 
       {/* 3-col layout */}
@@ -268,11 +260,9 @@ export default function CommunityDetail() {
             <button
               onClick={() => {
                 setSaved(s => !s)
-                toast(saved ? 'Modello rimosso dai salvati' : 'Modello salvato — lo trovi in Salvati')
+                toast(saved ? 'Modello rimosso dai salvati' : 'Modello salvato, lo trovi in Salvati')
               }}
-              style={ghostBtn}
-              onMouseEnter={e => { e.currentTarget.style.background = 'var(--glass-2)' }}
-              onMouseLeave={e => { e.currentTarget.style.background = 'transparent' }}
+              className="btn-outline"
             >
               {saved ? <Check size={15} /> : <Bookmark size={15} />}
               {saved ? 'Salvato' : 'Salva modello'}
@@ -295,7 +285,7 @@ export default function CommunityDetail() {
               textTransform: 'uppercase', whiteSpace: 'nowrap', zIndex: 10,
             }}
           >
-            {pending ? `FORK — ANTEPRIMA v${nextVersion()} (PROPOSTA)` : 'FIG. 01 — MODEL PREVIEW'}
+            {pending ? `FORK, ANTEPRIMA v${nextVersion()} (PROPOSTA)` : 'FIG. 01, MODEL PREVIEW'}
           </div>
           <PrintViewer3D tone="light" />
         </GlassCard>
@@ -310,6 +300,14 @@ export default function CommunityDetail() {
             <span style={{ ...mono, fontSize: 10.5, color: 'var(--muted)' }}>{versions.length} release</span>
           </div>
 
+          {/* Azione fork ancorata alla sezione Versioni: chiaro che agisce qui */}
+          {!forkMode && (
+            <button className="btn-outline" style={{ marginBottom: 16 }} onClick={() => setForkMode('choose')}>
+              <GitFork size={15} />
+              Proponi una nuova versione
+            </button>
+          )}
+
           {/* ── Flusso fork ── */}
           {forkMode === 'choose' && (
             <div style={{ border: '1px solid var(--line-2)', borderRadius: 12, padding: 14, marginBottom: 16, display: 'flex', flexDirection: 'column', gap: 9 }}>
@@ -322,13 +320,25 @@ export default function CommunityDetail() {
                 </button>
               </div>
               <p style={{ fontSize: 12.5, color: 'var(--muted)', lineHeight: 1.5 }}>
-                Proponi una versione migliorata: caricala tu, oppure chiedi all&apos;AI di modificare il modello.
+                Per caricare una tua versione parti dal file originale: scaricalo, modificalo e ricaricalo. Oppure chiedi all&apos;AI di modificare il modello.
               </p>
-              <button style={ghostBtn} onClick={() => { setForkMode('upload'); setPending({ note: 'Pareti rinforzate e tolleranza snodo ridotta', diff: UPLOAD_DIFF, source: 'upload' }) }}>
+              <button
+                className="btn-outline"
+                onClick={() => { setHasDownloaded(true); toast(`gancio-modulare_v${currentV}.stl scaricato, ora puoi caricare la tua versione`) }}
+              >
+                {hasDownloaded ? <Check size={14} /> : <Download size={14} />}
+                {hasDownloaded ? 'Originale scaricato' : `Scarica l'originale · v${currentV}`}
+              </button>
+              <button
+                className="btn-outline"
+                disabled={!hasDownloaded}
+                title={hasDownloaded ? undefined : 'Scarica prima il file originale'}
+                onClick={() => { setForkMode('upload'); setPending({ note: 'Pareti rinforzate e tolleranza snodo ridotta', diff: UPLOAD_DIFF, source: 'upload' }) }}
+              >
                 <Upload size={14} />
                 Carica la tua versione
               </button>
-              <button style={ghostBtn} onClick={() => setForkMode('ai')}>
+              <button className="btn-outline" onClick={() => setForkMode('ai')}>
                 <Sparkles size={14} />
                 Modifica con AI
               </button>
@@ -399,7 +409,7 @@ export default function CommunityDetail() {
 
               <span style={{ ...mono, fontSize: 10, color: aiAttempts >= MAX_AI_ATTEMPTS ? '#e40014' : 'var(--muted-2)', letterSpacing: '0.06em' }}>
                 {aiAttempts >= MAX_AI_ATTEMPTS
-                  ? 'TENTATIVI ESAURITI — CARICA LA TUA VERSIONE O RIPARTI DAL FORK'
+                  ? 'TENTATIVI ESAURITI, CARICA LA TUA VERSIONE O RIPARTI DAL FORK'
                   : `TENTATIVI: ${aiAttempts}/${MAX_AI_ATTEMPTS}`}
               </span>
 
@@ -421,7 +431,8 @@ export default function CommunityDetail() {
                       Accetta e pubblica
                     </PrimaryButton>
                     <button
-                      style={{ ...ghostBtn, padding: '0 13px' }}
+                      className="btn-outline"
+                      style={{ padding: '0 13px' }}
                       disabled={aiAttempts >= MAX_AI_ATTEMPTS}
                       onClick={() => { setPending(null) }}
                       title="Riformula la richiesta e riprova"

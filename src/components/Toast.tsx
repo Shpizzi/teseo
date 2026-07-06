@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react'
 import { CheckCircle2 } from 'lucide-react'
 
-// ponytail: singleton event-bus, niente context/provider — basta montare <Toaster/> nel layout
+// ponytail: singleton event-bus, niente context/provider, basta montare <Toaster/> nel layout
 type ToastMsg = { id: number; text: string }
 let listener: ((t: ToastMsg) => void) | null = null
 let nextId = 1

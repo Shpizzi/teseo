@@ -6,7 +6,7 @@ import { FloatItem, Tazza, Moka, Cuffie, Occhiali, Telecomando, Ingranaggio, Sed
 
 /* Chrome condiviso dalle pagine pubbliche: nav, footer, helper di sezione */
 
-/* Logo Teseo: filo di Arianna / labirinto — spirale concentrica che è anche
+/* Logo Teseo: filo di Arianna / labirinto, spirale concentrica che è anche
    il percorso di stampa di uno slicer. Sostituisce il pacco (spedizioni). */
 export function TeseoLogo({ size = 22, color = 'var(--cyan)' }: { size?: number; color?: string }) {
   return (
@@ -249,7 +249,7 @@ export function LandingFooter() {
 
         <div style={{ flex: 1 }} />
 
-        {/* Newsletter — solo UI, nessun backend */}
+        {/* Newsletter, solo UI, nessun backend */}
         <div style={{ minWidth: 300 }}>
           <div style={{ fontFamily: 'var(--mono)', fontSize: 13, color: '#fff', marginBottom: 14 }}>
             Iscriviti alla newsletter

@@ -47,7 +47,7 @@ export function OrderStatusPill({ status }: { status: LiveStatus }) {
   return <span className="status-pill sp-err">Errore</span>
 }
 
-// ── Ordini — stesso linguaggio della pagina progetti del cliente:
+// ── Ordini, stesso linguaggio della pagina progetti del cliente:
 //    tab a pillola, toggle quadri/lista, righe/card invece della tabella ──
 export default function Ordini() {
   const [activeTab, setActiveTab] = useState<TabKey>('new')
@@ -67,12 +67,12 @@ export default function Ordini() {
 
   const accept = (id: string) => {
     setOrderStatus(id, 'accepted')
-    toast('Ordine accettato — pronto per lo slicing')
+    toast('Ordine accettato, pronto per lo slicing')
   }
   const reject = (id: string) => {
     setOrderStatus(id, 'rejected')
     setRejectingId(undefined)
-    toast('Ordine rifiutato — il cliente riceve una notifica')
+    toast('Ordine rifiutato, il cliente riceve una notifica')
   }
   const acceptSelected = () => {
     selected.forEach(id => setOrderStatus(id, 'accepted'))
@@ -203,7 +203,7 @@ export default function Ordini() {
     </div>
   )
 
-  /* ── Riga (vista lista) — come la riga progetti del cliente ── */
+  /* ── Riga (vista lista), come la riga progetti del cliente ── */
   const orderRow = (order: LiveOrder) => (
     <div
       key={order.id}
@@ -258,7 +258,7 @@ export default function Ordini() {
     </div>
   )
 
-  /* ── Card (vista quadri) — come la card progetti del cliente ── */
+  /* ── Card (vista quadri), come la card progetti del cliente ── */
   const orderCard = (order: LiveOrder) => (
     <div
       key={order.id}
@@ -351,7 +351,7 @@ export default function Ordini() {
         </button>
       </div>
 
-      {/* Tabs + toggle vista — come la pagina progetti del cliente */}
+      {/* Tabs + toggle vista, come la pagina progetti del cliente */}
       <div style={{ display: 'flex', alignItems: 'center', gap: 12, flex: '0 0 auto' }}>
         <div
           style={{
@@ -398,7 +398,7 @@ export default function Ordini() {
             {query
               ? <>Nessun ordine per «{query}».</>
               : activeTab === 'new'
-              ? <>Nessun nuovo ordine da valutare — tutto smaltito.</>
+              ? <>Nessun nuovo ordine da valutare, tutto smaltito.</>
               : <>Nessun ordine in questo stato.</>}{' '}
             <button
               onClick={() => { setQuery(''); setActiveTab('all') }}

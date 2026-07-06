@@ -61,12 +61,12 @@ function MokaBuild({ progressRef }: { progressRef: MutableRefObject<number> }) {
         </group>
       ))}
 
-      {/* MANICO — da stampare: wireframe fantasma sopra il piano di stampa */}
+      {/* MANICO, da stampare: wireframe fantasma sopra il piano di stampa */}
       <mesh position={[0.6, 0.35, 0]} rotation={[0, 0, 0.35]}>
         <boxGeometry args={[0.12, 0.52, 0.16, 2, 6, 2]} />
         <meshBasicMaterial color={LEMON} wireframe transparent opacity={0.14} clippingPlanes={[clipWire]} />
       </mesh>
-      {/* MANICO — parte stampata: fill pieno + wireframe chiaro sotto il piano */}
+      {/* MANICO, parte stampata: fill pieno + wireframe chiaro sotto il piano */}
       <mesh position={[0.6, 0.35, 0]} rotation={[0, 0, 0.35]}>
         <boxGeometry args={[0.12, 0.52, 0.16, 2, 6, 2]} />
         <meshBasicMaterial color={LEMON} transparent opacity={0.85} clippingPlanes={[clipSolid]} side={THREE.DoubleSide} />
@@ -156,7 +156,7 @@ export default function PrintBuildScroll() {
           FIG. 02 &mdash; SI STAMPA SOLO IL PEZZO ROTTO &middot; SCRUB = SCROLL
         </span>
 
-        {/* Colonna testo — statica: titolo + descrizione */}
+        {/* Colonna testo, statica: titolo + descrizione */}
         <div style={{ flex: '0 0 40%', padding: '0 5% 0 8%', position: 'relative', zIndex: 2 }}>
           <h2
             style={{

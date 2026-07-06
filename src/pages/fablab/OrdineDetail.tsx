@@ -82,7 +82,7 @@ export default function OrdineDetail() {
   const timeline = order.timeline.map((s, i) => ({
     ...s,
     done: i < doneCount,
-    date: i < doneCount && s.date === '—' ? 'adesso' : s.date,
+    date: i < doneCount && s.date === '-' ? 'adesso' : s.date,
   }))
   const currentStepIdx = timeline.findIndex(s => !s.done)
 
@@ -192,7 +192,7 @@ export default function OrdineDetail() {
             </div>
           )}
 
-          {/* Action buttons — CTA coerente con lo stato dell'ordine */}
+          {/* Action buttons, CTA coerente con lo stato dell'ordine */}
           {status === 'new' && (
             <>
               <button style={{
@@ -203,7 +203,7 @@ export default function OrdineDetail() {
               }}
                 onClick={() => {
                   setOrderStatus(order.id, 'accepted')
-                  toast('Ordine accettato — pronto per lo slicing')
+                  toast('Ordine accettato, pronto per lo slicing')
                 }}
                 onMouseEnter={e => { (e.currentTarget as HTMLButtonElement).style.background = 'var(--cyan)' }}
                 onMouseLeave={e => { (e.currentTarget as HTMLButtonElement).style.background = 'var(--forest)' }}
@@ -215,7 +215,7 @@ export default function OrdineDetail() {
                   <button
                     onClick={() => {
                       setOrderStatus(order.id, 'rejected')
-                      toast('Ordine rifiutato — il cliente riceve una notifica')
+                      toast('Ordine rifiutato, il cliente riceve una notifica')
                       navigate('/fablab/ordini')
                     }}
                     style={{
@@ -270,7 +270,7 @@ export default function OrdineDetail() {
                 fontFamily: 'inherit', fontWeight: 600, fontSize: 13,
                 padding: '10px 0', borderRadius: 100, cursor: 'pointer', width: '100%',
               }}>
-              In stampa — vedi coda →
+              In stampa, vedi coda →
             </button>
           )}
           {status === 'ready' && (
@@ -296,7 +296,7 @@ export default function OrdineDetail() {
             }}
               onClick={() => {
                 setOrderStatus(order.id, 'printing')
-                toast('Stampa riavviata — l’ordine torna in coda')
+                toast('Stampa riavviata, l’ordine torna in coda')
               }}
               onMouseEnter={e => { (e.currentTarget as HTMLButtonElement).style.background = 'var(--cyan)' }}
               onMouseLeave={e => { (e.currentTarget as HTMLButtonElement).style.background = 'var(--forest)' }}
@@ -325,16 +325,16 @@ export default function OrdineDetail() {
               fontFamily: 'var(--mono)', fontSize: 10, color: 'var(--muted)',
               letterSpacing: '0.1em', textTransform: 'uppercase',
             }}>
-              FIG. 01 — PREVIEW ORDINE
+              FIG. 01, PREVIEW ORDINE
             </span>
           </div>
 
-          {/* 3D viewer — avanzamento reale solo se la stampa è in corso */}
+          {/* 3D viewer, avanzamento reale solo se la stampa è in corso */}
           <div style={{ flex: 1, position: 'relative' }}>
             <PrintViewer3D progress={status === 'printing' ? progress : 100} />
           </div>
 
-          {/* Progress badge bottom — solo per ordini in stampa */}
+          {/* Progress badge bottom, solo per ordini in stampa */}
           {status === 'printing' && (
             <div style={{
               position: 'absolute', bottom: 20, left: 20, right: 20, zIndex: 5,
@@ -463,7 +463,7 @@ export default function OrdineDetail() {
             Contatto
           </div>
           <a
-            href={`mailto:${order.customer.email}?subject=Ordine ${order.ordNum} — ${order.name}`}
+            href={`mailto:${order.customer.email}?subject=Ordine ${order.ordNum}, ${order.name}`}
             style={{
               background: 'transparent', border: '1px solid var(--line-2)', color: 'var(--cyan)',
               fontFamily: 'inherit', fontWeight: 600, fontSize: 13,

@@ -15,7 +15,7 @@ export type HistoryProject = {
 export const historyProjects: HistoryProject[] = [
   { id: 'h1', name: 'Maniglia armadio cucina', fablab: 'DamA Space', material: 'PLA', completedDate: '12 mag 2025', status: 'completed', cost: '€ 14.50' },
   { id: 'h2', name: 'Supporto smartphone bici', fablab: 'FabLab Milano', material: 'PETG', completedDate: '03 apr 2025', status: 'completed', cost: '€ 8.00' },
-  { id: 'h3', name: 'Coperchio router v1', fablab: 'Tillverka', material: 'ABS', completedDate: '18 mar 2025', status: 'cancelled', cost: '—' },
+  { id: 'h3', name: 'Coperchio router v1', fablab: 'Tillverka', material: 'ABS', completedDate: '18 mar 2025', status: 'cancelled', cost: '-' },
 ]
 
 // ===== PRODUCERS FULL =====
@@ -157,7 +157,7 @@ const REVIEW_POOL = [
 ]
 const REVIEW_DATES = ['giu 2026', 'mag 2026', 'apr 2026', 'mar 2026']
 
-// ponytail: profili generati deterministicamente dal nome — sostituire con dati reali quando i fablab si registrano
+// ponytail: profili generati deterministicamente dal nome, sostituire con dati reali quando i fablab si registrano
 export const networkProducers: ProducerFull[] = milanoFablabs
   .filter(f => !producers.some(p => f.name.toLowerCase().includes(p.name.toLowerCase())))
   .map((f, i) => {
@@ -267,7 +267,7 @@ export type ChatMessage = {
 }
 
 export const conversations: ChatConversation[] = [
-  { id: 'conv1', fablab: 'Tillverka', fablabInitials: 'FL', lastMessage: 'La stampa è in corso, ETA circa 2h.', lastTime: '10:42', unread: 1, projectName: 'Demogor — statuetta' },
+  { id: 'conv1', fablab: 'Tillverka', fablabInitials: 'FL', lastMessage: 'La stampa è in corso, ETA circa 2h.', lastTime: '10:42', unread: 1, projectName: 'Demogor, statuetta' },
   { id: 'conv2', fablab: 'DamA Space', fablabInitials: 'MN', lastMessage: 'Pronto al ritiro dalle 15:00!', lastTime: 'ieri', unread: 0, projectName: 'Ricambio cardine' },
   { id: 'conv3', fablab: 'FabLab Milano', fablabInitials: 'FB', lastMessage: 'Certo, possiamo usare PETG grigio.', lastTime: 'lun', unread: 0, projectName: 'Vaso parametrico' },
 ]

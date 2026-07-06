@@ -8,7 +8,7 @@ import { userProjects, fablabOrders } from '../mock'
 import { producers } from '../mock/user-pages'
 
 /* Topbar stile Shopify: sempre scura, logo a sinistra, ricerca globale al
-   centro (funzioni, pezzi, fablab, progetti — risultati raggruppati con
+   centro (funzioni, pezzi, fablab, progetti, risultati raggruppati con
    micro-label), a destra notifiche, AI (apre il drawer laterale) e profilo. */
 
 type Hit = { group: string; icon: ReactNode; label: string; meta?: string; to: string }

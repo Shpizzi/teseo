@@ -92,7 +92,7 @@ export default function ProgettoDetail() {
         )}
       </div>
 
-      {/* Main 3-col layout — timeline e gestione in evidenza a destra */}
+      {/* Main 3-col layout, timeline e gestione in evidenza a destra */}
       <div style={{ flex: 1, display: 'grid', gridTemplateColumns: '1fr 1.3fr 1.1fr', gap: 16, minHeight: 0 }}>
 
         {/* Left: project details */}
@@ -111,7 +111,7 @@ export default function ProgettoDetail() {
             {/* Material */}
             <div>
               <div style={{ fontSize: 10, fontFamily: 'var(--mono)', color: 'var(--muted)', textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: 5 }}>MATERIALE</div>
-              <div style={{ fontSize: 13.5, fontWeight: 600, color: 'var(--ink)' }}>{project.material || '—'}</div>
+              <div style={{ fontSize: 13.5, fontWeight: 600, color: 'var(--ink)' }}>{project.material || '-'}</div>
             </div>
 
             {/* FabLab */}
@@ -126,7 +126,7 @@ export default function ProgettoDetail() {
                   {project.fablab} →
                 </div>
               ) : (
-                <div style={{ fontSize: 13.5, fontWeight: 600, color: 'var(--ink)' }}>{project.fablab || '—'}</div>
+                <div style={{ fontSize: 13.5, fontWeight: 600, color: 'var(--ink)' }}>{project.fablab || '-'}</div>
               )}
             </div>
 
@@ -139,19 +139,19 @@ export default function ProgettoDetail() {
             {/* ETA */}
             <div>
               <div style={{ fontSize: 10, fontFamily: 'var(--mono)', color: 'var(--muted)', textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: 5 }}>ETA</div>
-              <div style={{ fontSize: 13.5, fontFamily: 'var(--mono)', fontWeight: 600, color: 'var(--ink)' }}>{project.eta || '—'}</div>
+              <div style={{ fontSize: 13.5, fontFamily: 'var(--mono)', fontWeight: 600, color: 'var(--ink)' }}>{project.eta || '-'}</div>
             </div>
 
             {/* Order date */}
             <div>
               <div style={{ fontSize: 10, fontFamily: 'var(--mono)', color: 'var(--muted)', textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: 5 }}>DATA ORDINE</div>
-              <div style={{ fontSize: 13.5, fontFamily: 'var(--mono)', fontWeight: 600, color: 'var(--ink)' }}>{project.orderDate ?? '—'}</div>
+              <div style={{ fontSize: 13.5, fontFamily: 'var(--mono)', fontWeight: 600, color: 'var(--ink)' }}>{project.orderDate ?? '-'}</div>
             </div>
 
             {/* Estimated cost */}
             <div>
               <div style={{ fontSize: 10, fontFamily: 'var(--mono)', color: 'var(--muted)', textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: 5 }}>COSTO STIMATO</div>
-              <div style={{ fontSize: 13.5, fontFamily: 'var(--mono)', fontWeight: 600, color: 'var(--ink)' }}>{project.cost ?? '—'}</div>
+              <div style={{ fontSize: 13.5, fontFamily: 'var(--mono)', fontWeight: 600, color: 'var(--ink)' }}>{project.cost ?? '-'}</div>
             </div>
           </div>
 
@@ -257,10 +257,10 @@ export default function ProgettoDetail() {
               zIndex: 10,
             }}
           >
-            FIG. 01 — MODEL PREVIEW
+            FIG. 01, MODEL PREVIEW
           </div>
 
-          {/* 3D Viewer — modello reale scansionato, clipping sull'avanzamento del progetto */}
+          {/* 3D Viewer, modello reale scansionato, clipping sull'avanzamento del progetto */}
           <div style={{ flex: 1, position: 'relative', minHeight: 0 }}>
             <PrintViewer3D modelUrl="/meshes/remote.glb" progress={isDraft ? 100 : project.progress} tone="light" />
           </div>
@@ -309,7 +309,7 @@ export default function ProgettoDetail() {
           )}
         </GlassCard>
 
-        {/* Right: timeline + gestione — la parte in evidenza della pagina */}
+        {/* Right: timeline + gestione, la parte in evidenza della pagina */}
         <GlassCard hero style={{ padding: 22, display: 'flex', flexDirection: 'column', overflow: 'auto' }}>
           <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 20 }}>
             <h3 style={{ fontSize: 12, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.08em', color: 'var(--ink)' }}>
@@ -349,7 +349,7 @@ export default function ProgettoDetail() {
                   )}
                 </div>
 
-                {/* Right: content — lo step corrente è un blocco evidenziato */}
+                {/* Right: content, lo step corrente è un blocco evidenziato */}
                 <div
                   style={{
                     flex: 1,

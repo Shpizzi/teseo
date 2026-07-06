@@ -18,7 +18,7 @@ function CaseStudySection() {
       <GlassCard hero style={{ padding: 32 }}>
         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: 10, position: 'relative' }}>
           <span style={{ fontFamily: 'var(--mono)', fontSize: 12, letterSpacing: '0.08em', color: 'var(--muted)' }}>
-            CASO REALE — SEDIA DA UFFICIO, COMPONENTE ROTTO DA 30g
+            CASO REALE, SEDIA DA UFFICIO, COMPONENTE ROTTO DA 30g
           </span>
           <span className="status-pill sp-print">PETG RICICLATO</span>
         </div>
@@ -87,7 +87,7 @@ function DigitalFootprintSection() {
           <Database size={20} color="var(--cyan)" style={{ margin: '0 auto' }} />
           <div style={{ fontFamily: 'var(--mono)', fontSize: 30, fontWeight: 700, color: 'var(--cyan)', marginTop: 12 }}>~2 Wh</div>
           <div style={{ fontSize: 13, color: 'var(--muted)', marginTop: 6, lineHeight: 1.5 }}>
-            per un pezzo <b style={{ color: 'var(--ink)' }}>già in archivio</b><br />(~1 g CO₂ — 14× meno)
+            per un pezzo <b style={{ color: 'var(--ink)' }}>già in archivio</b><br />(~1 g CO₂, 14× meno)
           </div>
         </GlassCard>
         <GlassCard style={{ padding: 26 }}>
@@ -213,7 +213,7 @@ function CircularSection() {
         <p style={{ fontSize: 13.5, color: 'var(--muted)', lineHeight: 1.65 }}>
           <b style={{ color: 'var(--ink)' }}>Onestà prima di tutto:</b> il PLA è compostabile solo in impianti industriali,
           non nel giardino di casa. E la stampa FDM non è a impatto zero: microplastiche ed emissioni VOC esistono e le tracciamo.
-          Non promettiamo miracoli — misuriamo, pubblichiamo e miglioriamo.
+          Non promettiamo miracoli, misuriamo, pubblichiamo e miglioriamo.
         </p>
       </div>
     </section>
@@ -232,7 +232,7 @@ function CtaSection() {
       </p>
       <div style={{ marginTop: 26, display: 'flex', gap: 12, justifyContent: 'center' }}>
         <PrimaryButton style={{ height: 50, fontSize: 15, padding: '0 30px' }} onClick={() => navigate('/app/dashboard')}>
-          Inizia a misurare
+          Apri la mia dashboard &rarr;
         </PrimaryButton>
         <GhostButton style={{ height: 50 }} onClick={() => navigate('/community')}>
           Scopri la community &rarr;

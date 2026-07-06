@@ -28,6 +28,7 @@ export const fablabNavItems: NavItem[] = [
 export default function FablabLayout() {
   const isMobile = useIsMobile()
   const [open, setOpen] = useState(false)
+  const [collapsed, setCollapsed] = useState(false)
   const [aiOpen, setAiOpen] = useState(false)
 
   return (
@@ -56,7 +57,7 @@ export default function FablabLayout() {
           dark
           items={fablabNavItems}
           brand={{ subtitle: 'spazio produttore' }}
-          {...(isMobile ? { open, onClose: () => setOpen(false) } : {})}
+          {...(isMobile ? { open, onClose: () => setOpen(false) } : { collapsed, onToggleCollapse: () => setCollapsed(v => !v) })}
         />
         <div
           style={{

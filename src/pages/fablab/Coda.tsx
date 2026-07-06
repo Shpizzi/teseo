@@ -104,7 +104,7 @@ export default function Coda() {
           <div style={{ flex: 1, overflow: 'auto', display: 'flex', flexDirection: 'column', gap: 8 }}>
             {queue.length === 0 && (
               <div style={{ padding: 28, textAlign: 'center', color: 'var(--muted)', fontSize: 13 }}>
-                Coda vuota —{' '}
+                Coda vuota -{' '}
                 <Link to="/fablab/ordini" style={{ color: 'var(--cyan)', fontWeight: 600, textDecoration: 'none' }}>
                   accetta un ordine
                 </Link>{' '}
@@ -204,7 +204,7 @@ export default function Coda() {
                   </div>
                 )}
 
-                {/* Status pill — pausa non è un errore: pill neutra tratteggiata */}
+                {/* Status pill, pausa non è un errore: pill neutra tratteggiata */}
                 {item.status === 'printing' && <span className="status-pill sp-print" style={{ flex: '0 0 auto' }}>In stampa</span>}
                 {item.status === 'queued'   && <span className="status-pill sp-new"   style={{ flex: '0 0 auto' }}>In coda</span>}
                 {item.status === 'paused'   && <span className="status-pill sp-new"   style={{ flex: '0 0 auto', borderStyle: 'dashed' }}>In pausa</span>}

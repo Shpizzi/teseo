@@ -4,7 +4,7 @@ import { useNavigate } from 'react-router-dom'
 import { userProjects, userImpactRows } from '../mock'
 import { communityModels, savedModels, producers } from '../mock/user-pages'
 
-// ponytail: orchestratore Wizard-of-Oz — router a keyword sui mock, nessun LLM reale.
+// ponytail: orchestratore Wizard-of-Oz, router a keyword sui mock, nessun LLM reale.
 // Upgrade path: sostituire orchestrate() con una chiamata API in streaming.
 
 type Chip = { label: string; to: string }
@@ -46,7 +46,7 @@ function orchestrate(input: string): Msg {
       text: printing.length
         ? `Hai ${printing.length} stampe in corso: ${printing.map(p => `«${p.name}» al ${p.progress}% (${p.eta}, ${p.fablab})`).join(' e ')}. Ti avviso io quando sono pronte al ritiro.`
         : 'Non hai stampe in corso al momento.',
-      chips: printing.map(p => ({ label: p.name.split(' — ')[0], to: '/app/progetti/' + p.id })),
+      chips: printing.map(p => ({ label: p.name.split(', ')[0], to: '/app/progetti/' + p.id })),
     }
   }
 

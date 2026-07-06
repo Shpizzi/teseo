@@ -4,7 +4,7 @@ import { useGLTF, Html } from '@react-three/drei'
 import { STLLoader, OBJLoader } from 'three-stdlib'
 import * as THREE from 'three'
 
-// The displaced icosahedron mesh — byte-identical to prototype
+// The displaced icosahedron mesh, byte-identical to prototype
 export function buildDisplacedGeo(): THREE.BufferGeometry {
   const geo = new THREE.IcosahedronGeometry(1, 5)
   const pos = geo.attributes.position
@@ -27,7 +27,7 @@ export function buildDisplacedGeo(): THREE.BufferGeometry {
 }
 
 // Principal axis of the point cloud via power iteration on the covariance
-// matrix — the true long axis of a tilted scan, which an axis-aligned bbox
+// matrix, the true long axis of a tilted scan, which an axis-aligned bbox
 // can't find.
 function principalAxis(g: THREE.BufferGeometry): THREE.Vector3 {
   const pos = g.attributes.position
@@ -53,7 +53,7 @@ function principalAxis(g: THREE.BufferGeometry): THREE.Vector3 {
 
 // Center a scanned geometry, stand its true long axis vertical, and scale it to
 // span ~2.4 units so it fills the same frame + clip range as the procedural
-// mesh. Textures/materials are dropped — the blueprint look is wireframe only.
+// mesh. Textures/materials are dropped, the blueprint look is wireframe only.
 function normalizeGeo(src: THREE.BufferGeometry): THREE.BufferGeometry {
   const g = src.clone()
   const q = new THREE.Quaternion().setFromUnitVectors(principalAxis(g), new THREE.Vector3(0, 1, 0))
@@ -116,15 +116,15 @@ function PrintBody({ geo, onProgressChange, progress, tone }: BodyProps) {
 
   return (
     <group ref={groupRef}>
-      {/* printed part — fill */}
+      {/* printed part, fill */}
       <mesh geometry={geo}>
         <meshBasicMaterial color={c.fill} transparent opacity={c.fillOp} clippingPlanes={[clipSolid]} side={THREE.DoubleSide} />
       </mesh>
-      {/* printed part — wireframe */}
+      {/* printed part, wireframe */}
       <mesh geometry={geo}>
         <meshBasicMaterial color={c.wire} wireframe transparent opacity={c.wireOp} clippingPlanes={[clipSolid]} />
       </mesh>
-      {/* to-print — faint wireframe */}
+      {/* to-print, faint wireframe */}
       <mesh geometry={geo}>
         <meshBasicMaterial color={c.ghost} wireframe transparent opacity={0.16} clippingPlanes={[clipWire]} />
       </mesh>

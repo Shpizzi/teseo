@@ -21,7 +21,7 @@ const STEPS = [
   {
     icon: <Users size={22} color="var(--cyan)" />,
     title: 'La community valida',
-    desc: 'L’AI genera, le persone verificano. Maker esperti controllano il file, lo migliorano e lo certificano. E se l’AI si blocca su un caso difficile, un contributor competente ti aiuta di persona — nessuno resta da solo.',
+    desc: 'L’AI genera, le persone verificano. Maker esperti controllano il file, lo migliorano e lo certificano. E se l’AI si blocca su un caso difficile, un contributor competente ti aiuta di persona, nessuno resta da solo.',
     note: 'VERSIONING · CERTIFICAZIONE',
   },
   {
@@ -177,7 +177,7 @@ function FaqSection() {
     },
     {
       q: 'Non so nemmeno cosa sia un FabLab.',
-      a: 'Sei in buona compagnia: il 56% delle persone non lo sa. È un laboratorio di fabbricazione digitale — stampanti 3D, laser, persone che le sanno usare. Con Teseo non devi nemmeno entrarci se non vuoi: scegli sulla mappa, ritiri quando è pronto.',
+      a: 'Sei in buona compagnia: il 56% delle persone non lo sa. È un laboratorio di fabbricazione digitale, stampanti 3D, laser, persone che le sanno usare. Con Teseo non devi nemmeno entrarci se non vuoi: scegli sulla mappa, ritiri quando è pronto.',
     },
     {
       q: 'E se l’AI sbaglia il modello?',
@@ -242,7 +242,7 @@ export default function ComeFunziona() {
       <PageHero
         tag="COME FUNZIONA"
         title={<>Dal guasto al ritiro,<br />senza competenze tecniche.</>}
-        subtitle="Non devi saper modellare in 3D, né sapere cos'è un FabLab. Ti serve solo il telefono — al resto pensano l'AI, la community e la rete di laboratori di quartiere."
+        subtitle="Non devi saper modellare in 3D, né sapere cos'è un FabLab. Ti serve solo il telefono, al resto pensano l'AI, la community e la rete di laboratori di quartiere."
       />
       <StepsSection />
       <LayersSection />

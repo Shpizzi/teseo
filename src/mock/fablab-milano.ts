@@ -1,4 +1,4 @@
-// FabLab reali di Milano e provincia — da Teseo_rete_fablab_milano.kmz (Google My Maps)
+// FabLab reali di Milano e provincia, da Teseo_rete_fablab_milano.kmz (Google My Maps)
 export type MilanoFablab = { name: string; lng: number; lat: number; address: string; zone: string }
 
 export const milanoFablabs: MilanoFablab[] = [

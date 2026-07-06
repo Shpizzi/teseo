@@ -78,7 +78,7 @@ export default function Slicing() {
           Slicing AI
         </h1>
         <p style={{ fontSize: 14.5, color: 'rgba(244,250,237,.65)', lineHeight: 1.65 }}>
-          L&apos;AI preparerà i file al posto tuo{ordine ? <> — anche per l&apos;ordine <span style={{ fontFamily: 'var(--mono)', color: 'var(--lemongrass)' }}>#{ordine}</span></> : ''}:
+          L&apos;AI preparerà i file al posto tuo{ordine ? <>, anche per l&apos;ordine <span style={{ fontFamily: 'var(--mono)', color: 'var(--lemongrass)' }}>#{ordine}</span></> : ''}:
           orientamento, supporti e parametri, senza aprire lo slicer.
         </p>
 

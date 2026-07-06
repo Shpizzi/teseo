@@ -52,7 +52,7 @@ export type NearbyProducer = {
 export const userProjects: Project[] = [
   {
     id: 'p1',
-    name: 'Demogor — statuetta articolata',
+    name: 'Demogor, statuetta articolata',
     fablab: 'Tillverka',
     material: 'ABS rosso',
     progress: 84,
@@ -105,11 +105,11 @@ export function projectTimeline(p: Project): { label: string; date: string; done
   const printing = p.status === 'printing' || p.status === 'ready'
   const ready = p.status === 'ready'
   return [
-    { label: 'Ordine inviato', date: p.orderDate ?? '—', done: p.status !== 'draft' },
-    { label: `Accettato da ${p.fablab || 'produttore'}`, date: p.orderDate ?? '—', done: printing },
-    { label: 'In stampa', date: printing ? (ready ? 'completata' : `${p.progress}%`) : '—', done: printing },
-    { label: 'Pronto al ritiro', date: ready ? (p.eta ?? '—') : '—', done: ready },
-    { label: 'Ritirato', date: '—', done: false },
+    { label: 'Ordine inviato', date: p.orderDate ?? '-', done: p.status !== 'draft' },
+    { label: `Accettato da ${p.fablab || 'produttore'}`, date: p.orderDate ?? '-', done: printing },
+    { label: 'In stampa', date: printing ? (ready ? 'completata' : `${p.progress}%`) : '-', done: printing },
+    { label: 'Pronto al ritiro', date: ready ? (p.eta ?? '-') : '-', done: ready },
+    { label: 'Ritirato', date: '-', done: false },
   ]
 }
 
@@ -225,7 +225,7 @@ export type FablabKpi = {
 export const fablabOrders: Order[] = [
   { id: 'o1', ordNum: '52943884', name: 'Ingranaggio di ricambio', customer: 'Studio Vimar', material: 'Nylon', status: 'new', deadline: 'urgent', deadlineLabel: '⚡ ENTRO 3H' },
   { id: 'o2', ordNum: '52943880', name: 'Custodia sensore IoT (×4)', customer: 'Marco T.', material: 'PETG', status: 'new', deadline: 'week', deadlineLabel: 'entro 3 giorni' },
-  { id: 'o3', ordNum: '52943876', name: 'Demogor — statuetta articolata', customer: 'Francesca R.', material: 'ABS rosso', status: 'printing', deadline: 'today', deadlineLabel: 'oggi', progress: 84 },
+  { id: 'o3', ordNum: '52943876', name: 'Demogor, statuetta articolata', customer: 'Francesca R.', material: 'ABS rosso', status: 'printing', deadline: 'today', deadlineLabel: 'oggi', progress: 84 },
   { id: 'o4', ordNum: '52943879', name: 'Coperchio stagno IP67', customer: 'Idroservice', material: 'PETG', status: 'printing', deadline: 'week', deadlineLabel: 'domani', progress: 31 },
   { id: 'o5', ordNum: '52943871', name: 'Set targhette segnaletiche', customer: 'Comune di Milano', material: 'PLA', status: 'ready', deadline: 'week', deadlineLabel: 'ritiro oggi' },
   { id: 'o6', ordNum: '52943865', name: 'Prototipo impugnatura', customer: 'Lab Polimi', material: 'Resina', status: 'error', deadline: 'week', deadlineLabel: 'entro 3 giorni' },

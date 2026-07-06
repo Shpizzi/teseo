@@ -2,9 +2,12 @@ import { useState } from 'react'
 import { Send } from 'lucide-react'
 import { useLocation } from 'react-router-dom'
 import GlassCard from '../../components/GlassCard'
-import { conversations, chatMessages, type ChatMessage } from '../../mock/user-pages'
+import { type ChatMessage } from '../../mock/user-pages'
+import { useConversations, useChatMessages } from '../../mock/messagesStore'
 
 export default function Messaggi() {
+  const conversations = useConversations()
+  const chatMessages = useChatMessages()
   // Deep-link dal dettaglio progetto/produttore: apre subito la conversazione giusta
   const incoming = (useLocation().state as { conversationId?: string } | null)?.conversationId
   const [activeConv, setActiveConv] = useState(
@@ -65,7 +68,6 @@ export default function Messaggi() {
                   borderRadius: 13,
                   cursor: 'pointer',
                   background: isActive ? 'var(--glass-2)' : 'transparent',
-                  borderLeft: isActive ? '2px solid var(--cyan)' : '2px solid transparent',
                   transition: '0.18s',
                 }}
                 onMouseEnter={e => {

@@ -4,7 +4,7 @@ import { Sparkles, Send, ArrowRight } from 'lucide-react'
 import StreamText from '../components/StreamText'
 import { searchModels } from '../components/TeseoAssistant'
 
-// ponytail: onboarding Wizard-of-Oz — flusso guidato scriptato, nessun LLM reale.
+// ponytail: onboarding Wizard-of-Oz, flusso guidato scriptato, nessun LLM reale.
 // Se searchModels trova un match usa quello, altrimenti il fallback "gancio".
 
 const mono: React.CSSProperties = { fontFamily: 'var(--mono)' }
@@ -52,9 +52,13 @@ export default function Onboarding() {
     setThinking('Cerco nell’archivio della community…')
     setTimeout(() => {
       const hit = searchModels(t)[0]
+      // Niente match nell'archivio? Nessun modello finto: si ricostruisce da scansione.
       const found = hit
         ? `Trovato: «${hit.name}» nell’archivio community (${hit.meta}). È compatibile con quello che mi hai descritto.`
-        : 'Trovato: «Gancio modulare da parete» v2.3 nell’archivio community — validato dai maker, 1.842 download, ★ 4.9. È compatibile con quello che mi hai descritto.'
+        : 'Non ho ancora un modello pronto per questo nell’archivio. Nessun problema: lo ricostruiamo da una scansione (o una foto) e l’AI genera la mesh, poi la fa validare da una persona.'
+      const producerLine = hit
+        ? 'FabLab Milano è disponibile a 4,1 km: in PLA costa ~€ 4, pronto domani entro le 12. Preparo l’ordine?'
+        : 'FabLab Milano è disponibile a 4,1 km e può ricostruirlo e stamparlo in PLA: prima una scansione veloce del pezzo, poi la stampa. Procediamo?'
       setThinking(null)
       push({
         role: 'assistant',
@@ -65,7 +69,7 @@ export default function Onboarding() {
             setThinking(null)
             push({
               role: 'assistant',
-              text: 'FabLab Milano è disponibile a 4,1 km: in PLA costa ~€ 4, pronto domani entro le 12. Preparo l’ordine?',
+              text: producerLine,
               after: () => setStage('confirm'),
             })
           }, 1600)

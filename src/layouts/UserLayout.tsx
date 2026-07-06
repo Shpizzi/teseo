@@ -3,7 +3,6 @@ import { Outlet } from 'react-router-dom'
 import {
   LayoutDashboard,
   Grid2X2,
-  Bookmark,
   Users,
   MapPin,
   MessageSquare,
@@ -22,8 +21,7 @@ const unreadCount = conversations.reduce((n, c) => n + c.unread, 0)
 const userNavItems: NavItem[] = [
   { label: 'Dashboard',  icon: <LayoutDashboard size={20} />, href: '/app/dashboard' },
   { label: 'Progetti',   icon: <Grid2X2 size={20} />,         href: '/app/progetti' },
-  { label: 'Salvati',    icon: <Bookmark size={20} />,         href: '/app/salvati' },
-  { label: 'Archivio pezzi', icon: <Users size={20} />,        href: '/app/community' },
+  { label: 'Community',  icon: <Users size={20} />,           href: '/app/community' },
   { label: 'Produttori', icon: <MapPin size={20} />,           href: '/app/produttori' },
   { label: 'Messaggi',   icon: <MessageSquare size={20} />,    href: '/app/messages', badge: unreadCount },
   { label: 'Impatto',    icon: <Leaf size={20} />,             href: '/app/impatto' },
@@ -32,6 +30,7 @@ const userNavItems: NavItem[] = [
 export default function UserLayout() {
   const isMobile = useIsMobile()
   const [open, setOpen] = useState(false)
+  const [collapsed, setCollapsed] = useState(false)
   const [aiOpen, setAiOpen] = useState(false)
 
   // La barra "Chiedi all'AI" della dashboard apre il drawer con la domanda
@@ -65,7 +64,7 @@ export default function UserLayout() {
         <Sidebar
           items={userNavItems}
           brand={{ subtitle: 'spazio personale' }}
-          {...(isMobile ? { open, onClose: () => setOpen(false) } : {})}
+          {...(isMobile ? { open, onClose: () => setOpen(false) } : { collapsed, onToggleCollapse: () => setCollapsed(v => !v) })}
         />
         <div
           style={{

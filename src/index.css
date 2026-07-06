@@ -4,12 +4,12 @@
 @tailwind components;
 @tailwind utilities;
 
-/* ===== CSS VARIABLES — palette spade.com (sage / moss / forest / lemongrass) ===== */
+/* ===== CSS VARIABLES, palette spade.com (sage / moss / forest / lemongrass) ===== */
 :root {
   --bg: #fafcf5;          /* off-white verde: fondo pagina */
   --bg-2: #f4f8ec;        /* off-white verde 2: pannelli secondari */
   --ink: #090f05;         /* quasi-nero verde: testo primario */
-  --cyan: #3f7308;        /* ponytail: vecchio nome var, ora è il moss di spade — rinominarla toccherebbe ogni pagina */
+  --cyan: #3f7308;        /* ponytail: vecchio nome var, ora è il moss di spade, rinominarla toccherebbe ogni pagina */
   --forest: #18280e;      /* superfici scure / bottoni primari */
   --lemongrass: #b2eb76;  /* accento hover / highlight su scuro */
   --white: #fff;
@@ -60,7 +60,7 @@ body::before {
 /* La griglia blueprint non è più globale: vive solo dentro le sezioni
    che la usano (.land-grid, superfici scure, viewport) */
 
-/* ===== SCROLLBAR — invisibile ovunque, lo scroll resta ===== */
+/* ===== SCROLLBAR, invisibile ovunque, lo scroll resta ===== */
 * {
   scrollbar-width: none; /* Firefox */
   -ms-overflow-style: none;
@@ -108,7 +108,7 @@ body::before {
     background-size: 26px 26px, 26px 26px, 130px 130px, 130px 130px;
   }
 
-  /* Card (ex glass) — spade: bianco, bordo sage, niente blur */
+  /* Card (ex glass), spade: bianco, bordo sage, niente blur */
   .glass-panel {
     background: var(--glass);
     border: 1px solid var(--line);
@@ -134,7 +134,7 @@ body::before {
   }
 
 
-  /* Registration corner marks — i tick angolari di spade */
+  /* Registration corner marks, i tick angolari di spade */
   .reg-marks {
     position: absolute;
     inset: 0;
@@ -182,7 +182,7 @@ body::before {
     border-right: 1.5px solid;
   }
 
-  /* Status pills — mono, squadrate come le label spade */
+  /* Status pills, mono, squadrate come le label spade */
   .status-pill {
     font-size: 10px;
     font-weight: 600;
@@ -248,7 +248,7 @@ body::before {
     z-index: 1;
   }
 
-  /* Progress bar — spade: track 3px nero/10 */
+  /* Progress bar, spade: track 3px nero/10 */
   .progress-track {
     height: 3px;
     border-radius: 0;
@@ -333,7 +333,7 @@ body::before {
   .pdot-idle   { background: transparent; box-shadow: inset 0 0 0 1.5px var(--line-2); }
   .pdot-err    { background: #e40014; animation: blink 1.1s infinite; }
 
-  /* Map pin — la mappa resta scura (forest), i pin sono lemongrass */
+  /* Map pin, la mappa resta scura (forest), i pin sono lemongrass */
   .mpin {
     position: absolute;
     transform: translate(-50%, -100%);
@@ -473,6 +473,67 @@ body::before {
     transform: translateY(-1px);
   }
   .opt-card:disabled { opacity: 0.55; cursor: default; }
+
+  /* Outline unificato su superfici chiare (community, produttori): hover = fondo glass-2 */
+  .btn-outline {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    background: transparent;
+    color: var(--cyan);
+    border: 1px solid var(--line-2);
+    font-family: inherit;
+    font-weight: 600;
+    font-size: 13px;
+    padding: 9px 16px;
+    border-radius: 100px;
+    cursor: pointer;
+    transition: background-color 0.2s ease, border-color 0.2s ease;
+  }
+  .btn-outline:hover:not(:disabled) { background: var(--glass-2); border-color: var(--cyan); }
+  .btn-outline:disabled { opacity: 0.5; cursor: not-allowed; }
+
+  /* Outline su superfici scure (ScanView forest): hover = alone lemongrass.
+     Nota: l'hover cambia SOLO sfondo/bordo, così le varianti con color inline restano coerenti. */
+  .btn-outline-dark {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    background: transparent;
+    color: var(--lemongrass);
+    border: 1px solid rgba(255, 255, 255, 0.28);
+    font-family: inherit;
+    font-weight: 600;
+    font-size: 13.5px;
+    padding: 0 20px;
+    height: 44px;
+    border-radius: 100px;
+    cursor: pointer;
+    flex: 0 0 auto;
+    transition: background-color 0.2s ease, border-color 0.2s ease, color 0.2s ease;
+  }
+  .btn-outline-dark:hover:not(:disabled) { background: rgba(178, 235, 118, 0.1); border-color: var(--lemongrass); }
+  .btn-outline-dark:disabled { opacity: 0.5; cursor: not-allowed; }
+  /* Variante attenuata (reset/indietro): il colore vive nella classe, così l'hover è percepibile (testo→bianco, bordo→più chiaro) */
+  .btn-outline-dark--muted { color: rgba(255, 255, 255, 0.6); border-color: rgba(255, 255, 255, 0.2); }
+  .btn-outline-dark--muted:hover { color: #fff; border-color: rgba(255, 255, 255, 0.5); background: rgba(255, 255, 255, 0.08); }
+
+  /* Nav circolare su overlay scuro (lightbox produttore) */
+  .btn-nav-dark {
+    background: rgba(255, 255, 255, 0.1);
+    border: 1px solid rgba(255, 255, 255, 0.25);
+    border-radius: 50%;
+    width: 42px;
+    height: 42px;
+    display: grid;
+    place-items: center;
+    cursor: pointer;
+    color: #fff;
+    flex: 0 0 auto;
+    transition: background-color 0.2s ease;
+  }
+  .btn-nav-dark:hover { background: rgba(255, 255, 255, 0.22); }
 }
 
 /* ===== ANIMATIONS ===== */
@@ -502,7 +563,7 @@ body::before {
   to   { transform: translateY(500%); }
 }
 
-/* Marquee — firma spade (loghi/testo che scorrono) */
+/* Marquee, firma spade (loghi/testo che scorrono) */
 @keyframes marquee {
   from { transform: translateX(0); }
   to   { transform: translateX(calc(-100% - 2rem)); }
@@ -533,7 +594,7 @@ body::before {
 .anim-fadeUp-d6 { animation: fadeUp .7s .6s cubic-bezier(.2,.7,.3,1) both; }
 .anim-pulse     { animation: pulse-ring 2.5s ease-out infinite; }
 
-/* ===== SCAN (CV) OVERLAY — resta su video scuro: accenti lemongrass ===== */
+/* ===== SCAN (CV) OVERLAY, resta su video scuro: accenti lemongrass ===== */
 @keyframes scan-sweep {
   0%   { top: 6%;  opacity: 0; }
   10%  { opacity: 1; }
@@ -561,7 +622,7 @@ body::before {
   border-color: var(--lemongrass); border-style: solid; opacity: 0.85;
 }
 
-/* Landing scrollable wrapper — fondo bianco, i colori vivono nei blocchi */
+/* Landing scrollable wrapper, fondo bianco, i colori vivono nei blocchi */
 .landing-scroll {
   position: fixed;
   inset: 0;

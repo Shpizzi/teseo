@@ -1,6 +1,6 @@
 // In-browser zero-shot image recognition (CLIP) via transformers.js.
 // The model (~150MB) downloads from the HuggingFace hub on first use and is
-// then served from the browser cache — works offline after that first load.
+// then served from the browser cache, works offline after that first load.
 //
 // transformers.js is imported *dynamically* inside getRecognizer(), not at
 // module top level: onnxruntime-web can throw during its own module eval under
@@ -37,7 +37,7 @@ export async function recognize(
   const clf = await getRecognizer()
   const out = await clf(image, labels, { hypothesis_template: 'a photo of a {}' })
   // transformers.js returns labels raw (no template prefix) but not guaranteed
-  // sorted — sort ourselves and take the top.
+  // sorted, sort ourselves and take the top.
   const [top] = [...out].sort((a, b) => b.score - a.score)
   return top
 }

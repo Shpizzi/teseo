@@ -1,4 +1,6 @@
 import { useState } from 'react'
+import { useNavigate } from 'react-router-dom'
+import { Printer, Bookmark } from 'lucide-react'
 import GlassCard from '../../components/GlassCard'
 import PrimaryButton from '../../components/PrimaryButton'
 import { userProjects } from '../../mock'
@@ -6,6 +8,7 @@ import { savedModels } from '../../mock/user-pages'
 import { toast } from '../../components/Toast'
 
 export default function Profilo() {
+  const navigate = useNavigate()
   const [confirmDelete, setConfirmDelete] = useState(false)
   const [notifEmail, setNotifEmail] = useState(true)
   const [notifSms, setNotifSms] = useState(false)
@@ -57,7 +60,7 @@ export default function Profilo() {
   )
 
   return (
-    <>
+    <div style={{ flex: 1, minHeight: 0, overflow: 'auto', display: 'flex', flexDirection: 'column', gap: 16 }}>
       {/* Hero header card */}
       <GlassCard
         hero
@@ -102,7 +105,7 @@ export default function Profilo() {
       </GlassCard>
 
       {/* Two columns */}
-      <div style={{ flex: 1, display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 16, minHeight: 0 }}>
+      <div style={{ flex: '0 0 auto', display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 16 }}>
         {/* Left column */}
         <div style={{ display: 'flex', flexDirection: 'column', gap: 16, overflow: 'auto' }}>
           {/* Preferenze */}
@@ -254,6 +257,32 @@ export default function Profilo() {
           )}
         </GlassCard>
       </div>
-    </>
+
+      {/* I miei salvati (spostato qui dalla sidebar: è roba personale) */}
+      <GlassCard style={{ padding: 22, display: 'flex', flexDirection: 'column', gap: 14, flex: '0 0 auto' }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+          <Bookmark size={16} style={{ color: 'var(--cyan)' }} />
+          <h3 style={{ fontSize: 13, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.08em', color: 'var(--ink)' }}>
+            I miei salvati
+          </h3>
+          <span style={{ fontFamily: 'var(--mono)', fontSize: 11, color: 'var(--muted)' }}>{savedModels.length} MODELLI</span>
+        </div>
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(210px, 1fr))', gap: 12 }}>
+          {savedModels.map(m => (
+            <div key={m.id} style={{ border: '1px solid var(--line)', borderRadius: 'var(--radius)', padding: 14, display: 'flex', flexDirection: 'column', gap: 8, background: 'var(--glass)' }}>
+              <div style={{ fontWeight: 600, fontSize: 14, color: 'var(--ink)' }}>{m.name}</div>
+              <div style={{ fontFamily: 'var(--mono)', color: 'var(--muted)', fontSize: 10.5, textTransform: 'uppercase', letterSpacing: '0.06em' }}>{m.category}</div>
+              <button
+                onClick={() => navigate('/app/new', { state: { modelName: m.name } })}
+                className="btn-outline"
+                style={{ marginTop: 4, fontSize: 12, padding: '7px 13px' }}
+              >
+                <Printer size={13} /> Stampa
+              </button>
+            </div>
+          ))}
+        </div>
+      </GlassCard>
+    </div>
   )
 }

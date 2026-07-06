@@ -135,7 +135,7 @@ function OrderRow({ order, onNavigate, rejecting, onRejectStart, onRejectCancel 
               onClick={e => {
                 e.stopPropagation()
                 setOrderStatus(order.id, 'accepted')
-                toast('Ordine accettato — pronto per lo slicing')
+                toast('Ordine accettato, pronto per lo slicing')
               }}
               style={{
                 background: 'var(--forest)',
@@ -160,7 +160,7 @@ function OrderRow({ order, onNavigate, rejecting, onRejectStart, onRejectCancel 
               onClick={() => {
                 setOrderStatus(order.id, 'rejected')
                 onRejectCancel()
-                toast('Ordine rifiutato — il cliente riceve una notifica')
+                toast('Ordine rifiutato, il cliente riceve una notifica')
               }}
               style={{
                 background: 'transparent', border: '1px dashed #e40014', color: '#e40014',
@@ -511,7 +511,7 @@ export default function FablabDashboard() {
           >
             {filteredOrders.length === 0 && (
               <div style={{ padding: 28, textAlign: 'center', color: 'var(--muted)', fontSize: 13 }}>
-                {activeTab === 'new' ? 'Nessun nuovo ordine da valutare — tutto smaltito.' : 'Nessun ordine in questo stato.'}
+                {activeTab === 'new' ? 'Nessun nuovo ordine da valutare, tutto smaltito.' : 'Nessun ordine in questo stato.'}
               </div>
             )}
             {filteredOrders.map(order => (
