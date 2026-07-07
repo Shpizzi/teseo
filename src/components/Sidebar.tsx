@@ -71,32 +71,8 @@ export default function Sidebar({ items, brand, dark, open, onClose, collapsed, 
           marginBottom: 8,
         }}
       >
-        <span
-          style={{
-            width: 38,
-            height: 38,
-            borderRadius: 11,
-            background: c.accentBg,
-            border: `1px solid ${c.line}`,
-            display: 'grid',
-            placeItems: 'center',
-            color: c.accent,
-            flex: '0 0 auto',
-          }}
-        >
-          <TeseoLogo size={19} color="currentColor" />
-        </span>
         <span style={{ flex: 1, minWidth: 0 }}>
-          <div
-            style={{
-              fontWeight: 800,
-              fontSize: 16,
-              letterSpacing: '0.12em',
-              color: c.ink,
-            }}
-          >
-            TESEO
-          </div>
+          <TeseoLogo size={20} color={c.ink} />
           <div
             style={{
               display: 'block',

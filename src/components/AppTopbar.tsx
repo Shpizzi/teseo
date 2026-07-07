@@ -165,8 +165,6 @@ export default function AppTopbar({ branch, onOpenAi, user }: AppTopbarProps) {
         style={{ display: 'flex', alignItems: 'center', gap: 9, textDecoration: 'none', flexShrink: 0, paddingLeft: 4 }}
       >
         <TeseoLogo size={21} color="var(--lemongrass)" />
-        <span style={{ fontWeight: 800, fontSize: 15, letterSpacing: '0.12em', color: ink }}>TESEO</span>
-        
       </Link>
 
       {/* Ricerca centrale */}
