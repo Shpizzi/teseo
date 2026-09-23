@@ -2,6 +2,7 @@ import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { Download, Check, LayoutGrid, List } from 'lucide-react'
 import SearchBar from '../../components/SearchBar'
+import { useIsMobile } from '../../hooks/useIsMobile'
 import GlassCard from '../../components/GlassCard'
 import { type DeadlineType } from '../../mock'
 import { useLiveOrders, setOrderStatus, type LiveStatus, type LiveOrder } from '../../mock/orderStore'
@@ -52,6 +53,7 @@ export function OrderStatusPill({ status }: { status: LiveStatus }) {
 export default function Ordini() {
   const [activeTab, setActiveTab] = useState<TabKey>('new')
   const [view, setView] = useState<'grid' | 'list'>('list')
+  const isMobile = useIsMobile() // ponytail: la riga-lista non ci sta in 390px, card sempre
   const [query, setQuery] = useState('')
   const [rejectingId, setRejectingId] = useState<string>()
   const [selected, setSelected] = useState<Set<string>>(new Set())
@@ -408,7 +410,7 @@ export default function Ordini() {
             </button>
           </div>
         )}
-        {view === 'grid' ? (
+        {view === 'grid' || isMobile ? (
           <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 14, alignContent: 'start' }}>
             {filteredOrders.map(orderCard)}
           </div>

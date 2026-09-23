@@ -5,7 +5,6 @@ import {
   ShoppingBag,
   Activity,
   Leaf,
-  Menu,
 } from 'lucide-react'
 import Sidebar, { type NavItem } from '../components/Sidebar'
 import AppTopbar from '../components/AppTopbar'
@@ -55,6 +54,7 @@ export default function FablabLayout() {
           Versione scura per marcare che qui sei nel lato produttore. */}
       <AppTopbar
         branch="fablab"
+        onMenu={isMobile ? () => setOpen(true) : undefined}
         onOpenAi={() => setAiOpen(true)}
         user={{ initials: 'T', profileHref: '/fablab/dashboard' }}
       />
@@ -76,20 +76,6 @@ export default function FablabLayout() {
             overflow: 'hidden',
           }}
         >
-          {isMobile && (
-            <button
-              onClick={() => setOpen(true)}
-              aria-label="Apri menu"
-              style={{
-                display: 'flex', alignItems: 'center', gap: 9, alignSelf: 'flex-start',
-                background: 'var(--glass)', border: '1px solid var(--line)', borderRadius: 11,
-                color: 'var(--ink)', padding: '8px 14px', cursor: 'pointer', flex: '0 0 auto',
-                fontFamily: 'var(--mono)', fontSize: 12, letterSpacing: '0.08em',
-              }}
-            >
-              <Menu size={18} style={{ color: 'var(--cyan)' }} /> MENU
-            </button>
-          )}
           <Outlet />
         </div>
 

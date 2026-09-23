@@ -305,7 +305,7 @@ export default function FablabDashboard() {
     <div style={{ flex: 1, minHeight: 0, overflow: 'auto', display: 'flex', flexDirection: 'column', gap: 24 }}>
       {/* ── Hero centrata ── */}
       <div className="anim-fadeUp" style={{ position: 'relative', padding: '26px 0 6px', flex: '0 0 auto' }}>
-        <div style={{ position: 'absolute', right: 0, top: 10, display: 'flex', alignItems: 'center', gap: 10 }}>
+        <div className="hero-actions" style={{ position: 'absolute', right: 0, top: 10, display: 'flex', alignItems: 'center', gap: 10 }}>
           <button
             onClick={() => toast('Report di produzione esportato (PDF)')}
             style={{

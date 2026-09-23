@@ -107,7 +107,7 @@ export default function ProduttoreDetail() {
       </div>
 
       {/* Header card: foto + info, stile scheda Google Maps */}
-      <GlassCard hero style={{ padding: 0, display: 'flex', overflow: 'hidden', flex: '0 0 auto' }}>
+      <GlassCard hero className="prod-hero" style={{ padding: 0, display: 'flex', overflow: 'hidden', flex: '0 0 auto' }}>
         <div
           onClick={() => setLightbox({ photos: producer.gallery, index: 0 })}
           style={{ position: 'relative', width: 260, height: 148, flex: '0 0 auto', borderRight: '1px solid var(--line)', cursor: 'pointer' }}
@@ -130,7 +130,7 @@ export default function ProduttoreDetail() {
           </span>
         </div>
         <div style={{ flex: 1, padding: '20px 24px', display: 'flex', flexDirection: 'column', gap: 8, minWidth: 0 }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 12, flexWrap: 'wrap' }}>
             <div
               style={{
                 width: 12, height: 12, borderRadius: '50%', flex: '0 0 auto',
@@ -162,7 +162,7 @@ export default function ProduttoreDetail() {
               </PrimaryButton>
             </div>
           </div>
-          <div style={{ display: 'flex', alignItems: 'center', gap: 18, fontFamily: 'var(--mono)', fontSize: 12, color: 'var(--muted)' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 18, fontFamily: 'var(--mono)', fontSize: 12, color: 'var(--muted)', flexWrap: 'wrap' }}>
             <span style={{ display: 'flex', alignItems: 'center', gap: 5 }}><MapPin size={12} /> {producer.address}</span>
             <span style={{ display: 'flex', alignItems: 'center', gap: 5 }}><Clock size={12} /> {producer.hours}</span>
             <span>{producer.distance}</span>

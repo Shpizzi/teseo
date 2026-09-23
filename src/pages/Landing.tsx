@@ -303,6 +303,7 @@ function HowItWorksSection() {
     const track = trackRef.current
     if (!section || !track) return
     const scroller = section.closest('.landing-scroll') as HTMLElement | null
+    if (window.matchMedia('(max-width: 768px)').matches) return // mobile: card impilate (css .hiw-*)
 
     const tween = gsap.to(track, {
       x: () => -(track.scrollWidth - window.innerWidth),
@@ -324,8 +325,9 @@ function HowItWorksSection() {
 
   return (
     /* 300vh di scroll verticale: la viewport resta pinnata e il track scorre in orizzontale */
-    <section ref={sectionRef} id="come-funziona" style={{ height: '300vh', position: 'relative' }}>
+    <section ref={sectionRef} id="come-funziona" className="hiw" style={{ height: '300vh', position: 'relative' }}>
       <div
+        className="hiw-pin"
         style={{
           position: 'sticky',
           top: 0,
@@ -353,6 +355,7 @@ function HowItWorksSection() {
         {/* Track orizzontale, card foto + titolo + sottotitolo */}
         <div
           ref={trackRef}
+          className="hiw-track"
           style={{
             display: 'flex',
             gap: 24,
@@ -365,7 +368,7 @@ function HowItWorksSection() {
           {steps.map((step, i) => (
             <div
               key={i}
-              className="glass-panel"
+              className="glass-panel hiw-card"
               style={{
                 width: 'min(58vw, 760px)',
                 flexShrink: 0,

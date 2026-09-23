@@ -52,6 +52,7 @@ export function LandingNav() {
         height: 64,
         display: 'flex',
         alignItems: 'center',
+        justifyContent: 'space-between',
         gap: 40,
       }}
     >
@@ -59,7 +60,7 @@ export function LandingNav() {
         <TeseoLogo size={22} color="var(--ink)" />
       </Link>
 
-      <div style={{ display: 'flex', alignItems: 'center', gap: 28, flex: 1 }}>
+      <div className="only-desktop" style={{ display: 'flex', alignItems: 'center', gap: 28, flex: 1 }}>
         {NAV_LINKS.map(link => (
           <button
             key={link.hash}
@@ -98,7 +99,7 @@ export function LandingNav() {
         >
           Accedi
         </a>
-        <PrimaryButton style={{ height: 38, padding: '0 18px', fontSize: 13 }} onClick={() => navigate('/fablab/dashboard')}>
+        <PrimaryButton style={{ height: 38, padding: '0 18px', fontSize: 13, whiteSpace: 'nowrap' }} onClick={() => navigate('/fablab/dashboard')}>
           Iscrivi il tuo FabLab
         </PrimaryButton>
       </div>
@@ -249,7 +250,7 @@ export function LandingFooter() {
         <div style={{ flex: 1 }} />
 
         {/* Newsletter, solo UI, nessun backend */}
-        <div style={{ minWidth: 300 }}>
+        <div style={{ minWidth: 'min(300px, 100%)', flex: '1 1 auto' }}>
           <div style={{ fontFamily: 'var(--mono)', fontSize: 13, color: '#fff', marginBottom: 14 }}>
             Iscriviti alla newsletter
           </div>

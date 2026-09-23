@@ -108,6 +108,7 @@ export default function PrintBuildScroll() {
     /* 260vh di scroll: la scena resta pinnata (sticky) mentre il manico si stampa */
     <section ref={sectionRef} style={{ height: '260vh', position: 'relative' }}>
       <div
+        className="pbs-pin"
         style={{
           position: 'sticky',
           top: 0,
@@ -140,6 +141,7 @@ export default function PrintBuildScroll() {
 
         {/* Caption alto */}
         <span
+          className="pbs-caption"
           style={{
             position: 'absolute',
             top: 22,
@@ -157,7 +159,7 @@ export default function PrintBuildScroll() {
         </span>
 
         {/* Colonna testo, statica: titolo + descrizione */}
-        <div style={{ flex: '0 0 40%', padding: '0 5% 0 8%', position: 'relative', zIndex: 2 }}>
+        <div className="pbs-text" style={{ flex: '0 0 40%', padding: '0 5% 0 8%', position: 'relative', zIndex: 2 }}>
           <h2
             style={{
               fontSize: 'clamp(44px, 5.6vw, 76px)',
@@ -176,7 +178,7 @@ export default function PrintBuildScroll() {
         </div>
 
         {/* Canvas 3D */}
-        <div style={{ flex: 1, height: '100%', position: 'relative' }}>
+        <div className="pbs-canvas" style={{ flex: 1, height: '100%', position: 'relative' }}>
           <Canvas
             gl={{ localClippingEnabled: true, antialias: true, alpha: true }}
             camera={{ fov: 42, position: [0.2, 0.7, 4.6], near: 0.1, far: 100 }}

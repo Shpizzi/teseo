@@ -65,7 +65,7 @@ export default function Dashboard() {
     <div style={{ flex: 1, minHeight: 0, overflow: 'auto', display: 'flex', flexDirection: 'column', gap: 24 }}>
       {/* ── Hero centrata ── */}
       <div className="anim-fadeUp" style={{ position: 'relative', padding: '26px 0 6px', flex: '0 0 auto' }}>
-        <div style={{ position: 'absolute', right: 0, top: 10 }}>
+        <div className="hero-actions" style={{ position: 'absolute', right: 0, top: 10 }}>
           <PrimaryButton onClick={() => navigate('/app/new')}>
             <Plus size={18} />
             Nuova stampa

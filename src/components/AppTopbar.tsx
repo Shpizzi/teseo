@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from 'react'
 import type { ReactNode } from 'react'
 import { useNavigate, Link } from 'react-router-dom'
-import { Search, Bell, Sparkles, Zap, Box, MapPin, Layers, Package, ScanLine, Leaf } from 'lucide-react'
+import { Search, Bell, Sparkles, Zap, Box, MapPin, Layers, Package, ScanLine, Leaf, Menu } from 'lucide-react'
 import { TeseoLogo } from './LandingChrome'
 import { searchModels } from './TeseoAssistant'
 import { userProjects, fablabOrders } from '../mock'
@@ -81,9 +81,11 @@ type AppTopbarProps = {
   branch: 'user' | 'fablab'
   onOpenAi: () => void
   user: { initials: string; profileHref: string }
+  // Mobile: apre il drawer della sidebar (hamburger a sinistra del logo)
+  onMenu?: () => void
 }
 
-export default function AppTopbar({ branch, onOpenAi, user }: AppTopbarProps) {
+export default function AppTopbar({ branch, onOpenAi, user, onMenu }: AppTopbarProps) {
   const navigate = useNavigate()
   const [query, setQuery] = useState('')
   const [focused, setFocused] = useState(false)
@@ -148,9 +150,9 @@ export default function AppTopbar({ branch, onOpenAi, user }: AppTopbarProps) {
       style={{
         display: 'flex',
         alignItems: 'center',
-        gap: 16,
+        gap: onMenu ? 8 : 16,
         height: 56,
-        padding: '0 14px',
+        padding: onMenu ? '0 10px' : '0 14px',
         background: 'var(--forest)',
         border: `1px solid ${line}`,
         borderRadius: 'var(--radius)',
@@ -159,16 +161,22 @@ export default function AppTopbar({ branch, onOpenAi, user }: AppTopbarProps) {
         zIndex: 30,
       }}
     >
+      {onMenu && (
+        <button aria-label="Apri menu" onClick={onMenu} style={{ ...iconBtn, color: 'var(--lemongrass)' }}>
+          <Menu size={20} />
+        </button>
+      )}
+
       {/* Logo + wordmark, come Shopify */}
       <Link
         to={branch === 'user' ? '/app/dashboard' : '/fablab/dashboard'}
         style={{ display: 'flex', alignItems: 'center', gap: 9, textDecoration: 'none', flexShrink: 0, paddingLeft: 4 }}
       >
-        <TeseoLogo size={21} color="var(--lemongrass)" />
+        <TeseoLogo size={onMenu ? 17 : 21} color="var(--lemongrass)" />
       </Link>
 
       {/* Ricerca centrale */}
-      <div style={{ flex: 1, maxWidth: 560, margin: '0 auto', position: 'relative' }}>
+      <div style={{ flex: 1, minWidth: 0, maxWidth: 560, margin: '0 auto', position: 'relative' }}>
         <div
           style={{
             display: 'flex',
@@ -202,6 +210,7 @@ export default function AppTopbar({ branch, onOpenAi, user }: AppTopbarProps) {
             onKeyDown={e => { if (e.key === 'Enter' && hits[0]) go(hits[0].to) }}
           />
           <span
+            className="only-desktop"
             style={{
               fontFamily: 'var(--mono)',
               fontSize: 10,
@@ -302,7 +311,7 @@ export default function AppTopbar({ branch, onOpenAi, user }: AppTopbarProps) {
       </div>
 
       {/* Destra: notifiche · AI · profilo (come Shopify) */}
-      <div style={{ display: 'flex', alignItems: 'center', gap: 6, flexShrink: 0, position: 'relative' }}>
+      <div style={{ display: 'flex', alignItems: 'center', gap: onMenu ? 0 : 6, flexShrink: 0, position: 'relative' }}>
         <button
           aria-label="Notifiche"
           style={iconBtn}
@@ -347,7 +356,7 @@ export default function AppTopbar({ branch, onOpenAi, user }: AppTopbarProps) {
               position: 'absolute',
               top: 46,
               right: 0,
-              width: 330,
+              width: 'min(330px, calc(100vw - 48px))',
               background: 'var(--glass)',
               border: '1px solid var(--line-2)',
               borderRadius: 12,

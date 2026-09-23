@@ -148,6 +148,8 @@ export default function TeseoAssistant({ open, onClose }: { open: boolean; onClo
      perdere la conversazione: da chiuso collassa a larghezza 0. */
   return (
     <div
+      className="teseo-ai"
+      data-open={open}
       style={{
         flex: '0 0 auto',
         width: open ? 'min(380px, 30vw)' : 0,

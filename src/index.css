@@ -639,3 +639,62 @@ body::before {
   background: linear-gradient(90deg, transparent, var(--line-2) 20%, var(--line-2) 80%, transparent);
   margin: 0 10%;
 }
+
+/* ===== MOBILE (≤768px) =====
+   ponytail: le pagine usano griglie inline (gridTemplateColumns) che non
+   hanno media query. Gli attribute selector + !important le piegano tutte
+   da qui senza toccare 25 file. Se serve un layout mobile ad hoc per una
+   pagina, aggiungere una classe e sovrascrivere sotto. */
+@media (max-width: 768px) {
+  /* ogni griglia multi-colonna → una colonna */
+  [style*="grid-template-columns"] { grid-template-columns: minmax(0, 1fr) !important; }
+  /* KPI / card strip → due colonne */
+  [style*="repeat(3"], [style*="repeat(4"], [style*="repeat(5"] { grid-template-columns: minmax(0, 1fr) minmax(0, 1fr) !important; }
+  /* tabella confronto impatto: resta a 4 colonne */
+  [style*="1.3fr 1fr 1fr 1fr"] { grid-template-columns: 1.3fr 1fr 1fr 1fr !important; }
+
+  /* pannelli affiancati a tutta altezza (min-height:0) → colonna unica che scrolla */
+  [style*="grid-template-columns"][style*="min-height: 0"] {
+    overflow: auto !important;
+    align-content: start !important;
+    grid-auto-rows: auto;
+  }
+  [style*="grid-template-columns"][style*="min-height: 0"] > * { overflow: visible !important; }
+  /* viewer 3D e mappe sono position:absolute nel pannello: senza altezza spariscono */
+  [style*="grid-template-columns"] > :has(canvas),
+  [style*="grid-template-columns"] > :has(.maplibregl-map) { min-height: 340px; }
+
+  .only-desktop { display: none !important; }
+
+  /* header di pagina (titolo · spacer · azioni): vanno a capo invece di sforare */
+  [style*="display: flex"][style*="align-items: center"][style*="flex: 0 0 auto"] { flex-wrap: wrap; }
+  /* tab segmentate (Ordini): scorrono */
+  [style*="border-radius: 100px"][style*="width: fit-content"] { max-width: 100%; overflow-x: auto; }
+  /* pulsanti hero delle dashboard: da assoluti a in-flow, centrati */
+  .hero-actions { position: static !important; display: flex; justify-content: center; flex-wrap: wrap; gap: 10px; margin-bottom: 12px; }
+  /* scheda produttore: foto sopra, info sotto */
+  .prod-hero { flex-wrap: wrap; }
+  .prod-hero > div:first-child { width: 100% !important; height: 180px !important; border-right: none !important; border-bottom: 1px solid var(--line); }
+
+  /* landing · 4 passi: niente pin orizzontale, card impilate */
+  .hiw { height: auto !important; padding: 56px 0; }
+  .hiw-pin { position: static !important; height: auto !important; overflow: visible !important; }
+  .hiw-track { width: auto !important; flex-direction: column; transform: none !important; }
+  .hiw-card { width: auto !important; flex-direction: column; }
+  .hiw-card > div:first-child { flex: 0 0 180px !important; }
+  .hiw-card > div:last-child { min-height: 0 !important; padding: 24px !important; }
+  /* landing · bento due destini: una colonna */
+  .impact-bento { grid-template-columns: minmax(0, 1fr) !important; grid-template-areas: none !important; }
+  .impact-bento > * { grid-area: auto !important; }
+  /* landing · strato dopo strato: testo sopra, 3D sotto */
+  .pbs-pin { flex-direction: column; align-items: stretch !important; }
+  .pbs-text { flex: 0 0 auto !important; padding: 64px 24px 0 !important; }
+  .pbs-canvas { min-height: 0; }
+  .pbs-caption { white-space: normal !important; text-align: center; width: 80%; }
+
+  /* assistente AI: da pannello laterale a overlay a tutto schermo */
+  .teseo-ai { position: fixed !important; inset: 12px !important; width: auto !important; height: auto !important; margin: 0 !important; z-index: 60; }
+  .teseo-ai[data-open="false"] { display: none !important; }
+  .teseo-ai > div { width: 100% !important; min-width: 0 !important; }
+  input, select, textarea { font-size: 16px !important; } /* evita lo zoom iOS al focus */
+}
